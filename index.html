@@ -185,6 +185,13 @@
   }
   .photo figcaption{font-size:.8rem;color:var(--sub);margin-top:5px;line-height:1.5;}
   .photo figcaption a{color:var(--blue);text-decoration:none;}
+
+  .home-jump{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;}
+  .home-jump a{
+    background:#fff;border:1.5px solid var(--line);border-radius:12px;
+    padding:7px 14px;font-size:.92rem;font-weight:700;color:#6b3a1f;text-decoration:none;
+  }
+  .home-jump a:active{background:var(--accent-soft);}
 </style>
 </head>
 <body>
@@ -198,9 +205,6 @@
   <button class="tab" id="tab-d5" data-p="d5"><span>11/01</span><span class="tab-w">日・柳川</span></button>
   <button class="tab" id="tab-d6" data-p="d6"><span>11/02</span><span class="tab-w">一・能古島</span></button>
   <button class="tab" id="tab-d7" data-p="d7"><span>11/03</span><span class="tab-w">二・回程</span></button>
-  <button class="tab" id="tab-transport" data-p="transport"><span>🚃 交通</span></button>
-  <button class="tab" id="tab-food" data-p="food"><span>🍜 美食</span></button>
-  <button class="tab" id="tab-guide" data-p="guide"><span>📋 攻略</span></button>
 </nav>
 
 <section class="page" id="pg-home">
@@ -238,7 +242,102 @@
   <tr><td><b>11/03</b>（二）</td><td data-l="白天">前往機場、中午班機（文化之日，提早出門）</td><td data-l="晚上">—</td></tr>
 </table>
 </div>
+<div class="home-jump"><a href="#sec-transport">🚃 交通與票券</a><a href="#sec-food">🍜 美食備忘錄</a><a href="#sec-backup">🌧 備案</a><a href="#sec-tips">📋 行前貼士</a></div>
 
+
+
+
+
+<h2 class="sec" id="sec-transport">交通與票券小抄</h2>
+<div class="card" style="overflow-x:auto;">
+<table class="fee-table">
+  <tr><th>票券／區間</th><th>價格</th><th>備註</th></tr>
+  <tr><td>機場 ⇄ 博多（地下鐵）</td><td data-l="價格">¥260／2 站約 6 分</td><td data-l="備註">國際線需先搭免費接駁到國內線</td></tr>
+  <tr><td>地下鐵一日券</td><td data-l="價格">大人 ¥640</td><td data-l="備註">感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
+  <tr><td>太宰府散策きっぷ（西鐵）</td><td data-l="價格">來回車票＋梅ヶ枝餅券</td><td data-l="備註">天神站購買，價格以西鐵官網為準</td></tr>
+  <tr><td>天神 ⇄ 柳川（西鐵特急）</td><td data-l="價格">特急自由席不另收費</td><td data-l="備註">約 50 分；川下り現場購票 大人 ¥2,200</td></tr>
+  <tr><td>博多 ⇄ バルーンさが（JR）</td><td data-l="價格">特急約 40–50 分</td><td data-l="備註">大會期間部分特急直停臨時站；普通車 10–15 分一班加開；IC 卡可用</td></tr>
+  <tr><td>姪浜 ⇄ 能古島渡輪</td><td data-l="價格">大人 ¥230</td><td data-l="備註">約 10 分、約每小時 1 班</td></tr>
+  <tr><td>海之中道（JR 香椎線）</td><td data-l="價格">博多出發約 40–45 分</td><td data-l="備註">—</td></tr>
+  <tr><td>博多 ⇄ 唐津（備案用）</td><td data-l="價格">單程約 ¥1,290／約 1.5 小時</td><td data-l="備註">地下鐵直通 JR 筑肥線，IC 卡可刷通</td></tr>
+</table>
+<div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士與熱氣球節臨時站；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
+</div>
+<h2 class="sec" id="sec-food">美食備忘錄</h2>
+<figure class="photo">
+  <a href="https://commons.wikimedia.org/wiki/File:Nakasu-yatai.JPG" target="_blank" rel="noopener">
+    <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Nakasu-yatai.JPG?width=900" alt="中洲屋台夜色" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
+  </a>
+  <figcaption>中洲屋台——傍晚 18 時陸續點燈開張 ・ 圖：<a href="https://commons.wikimedia.org/wiki/File:Nakasu-yatai.JPG" target="_blank" rel="noopener">Wikimedia Commons</a>（點圖見原檔與授權）</figcaption>
+</figure>
+<div class="card">
+  <div class="cols">
+    <div class="mini">
+      <h3>🍜 必吃在地味</h3>
+      <p>博多豚骨拉麵（一蘭本社總本店・一幸舎・Shin-Shin）、牛雜鍋、雞肉水炊鍋、鐵鍋一口煎餃、明太子料理、烏龍麵（博多是烏龍麵發祥地）、川端善哉紅豆湯。</p>
+    </div>
+    <div class="mini">
+      <h3>🏮 屋台攻略</h3>
+      <p>中洲（河畔氣氛最好）與天神（店多在地人多）兩大區，約 18:00 開始營業，<b>週日公休的店多、雨天多停業</b>；以現金為主，每人先點一杯飲料是禮貌。與長輩同行選 18:00 剛開店時段最從容。</p>
+    </div>
+    <div class="mini">
+      <h3>🐟 一日遊限定</h3>
+      <p>柳川＝鰻魚蒸籠飯（本吉屋・若松屋）；佐賀熱氣球會場＝「うまかもん市場」在地屋台；太宰府＝參道現烤梅ヶ枝餅；唐津（備案）＝呼子烏賊活造、唐津漢堡。</p>
+    </div>
+    <div class="mini">
+      <h3>🎁 伴手禮</h3>
+      <p>明太子（福さ屋・やまや）、通りもん（博多西餅）、鶴乃子、努努雞（冷食炸雞）、あまおう草莓製品。博多駅マイング＆阪急 B1 一次買齊。</p>
+    </div>
+  </div>
+</div>
+<h2 class="sec" id="sec-backup">雨天／體力備案</h2>
+<figure class="photo">
+  <a href="https://commons.wikimedia.org/wiki/File:Fukuoka_Tower_at_night.jpg" target="_blank" rel="noopener">
+    <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fukuoka_Tower_at_night.jpg?width=900" alt="福岡塔夜景" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
+  </a>
+  <figcaption>福岡塔夜景——備案清單裡隨時可以補進行程的一站 ・ 圖：<a href="https://commons.wikimedia.org/wiki/File:Fukuoka_Tower_at_night.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>（點圖見原檔與授權）</figcaption>
+</figure>
+<div class="card">
+  <ul class="tight">
+    <li><b>唐津宮日節（11/2–4）</b>：詳見 Day 6 備案 A——想體驗祭典熱血的首選。</li>
+    <li><b>teamLab Forest（BOSS E・ZO FUKUOKA 5F）</b>：室內光影樂園，大人約 ¥2,400 起，雨天首選。</li>
+    <li><b>福岡塔</b>（大人 ¥1,000，開到 22:00）：想看夜景可補進任一晚。</li>
+    <li><b>福岡市博物館</b>（金印「漢委奴國王」真品）、<b>博多町家ふるさと館</b>：市區交通方便的文化備案。</li>
+    <li><b>LaLaport 福岡</b>：門口有 1:1 實物大 ν鋼彈立像（整點有演出），順路購物備案。</li>
+    <li>熱氣球（天候取消時→11/2 補場）、能古島／海之中道賞花都<b>強烈依賴天氣</b>，行程間可互換。</li>
+  </ul>
+</div>
+
+<h2 class="sec" id="sec-tips">行前貼士</h2>
+<div class="card">
+  <ul class="tight">
+    <li><b>天氣</b>：10 月底～11 月初福岡約 13–22°C，早晚涼、日夜溫差大；熱氣球會場河川敷與白秋祭水邊晚間更涼，保暖層帶好。</li>
+    <li><b>預約清單</b>：千年煌夜預售票（線上）、鍋物晚餐訂位、（若要搭船）白秋祭乘船預約——11/1 場次已候補中，岸邊觀賞則免預約免費。</li>
+    <li><b>熱氣球心態</b>：飛不飛看天，起飛前數十分鐘才廣播決定；把 11/2 留作補場日就不怕撲空。</li>
+    <li><b>假日注意</b>：11/1（日）柳橋市場休市；11/3（二）文化之日為國定假日，機場與車站人多，返程請提早。</li>
+    <li><b>花況・楓況</b>：出發前一週查能古島官網「開花情報」與吞山觀音寺紅葉情報，依當年氣候微調。</li>
+    <li><b>時刻表</b>：文中列車時刻以 2026 年 7 月查詢之現行資訊為準，行前請以 Yahoo!乘換案內／Google Maps 與各官方公告再確認（熱氣球節、祭典期間常有臨時加開）。</li>
+    <li><b>長輩節奏</b>：每天安排 1–2 個咖啡館或茶屋休息點，午後留一段回飯店小憩的彈性；地下鐵與 JR 主要車站都有電梯。</li>
+    <li><b>走散對策</b>：熱氣球會場與祭典人潮多，先約好集合點（例如車站剪票口），長輩隨身帶飯店名片與緊急聯絡卡。</li>
+  </ul>
+</div>
+
+<h2 class="sec">主要資料來源</h2>
+<div class="card">
+  <ul class="tight src">
+    <li>佐賀國際熱氣球節：<a href="https://www.sibf.jp/news/2026/20260311a.html">官方 2026 開催日公告（10/30–11/3）</a>・<a href="https://www.sibf.jp/access/jr.html">官方 JR バルーンさが駅交通</a>・<a href="https://www.asobo-saga.jp/articles/detail/fdda7ed5-113c-4498-a04e-0168b68779b3">佐賀縣觀光 完全指南（場次・注意事項）</a></li>
+    <li>博多舊市街點燈漫步「千年煌夜」：<a href="https://www.hakata-light.jp/">官方網站（10/31–11/3・票價）</a></li>
+    <li>柳川白秋祭水上パレード：<a href="https://www.yanagawa-net.com/news_event_list/6059/">柳川市觀光協會 第74回公告（11/1–3・乘船預約）</a>・<a href="https://www.crossroadfukuoka.jp/event/12873">福岡縣觀光網站</a></li>
+    <li>柳川川下り料金：<a href="https://www.yanagawakk.co.jp/kawakudari/nishitetsu.html">柳川觀光開發（松月乘船場）</a></li>
+    <li>唐津宮日節（備案）：<a href="https://www.city.karatsu.lg.jp/page/4344.html">唐津市官方</a>・<a href="https://nagaratabi.com/karatsu-kunchi-guide/">唐津くんち2026完全ガイド</a>・<a href="https://ekitan.com/timetable/railway/line-station/6-28/d1">駅探 唐津駅時刻表</a></li>
+    <li>太宰府天滿宮本殿大改修完工：<a href="https://news.tnc.co.jp/news/articles/NID2026051830394">福岡TNC新聞（2026/5/18）</a></li>
+    <li>西鐵優惠票券：<a href="https://www.ensen24.jp/kippu/">西鐵 お得きっぷ 一覽</a></li>
+    <li>能古島 Island Park：<a href="https://nokonoshima.com/">官方網站</a>・<a href="https://meinohama.fukuoka.jp/nokonoshima-island-park/">姪浜情報站（票價整理）</a></li>
+    <li>海之中道海濱公園：<a href="https://uminaka-park.jp/guide/open-hour/">官方（開園時間・入園料）</a>；海洋世界：<a href="https://marine-world.jp/general-guide/regular-fees/">官方料金頁</a></li>
+    <li>teamLab Forest：<a href="https://www.teamlab.art/e/forest/">teamLab 官方</a>；福岡塔：<a href="https://www.crossroadfukuoka.jp/spot/12343">福岡縣觀光網站</a></li>
+    <li>福岡地下鐵一日券：<a href="https://subway.city.fukuoka.lg.jp/fare/card/oneday.php">福岡市地下鐵官方</a>；機場交通：<a href="https://www.fukuoka-airport.jp/en/access/bus.html">福岡機場官方</a></li>
+  </ul>
+</div>
 </section>
 
 <section class="page" id="pg-d1">
@@ -507,113 +606,11 @@
   </div></div>
 </div>
 
-<div class="pager"><button onclick="showPage('d6')">⬅ 11/02 能古島</button><button onclick="showPage('transport')">交通票券 ➡</button></div>
-</section>
-
-<section class="page" id="pg-transport">
-<h2 class="sec">交通與票券小抄</h2>
-<div class="card" style="overflow-x:auto;">
-<table class="fee-table">
-  <tr><th>票券／區間</th><th>價格</th><th>備註</th></tr>
-  <tr><td>機場 ⇄ 博多（地下鐵）</td><td data-l="價格">¥260／2 站約 6 分</td><td data-l="備註">國際線需先搭免費接駁到國內線</td></tr>
-  <tr><td>地下鐵一日券</td><td data-l="價格">大人 ¥640</td><td data-l="備註">感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
-  <tr><td>太宰府散策きっぷ（西鐵）</td><td data-l="價格">來回車票＋梅ヶ枝餅券</td><td data-l="備註">天神站購買，價格以西鐵官網為準</td></tr>
-  <tr><td>天神 ⇄ 柳川（西鐵特急）</td><td data-l="價格">特急自由席不另收費</td><td data-l="備註">約 50 分；川下り現場購票 大人 ¥2,200</td></tr>
-  <tr><td>博多 ⇄ バルーンさが（JR）</td><td data-l="價格">特急約 40–50 分</td><td data-l="備註">大會期間部分特急直停臨時站；普通車 10–15 分一班加開；IC 卡可用</td></tr>
-  <tr><td>姪浜 ⇄ 能古島渡輪</td><td data-l="價格">大人 ¥230</td><td data-l="備註">約 10 分、約每小時 1 班</td></tr>
-  <tr><td>海之中道（JR 香椎線）</td><td data-l="價格">博多出發約 40–45 分</td><td data-l="備註">—</td></tr>
-  <tr><td>博多 ⇄ 唐津（備案用）</td><td data-l="價格">單程約 ¥1,290／約 1.5 小時</td><td data-l="備註">地下鐵直通 JR 筑肥線，IC 卡可刷通</td></tr>
-</table>
-<div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士與熱氣球節臨時站；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
-</div>
-
-</section>
-
-<section class="page" id="pg-food">
-<h2 class="sec">美食備忘錄</h2>
-<figure class="photo">
-  <a href="https://commons.wikimedia.org/wiki/File:Nakasu-yatai.JPG" target="_blank" rel="noopener">
-    <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Nakasu-yatai.JPG?width=900" alt="中洲屋台夜色" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
-  </a>
-  <figcaption>中洲屋台——傍晚 18 時陸續點燈開張 ・ 圖：<a href="https://commons.wikimedia.org/wiki/File:Nakasu-yatai.JPG" target="_blank" rel="noopener">Wikimedia Commons</a>（點圖見原檔與授權）</figcaption>
-</figure>
-<div class="card">
-  <div class="cols">
-    <div class="mini">
-      <h3>🍜 必吃在地味</h3>
-      <p>博多豚骨拉麵（一蘭本社總本店・一幸舎・Shin-Shin）、牛雜鍋、雞肉水炊鍋、鐵鍋一口煎餃、明太子料理、烏龍麵（博多是烏龍麵發祥地）、川端善哉紅豆湯。</p>
-    </div>
-    <div class="mini">
-      <h3>🏮 屋台攻略</h3>
-      <p>中洲（河畔氣氛最好）與天神（店多在地人多）兩大區，約 18:00 開始營業，<b>週日公休的店多、雨天多停業</b>；以現金為主，每人先點一杯飲料是禮貌。與長輩同行選 18:00 剛開店時段最從容。</p>
-    </div>
-    <div class="mini">
-      <h3>🐟 一日遊限定</h3>
-      <p>柳川＝鰻魚蒸籠飯（本吉屋・若松屋）；佐賀熱氣球會場＝「うまかもん市場」在地屋台；太宰府＝參道現烤梅ヶ枝餅；唐津（備案）＝呼子烏賊活造、唐津漢堡。</p>
-    </div>
-    <div class="mini">
-      <h3>🎁 伴手禮</h3>
-      <p>明太子（福さ屋・やまや）、通りもん（博多西餅）、鶴乃子、努努雞（冷食炸雞）、あまおう草莓製品。博多駅マイング＆阪急 B1 一次買齊。</p>
-    </div>
-  </div>
-</div>
-
-</section>
-
-<section class="page" id="pg-guide">
-<h2 class="sec">雨天／體力備案</h2>
-<figure class="photo">
-  <a href="https://commons.wikimedia.org/wiki/File:Fukuoka_Tower_at_night.jpg" target="_blank" rel="noopener">
-    <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Fukuoka_Tower_at_night.jpg?width=900" alt="福岡塔夜景" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
-  </a>
-  <figcaption>福岡塔夜景——備案清單裡隨時可以補進行程的一站 ・ 圖：<a href="https://commons.wikimedia.org/wiki/File:Fukuoka_Tower_at_night.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>（點圖見原檔與授權）</figcaption>
-</figure>
-<div class="card">
-  <ul class="tight">
-    <li><b>唐津宮日節（11/2–4）</b>：詳見 Day 6 備案 A——想體驗祭典熱血的首選。</li>
-    <li><b>teamLab Forest（BOSS E・ZO FUKUOKA 5F）</b>：室內光影樂園，大人約 ¥2,400 起，雨天首選。</li>
-    <li><b>福岡塔</b>（大人 ¥1,000，開到 22:00）：想看夜景可補進任一晚。</li>
-    <li><b>福岡市博物館</b>（金印「漢委奴國王」真品）、<b>博多町家ふるさと館</b>：市區交通方便的文化備案。</li>
-    <li><b>LaLaport 福岡</b>：門口有 1:1 實物大 ν鋼彈立像（整點有演出），順路購物備案。</li>
-    <li>熱氣球（天候取消時→11/2 補場）、能古島／海之中道賞花都<b>強烈依賴天氣</b>，行程間可互換。</li>
-  </ul>
-</div>
-
-<h2 class="sec">行前貼士</h2>
-<div class="card">
-  <ul class="tight">
-    <li><b>天氣</b>：10 月底～11 月初福岡約 13–22°C，早晚涼、日夜溫差大；熱氣球會場河川敷與白秋祭水邊晚間更涼，保暖層帶好。</li>
-    <li><b>預約清單</b>：千年煌夜預售票（線上）、鍋物晚餐訂位、（若要搭船）白秋祭乘船預約——11/1 場次已候補中，岸邊觀賞則免預約免費。</li>
-    <li><b>熱氣球心態</b>：飛不飛看天，起飛前數十分鐘才廣播決定；把 11/2 留作補場日就不怕撲空。</li>
-    <li><b>假日注意</b>：11/1（日）柳橋市場休市；11/3（二）文化之日為國定假日，機場與車站人多，返程請提早。</li>
-    <li><b>花況・楓況</b>：出發前一週查能古島官網「開花情報」與吞山觀音寺紅葉情報，依當年氣候微調。</li>
-    <li><b>時刻表</b>：文中列車時刻以 2026 年 7 月查詢之現行資訊為準，行前請以 Yahoo!乘換案內／Google Maps 與各官方公告再確認（熱氣球節、祭典期間常有臨時加開）。</li>
-    <li><b>長輩節奏</b>：每天安排 1–2 個咖啡館或茶屋休息點，午後留一段回飯店小憩的彈性；地下鐵與 JR 主要車站都有電梯。</li>
-    <li><b>走散對策</b>：熱氣球會場與祭典人潮多，先約好集合點（例如車站剪票口），長輩隨身帶飯店名片與緊急聯絡卡。</li>
-  </ul>
-</div>
-
-<h2 class="sec">主要資料來源</h2>
-<div class="card">
-  <ul class="tight src">
-    <li>佐賀國際熱氣球節：<a href="https://www.sibf.jp/news/2026/20260311a.html">官方 2026 開催日公告（10/30–11/3）</a>・<a href="https://www.sibf.jp/access/jr.html">官方 JR バルーンさが駅交通</a>・<a href="https://www.asobo-saga.jp/articles/detail/fdda7ed5-113c-4498-a04e-0168b68779b3">佐賀縣觀光 完全指南（場次・注意事項）</a></li>
-    <li>博多舊市街點燈漫步「千年煌夜」：<a href="https://www.hakata-light.jp/">官方網站（10/31–11/3・票價）</a></li>
-    <li>柳川白秋祭水上パレード：<a href="https://www.yanagawa-net.com/news_event_list/6059/">柳川市觀光協會 第74回公告（11/1–3・乘船預約）</a>・<a href="https://www.crossroadfukuoka.jp/event/12873">福岡縣觀光網站</a></li>
-    <li>柳川川下り料金：<a href="https://www.yanagawakk.co.jp/kawakudari/nishitetsu.html">柳川觀光開發（松月乘船場）</a></li>
-    <li>唐津宮日節（備案）：<a href="https://www.city.karatsu.lg.jp/page/4344.html">唐津市官方</a>・<a href="https://nagaratabi.com/karatsu-kunchi-guide/">唐津くんち2026完全ガイド</a>・<a href="https://ekitan.com/timetable/railway/line-station/6-28/d1">駅探 唐津駅時刻表</a></li>
-    <li>太宰府天滿宮本殿大改修完工：<a href="https://news.tnc.co.jp/news/articles/NID2026051830394">福岡TNC新聞（2026/5/18）</a></li>
-    <li>西鐵優惠票券：<a href="https://www.ensen24.jp/kippu/">西鐵 お得きっぷ 一覽</a></li>
-    <li>能古島 Island Park：<a href="https://nokonoshima.com/">官方網站</a>・<a href="https://meinohama.fukuoka.jp/nokonoshima-island-park/">姪浜情報站（票價整理）</a></li>
-    <li>海之中道海濱公園：<a href="https://uminaka-park.jp/guide/open-hour/">官方（開園時間・入園料）</a>；海洋世界：<a href="https://marine-world.jp/general-guide/regular-fees/">官方料金頁</a></li>
-    <li>teamLab Forest：<a href="https://www.teamlab.art/e/forest/">teamLab 官方</a>；福岡塔：<a href="https://www.crossroadfukuoka.jp/spot/12343">福岡縣觀光網站</a></li>
-    <li>福岡地下鐵一日券：<a href="https://subway.city.fukuoka.lg.jp/fare/card/oneday.php">福岡市地下鐵官方</a>；機場交通：<a href="https://www.fukuoka-airport.jp/en/access/bus.html">福岡機場官方</a></li>
-  </ul>
-</div>
-
+<div class="pager"><button onclick="showPage('d6')">⬅ 11/02 能古島</button><button onclick="showPage('home')">回總覽 ➡</button></div>
 </section>
 
 <footer>
-  行程為 2026 年 7 月依網路公開資訊整理（7/21 v4.1：加入景點照片（Wikimedia Commons 自由授權）；分頁瀏覽・與長輩同行），價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  行程為 2026 年 7 月依網路公開資訊整理（7/21 v4.2：交通・美食・攻略整併至總覽頁；每日行程分頁＋景點照片），價格與時刻可能變動，出發前請以各官方網站為準。<br>
   祝旅途愉快 🎈🏮🛶
 </footer>
 
@@ -622,7 +619,7 @@
 
 <script>
 (function(){
-  var pages=['home','d1','d2','d3','d4','d5','d6','d7','transport','food','guide'];
+  var pages=['home','d1','d2','d3','d4','d5','d6','d7'];
   function show(id, updateHash){
     pages.forEach(function(p){
       var sec=document.getElementById('pg-'+p);
