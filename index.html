@@ -74,11 +74,12 @@
     flex:0 0 84px;font-weight:700;color:var(--accent);font-size:.9rem;padding-top:2px;
     white-space:nowrap;
   }
-  .slot-body{flex:1;font-size:.95rem;}
+  .slot-body{flex:1;min-width:0;font-size:.95rem;overflow-wrap:break-word;}
   .slot-body b{color:#6b3a1f;}
   .chips{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;}
   .chip{
-    font-size:.78rem;padding:2px 10px;border-radius:99px;white-space:nowrap;
+    font-size:.78rem;padding:3px 10px;border-radius:12px;
+    line-height:1.55;word-break:break-word;max-width:100%;
   }
   .chip.t{background:var(--blue-soft);color:var(--blue);}      /* 交通 */
   .chip.m{background:var(--gold-soft);color:#8a6516;}          /* 金額 */
@@ -96,7 +97,21 @@
     border-radius:8px;padding:10px 14px;margin-top:12px;font-size:.9rem;
   }
   .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  @media(max-width:640px){.cols{grid-template-columns:1fr;}}
+  table.overview td,table.overview th,.fee-table td,.fee-table th{word-break:break-word;}
+  @media(max-width:640px){
+    .cols{grid-template-columns:1fr;}
+    .wrap{padding:16px 12px 48px;}
+    header.hero{padding:26px 18px;}
+    header.hero h1{font-size:1.42rem;}
+    header.hero::after{font-size:42px;right:12px;top:8px;}
+    .card{padding:15px 14px;}
+    h2.sec{font-size:1.13rem;}
+    .slot{flex-direction:column;gap:3px;padding:10px 0;}
+    .slot-time{flex:none;}
+    .slot-body{font-size:.93rem;}
+    table.overview,.fee-table{font-size:.87rem;}
+    table.overview th,table.overview td,.fee-table th,.fee-table td{padding:7px 8px;}
+  }
   .mini h3{font-size:1rem;color:#6b3a1f;margin-bottom:6px;}
   .mini p{font-size:.92rem;margin-bottom:8px;}
   ul.tight{padding-left:1.2em;font-size:.93rem;}
