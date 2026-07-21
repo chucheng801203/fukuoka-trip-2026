@@ -143,11 +143,57 @@
   .src a{color:var(--blue);text-decoration:none;word-break:break-all;}
   .src li{margin-bottom:4px;}
   footer{margin-top:30px;text-align:center;color:var(--sub);font-size:.85rem;}
+
+  /* ===== 分頁瀏覽 ===== */
+  .tabbar{
+    position:sticky;top:0;z-index:60;background:rgba(250,246,240,.97);
+    -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+    display:flex;gap:6px;overflow-x:auto;padding:10px 4px;margin:0 -4px 14px;
+    border-bottom:2px solid var(--line);-webkit-overflow-scrolling:touch;scrollbar-width:none;
+  }
+  .tabbar::-webkit-scrollbar{display:none;}
+  .tab{
+    -webkit-appearance:none;appearance:none;font-family:inherit;
+    flex:0 0 auto;border:1.5px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:12px;padding:6px 12px;font-size:.92rem;font-weight:700;cursor:pointer;
+    text-align:center;line-height:1.35;display:flex;flex-direction:column;align-items:center;
+    min-width:3.8em;
+  }
+  .tab .tab-w{font-size:.76em;color:var(--sub);font-weight:600;}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .tab.active .tab-w{color:#fbe9e2;}
+  .page{display:none;}
+  .page.active{display:block;animation:fadein .22s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .pager{display:flex;justify-content:space-between;gap:10px;margin-top:4px;}
+  .pager button{
+    -webkit-appearance:none;appearance:none;font-family:inherit;
+    flex:1;border:1.5px solid var(--line);background:#fff;border-radius:12px;
+    padding:11px 8px;font-size:.95rem;font-weight:700;color:#6b3a1f;cursor:pointer;
+  }
+  .pager button:active{background:var(--accent-soft);}
+  table.overview tr.clickable{cursor:pointer;}
+  table.overview tr.clickable:hover td{background:#fdf3ee;}
+  .tap-hint{font-size:.9rem;color:var(--sub);margin:-8px 0 10px;}
 </style>
 </head>
 <body>
 <div class="wrap">
+<nav class="tabbar" id="tabbar" aria-label="頁面切換">
+  <button class="tab" id="tab-home" data-p="home"><span>🏠 總覽</span></button>
+  <button class="tab" id="tab-d1" data-p="d1"><span>10/28</span><span class="tab-w">三・抵達</span></button>
+  <button class="tab" id="tab-d2" data-p="d2"><span>10/29</span><span class="tab-w">四・太宰府</span></button>
+  <button class="tab" id="tab-d3" data-p="d3"><span>10/30</span><span class="tab-w">五・熱氣球</span></button>
+  <button class="tab" id="tab-d4" data-p="d4"><span>10/31</span><span class="tab-w">六・海之中道</span></button>
+  <button class="tab" id="tab-d5" data-p="d5"><span>11/01</span><span class="tab-w">日・柳川</span></button>
+  <button class="tab" id="tab-d6" data-p="d6"><span>11/02</span><span class="tab-w">一・能古島</span></button>
+  <button class="tab" id="tab-d7" data-p="d7"><span>11/03</span><span class="tab-w">二・回程</span></button>
+  <button class="tab" id="tab-transport" data-p="transport"><span>🚃 交通</span></button>
+  <button class="tab" id="tab-food" data-p="food"><span>🍜 美食</span></button>
+  <button class="tab" id="tab-guide" data-p="guide"><span>📋 攻略</span></button>
+</nav>
 
+<section class="page" id="pg-home">
 <header class="hero">
   <h1>福岡家族自由行・6 晚 7 天</h1>
   <p>2026/10/28（三）中午抵達 → 11/03（二）中午離開｜全程大眾運輸・不自駕｜建議住宿：博多駅周邊（連住 6 晚不換飯店）</p>
@@ -169,6 +215,7 @@
 </div>
 
 <h2 class="sec">行程總覽</h2>
+<p class="tap-hint">👆 點任一天，可直接開啟當日詳細行程</p>
 <div class="card" style="overflow-x:auto;">
 <table class="overview">
   <tr><th style="width:110px;">日期</th><th>主軸</th><th>晚上</th></tr>
@@ -182,8 +229,9 @@
 </table>
 </div>
 
-<h2 class="sec">每日行程</h2>
+</section>
 
+<section class="page" id="pg-d1">
 <!-- DAY 1 -->
 <div class="card day">
   <div class="day-head">
@@ -213,6 +261,10 @@
   <div class="note">💡 抵達日行程刻意排少：飛行＋入境後體力有限，舊城區這圈步行距離短、隨時可以喊停回飯店。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('home')">⬅ 總覽</button><button onclick="showPage('d2')">10/29 太宰府 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d2">
 <!-- DAY 2 -->
 <div class="card day">
   <div class="day-head">
@@ -246,6 +298,10 @@
   <div class="note">💡 覺得一天兩間寺廟太趕的話，南藏院（＋吞山觀音寺）可挪到 11/2 上午，與能古島二選一。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('d1')">⬅ 10/28 抵達日</button><button onclick="showPage('d3')">10/30 熱氣球 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d3">
 <!-- DAY 3 -->
 <div class="card day">
   <div class="day-head">
@@ -278,6 +334,10 @@
   <div class="warn">🎈 熱氣球是「有飛就是幸運」的活動——強風或降雨會取消飛行（起飛前數十分鐘現場廣播決定）。若 10/30 天候不佳，<b>把這天跟 11/2（能古島）對調</b>即可，行程完全不會亂。清晨 7:00 場最壯觀但要 5 點多出門，帶長輩建議下午場就好。歷年還有 2 個晚上舉辦熱氣球夜間點燈「夜間係留」（18:30 起，2026 場次以官方公告為準）——若剛好排在你們去的晚上，非常值得留下來，夜間係留日 JR 加開列車至 21 點台。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('d2')">⬅ 10/29 太宰府</button><button onclick="showPage('d4')">10/31 海之中道 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d4">
 <!-- DAY 4 -->
 <div class="card day">
   <div class="day-head">
@@ -310,6 +370,10 @@
   <div class="note">💡 今晚是萬聖節，天神、Canal City 一帶會有裝扮人潮與應景活動，順路感受一下即可。福岡塔夜景、teamLab Forest 這天就不硬塞了，已列入備案清單。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('d3')">⬅ 10/30 熱氣球</button><button onclick="showPage('d5')">11/01 柳川 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d5">
 <!-- DAY 5 -->
 <div class="card day">
   <div class="day-head">
@@ -346,6 +410,10 @@
   <div class="note">💡 這天把原本「一天衝柳川＋太宰府」拆開了：柳川值得白天玩到晚上一次滿足，太宰府已移到 Day 2。晚歸日，隔天（11/2）行程刻意排鬆。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('d4')">⬅ 10/31 海之中道</button><button onclick="showPage('d6')">11/02 能古島 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d6">
 <!-- DAY 6 -->
 <div class="card day">
   <div class="day-head">
@@ -376,6 +444,10 @@
   <div class="note">💡 主案（能古島）、備案 A（唐津）、備案 B（熱氣球）三選一就好，不要貪心——明天中午就要飛了。</div>
 </div>
 
+<div class="pager"><button onclick="showPage('d5')">⬅ 11/01 柳川</button><button onclick="showPage('d7')">11/03 回程 ➡</button></div>
+</section>
+
+<section class="page" id="pg-d7">
 <!-- DAY 7 -->
 <div class="card day">
   <div class="day-head">
@@ -395,6 +467,10 @@
   </div></div>
 </div>
 
+<div class="pager"><button onclick="showPage('d6')">⬅ 11/02 能古島</button><button onclick="showPage('transport')">交通票券 ➡</button></div>
+</section>
+
+<section class="page" id="pg-transport">
 <h2 class="sec">交通與票券小抄</h2>
 <div class="card" style="overflow-x:auto;">
 <table class="fee-table">
@@ -411,6 +487,9 @@
 <div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士與熱氣球節臨時站；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
 </div>
 
+</section>
+
+<section class="page" id="pg-food">
 <h2 class="sec">美食備忘錄</h2>
 <div class="card">
   <div class="cols">
@@ -433,6 +512,9 @@
   </div>
 </div>
 
+</section>
+
+<section class="page" id="pg-guide">
 <h2 class="sec">雨天／體力備案</h2>
 <div class="card">
   <ul class="tight">
@@ -476,11 +558,49 @@
   </ul>
 </div>
 
+</section>
+
 <footer>
-  行程為 2026 年 7 月依網路公開資訊整理（7/21 v3：與長輩同行版；唐津改備案，加入熱氣球節・千年煌夜・白秋祭），價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  行程為 2026 年 7 月依網路公開資訊整理（7/21 v4：分頁瀏覽版・與長輩同行；唐津為 Day 6 備案），價格與時刻可能變動，出發前請以各官方網站為準。<br>
   祝旅途愉快 🎈🏮🛶
 </footer>
 
+
 </div>
+
+<script>
+(function(){
+  var pages=['home','d1','d2','d3','d4','d5','d6','d7','transport','food','guide'];
+  function show(id, updateHash){
+    pages.forEach(function(p){
+      var sec=document.getElementById('pg-'+p);
+      var tab=document.getElementById('tab-'+p);
+      if(sec) sec.classList.toggle('active', p===id);
+      if(tab) tab.classList.toggle('active', p===id);
+    });
+    var t=document.getElementById('tab-'+id);
+    if(t && t.scrollIntoView){ try{t.scrollIntoView({block:'nearest',inline:'center'});}catch(e){} }
+    window.scrollTo(0,0);
+    if(updateHash!==false){ try{history.replaceState(null,'','#'+id);}catch(e){ location.hash=id; } }
+  }
+  window.showPage=show;
+  document.querySelectorAll('.tab').forEach(function(el){
+    el.addEventListener('click',function(){ show(el.getAttribute('data-p')); });
+  });
+  var rows=document.querySelectorAll('table.overview tr');
+  rows.forEach(function(tr,i){
+    if(i>=1 && i<=7){
+      tr.classList.add('clickable');
+      tr.addEventListener('click',function(){ show('d'+i); });
+    }
+  });
+  var h=(location.hash||'').replace('#','');
+  show(pages.indexOf(h)>=0 ? h : 'home', false);
+  window.addEventListener('hashchange',function(){
+    var g=(location.hash||'').replace('#','');
+    if(pages.indexOf(g)>=0) show(g,false);
+  });
+})();
+</script>
 </body>
 </html>
