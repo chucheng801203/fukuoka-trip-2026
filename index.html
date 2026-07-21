@@ -9,7 +9,7 @@
     --bg:#faf6f0;
     --card:#ffffff;
     --ink:#3d3229;
-    --sub:#8a7a68;
+    --sub:#6f5f4d;
     --accent:#c2492f;      /* 楓紅 */
     --accent-soft:#fbe9e2;
     --gold:#b78a2e;
@@ -22,9 +22,10 @@
     --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
   body{
     font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.75;
+    background:var(--bg);color:var(--ink);line-height:1.8;
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:960px;margin:0 auto;padding:24px 18px 60px;}
@@ -34,8 +35,9 @@
     position:relative;overflow:hidden;
   }
   header.hero::after{
-    content:"🎈";position:absolute;right:26px;top:18px;font-size:64px;opacity:.3;
+    content:"🎈";position:absolute;right:26px;top:18px;font-size:64px;opacity:.3;z-index:0;
   }
+  header.hero h1,header.hero p,.hero-tags{position:relative;z-index:1;}
   header.hero h1{font-size:1.7rem;letter-spacing:.5px;margin-bottom:8px;}
   header.hero p{opacity:.95;font-size:.98rem;}
   .hero-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;}
@@ -71,19 +73,19 @@
   .slot{display:flex;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line);}
   .slot:last-of-type{border-bottom:none;}
   .slot-time{
-    flex:0 0 84px;font-weight:700;color:var(--accent);font-size:.9rem;padding-top:2px;
+    flex:0 0 5.6em;font-weight:800;color:var(--accent);font-size:.92rem;padding-top:2px;
     white-space:nowrap;
   }
   .slot-body{flex:1;min-width:0;font-size:.95rem;overflow-wrap:break-word;}
   .slot-body b{color:#6b3a1f;}
   .chips{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;}
   .chip{
-    font-size:.78rem;padding:3px 10px;border-radius:12px;
+    font-size:.8rem;padding:3px 10px;border-radius:12px;
     line-height:1.55;word-break:break-word;max-width:100%;
   }
-  .chip.t{background:var(--blue-soft);color:var(--blue);}      /* 交通 */
-  .chip.m{background:var(--gold-soft);color:#8a6516;}          /* 金額 */
-  .chip.n{background:var(--green-soft);color:var(--green);}    /* 註記 */
+  .chip.t{background:var(--blue-soft);color:#35526b;}          /* 交通 */
+  .chip.m{background:var(--gold-soft);color:#6e5210;}          /* 金額 */
+  .chip.n{background:var(--green-soft);color:#41603a;}         /* 註記 */
   .note{
     background:var(--gold-soft);border-left:4px solid var(--gold);
     border-radius:8px;padding:10px 14px;margin-top:12px;font-size:.9rem;
@@ -109,8 +111,26 @@
     .slot{flex-direction:column;gap:3px;padding:10px 0;}
     .slot-time{flex:none;}
     .slot-body{font-size:.93rem;}
-    table.overview,.fee-table{font-size:.87rem;}
-    table.overview th,table.overview td,.fee-table th,.fee-table td{padding:7px 8px;}
+    table.overview,.fee-table{font-size:.9rem;}
+    /* 大字級對策：窄螢幕時表格改為堆疊卡片，欄位永遠不會被擠爆 */
+    table.overview,.fee-table,
+    table.overview tbody,.fee-table tbody,
+    table.overview tr,.fee-table tr,
+    table.overview td,.fee-table td{display:block;width:100%;}
+    table.overview tr:first-child,.fee-table tr:first-child{display:none;} /* 隱藏表頭列 */
+    table.overview tr,.fee-table tr{
+      border:1px solid var(--line);border-radius:10px;
+      padding:8px 12px;margin-bottom:10px;background:#fffdf9;
+    }
+    table.overview td,.fee-table td{border-bottom:none;padding:2px 0;}
+    table.overview td:first-child,.fee-table td:first-child{
+      font-weight:800;color:#8c321f;border-bottom:1px dashed var(--line);
+      padding-bottom:4px;margin-bottom:4px;
+    }
+    table.overview td[data-l]::before,.fee-table td[data-l]::before{
+      content:attr(data-l);color:var(--sub);font-weight:700;font-size:.85em;
+      margin-right:6px;
+    }
   }
   .mini h3{font-size:1rem;color:#6b3a1f;margin-bottom:6px;}
   .mini p{font-size:.92rem;margin-bottom:8px;}
@@ -152,13 +172,13 @@
 <div class="card" style="overflow-x:auto;">
 <table class="overview">
   <tr><th style="width:110px;">日期</th><th>主軸</th><th>晚上</th></tr>
-  <tr><td><b>10/28</b>（三）</td><td>抵達・博多舊城區散步（櫛田神社、川端通、Canal City）</td><td>中洲屋台 或 博多拉麵</td></tr>
-  <tr><td><b>10/29</b>（四）</td><td>太宰府天滿宮（新本殿）→ 篠栗南藏院臥佛（＋吞山早楓）</td><td>天神購物＋鍋物晚餐</td></tr>
-  <tr><td><b>10/30</b>（五）</td><td>柳橋市場早餐 → 佐賀國際熱氣球節（下午競技場次）🎈</td><td>天神屋台</td></tr>
-  <tr><td><b>10/31</b>（六）</td><td>海之中道海濱公園＋海洋世界水族館（花海散策日）</td><td>千年煌夜點燈散步 🏮</td></tr>
-  <tr><td><b>11/01</b>（日）</td><td>柳川：川下り遊船＋鰻魚飯 → 傍晚白秋祭水上遊行 🛶🎆</td><td>柳川晚歸（約 22:00 回博多）</td></tr>
-  <tr><td><b>11/02</b>（一）</td><td>能古島波斯菊悠閒場＋伴手禮採買 <span style="color:var(--sub);">（備案：唐津宮日節／熱氣球補場）</span></td><td>補吃清單上的鍋物</td></tr>
-  <tr><td><b>11/03</b>（二）</td><td>前往機場、中午班機（文化之日，提早出門）</td><td>—</td></tr>
+  <tr><td><b>10/28</b>（三）</td><td data-l="白天">抵達・博多舊城區散步（櫛田神社、川端通、Canal City）</td><td data-l="晚上">中洲屋台 或 博多拉麵</td></tr>
+  <tr><td><b>10/29</b>（四）</td><td data-l="白天">太宰府天滿宮（新本殿）→ 篠栗南藏院臥佛（＋吞山早楓）</td><td data-l="晚上">天神購物＋鍋物晚餐</td></tr>
+  <tr><td><b>10/30</b>（五）</td><td data-l="白天">柳橋市場早餐 → 佐賀國際熱氣球節（下午競技場次）🎈</td><td data-l="晚上">天神屋台</td></tr>
+  <tr><td><b>10/31</b>（六）</td><td data-l="白天">海之中道海濱公園＋海洋世界水族館（花海散策日）</td><td data-l="晚上">千年煌夜點燈散步 🏮</td></tr>
+  <tr><td><b>11/01</b>（日）</td><td data-l="白天">柳川：川下り遊船＋鰻魚飯 → 傍晚白秋祭水上遊行 🛶🎆</td><td data-l="晚上">柳川晚歸（約 22:00 回博多）</td></tr>
+  <tr><td><b>11/02</b>（一）</td><td data-l="白天">能古島波斯菊悠閒場＋伴手禮採買 <span style="color:var(--sub);">（備案：唐津宮日節／熱氣球補場）</span></td><td data-l="晚上">補吃清單上的鍋物</td></tr>
+  <tr><td><b>11/03</b>（二）</td><td data-l="白天">前往機場、中午班機（文化之日，提早出門）</td><td data-l="晚上">—</td></tr>
 </table>
 </div>
 
@@ -379,14 +399,14 @@
 <div class="card" style="overflow-x:auto;">
 <table class="fee-table">
   <tr><th>票券／區間</th><th>價格</th><th>備註</th></tr>
-  <tr><td>機場 ⇄ 博多（地下鐵）</td><td>¥260／2 站約 6 分</td><td>國際線需先搭免費接駁到國內線</td></tr>
-  <tr><td>地下鐵一日券</td><td>大人 ¥640</td><td>感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
-  <tr><td>太宰府散策きっぷ（西鐵）</td><td>來回車票＋梅ヶ枝餅券</td><td>天神站購買，價格以西鐵官網為準</td></tr>
-  <tr><td>天神 ⇄ 柳川（西鐵特急）</td><td>特急自由席不另收費</td><td>約 50 分；川下り現場購票 大人 ¥2,200</td></tr>
-  <tr><td>博多 ⇄ バルーンさが（JR）</td><td>特急約 40–50 分</td><td>大會期間部分特急直停臨時站；普通車 10–15 分一班加開；IC 卡可用</td></tr>
-  <tr><td>姪浜 ⇄ 能古島渡輪</td><td>大人 ¥230</td><td>約 10 分、約每小時 1 班</td></tr>
-  <tr><td>海之中道（JR 香椎線）</td><td>博多出發約 40–45 分</td><td>—</td></tr>
-  <tr><td>博多 ⇄ 唐津（備案用）</td><td>單程約 ¥1,290／約 1.5 小時</td><td>地下鐵直通 JR 筑肥線，IC 卡可刷通</td></tr>
+  <tr><td>機場 ⇄ 博多（地下鐵）</td><td data-l="價格">¥260／2 站約 6 分</td><td data-l="備註">國際線需先搭免費接駁到國內線</td></tr>
+  <tr><td>地下鐵一日券</td><td data-l="價格">大人 ¥640</td><td data-l="備註">感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
+  <tr><td>太宰府散策きっぷ（西鐵）</td><td data-l="價格">來回車票＋梅ヶ枝餅券</td><td data-l="備註">天神站購買，價格以西鐵官網為準</td></tr>
+  <tr><td>天神 ⇄ 柳川（西鐵特急）</td><td data-l="價格">特急自由席不另收費</td><td data-l="備註">約 50 分；川下り現場購票 大人 ¥2,200</td></tr>
+  <tr><td>博多 ⇄ バルーンさが（JR）</td><td data-l="價格">特急約 40–50 分</td><td data-l="備註">大會期間部分特急直停臨時站；普通車 10–15 分一班加開；IC 卡可用</td></tr>
+  <tr><td>姪浜 ⇄ 能古島渡輪</td><td data-l="價格">大人 ¥230</td><td data-l="備註">約 10 分、約每小時 1 班</td></tr>
+  <tr><td>海之中道（JR 香椎線）</td><td data-l="價格">博多出發約 40–45 分</td><td data-l="備註">—</td></tr>
+  <tr><td>博多 ⇄ 唐津（備案用）</td><td data-l="價格">單程約 ¥1,290／約 1.5 小時</td><td data-l="備註">地下鐵直通 JR 筑肥線，IC 卡可刷通</td></tr>
 </table>
 <div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士與熱氣球節臨時站；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
 </div>
