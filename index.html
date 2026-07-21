@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>福岡家族自由行 2026/10/28–11/03（不自駕）</title>
+<style>
+  :root{
+    --bg:#faf6f0;
+    --card:#ffffff;
+    --ink:#3d3229;
+    --sub:#8a7a68;
+    --accent:#c2492f;      /* 楓紅 */
+    --accent-soft:#fbe9e2;
+    --gold:#b78a2e;
+    --gold-soft:#f7efdc;
+    --green:#5a7a4f;
+    --green-soft:#e9f0e4;
+    --blue:#4a6d8c;
+    --blue-soft:#e6eef4;
+    --line:#eadfd2;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.75;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:24px 18px 60px;}
+  header.hero{
+    background:linear-gradient(135deg,#7a2e1d 0%,#c2492f 55%,#d97b3f 100%);
+    color:#fff;border-radius:18px;padding:38px 30px;margin-bottom:26px;
+    position:relative;overflow:hidden;
+  }
+  header.hero::after{
+    content:"🍁";position:absolute;right:26px;top:18px;font-size:64px;opacity:.25;
+  }
+  header.hero h1{font-size:1.7rem;letter-spacing:.5px;margin-bottom:8px;}
+  header.hero p{opacity:.95;font-size:.98rem;}
+  .hero-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;}
+  .hero-tags span{
+    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
+    padding:3px 12px;border-radius:99px;font-size:.85rem;
+  }
+  h2.sec{
+    font-size:1.25rem;margin:34px 0 14px;padding-left:12px;
+    border-left:5px solid var(--accent);letter-spacing:.5px;
+  }
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;margin-bottom:16px;box-shadow:0 1px 3px rgba(60,40,20,.05);
+  }
+  table.overview{width:100%;border-collapse:collapse;font-size:.93rem;}
+  table.overview th,table.overview td{
+    padding:9px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top;
+  }
+  table.overview th{background:var(--accent-soft);color:#8c321f;font-weight:700;}
+  table.overview tr:last-child td{border-bottom:none;}
+  .day{margin-bottom:22px;}
+  .day-head{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    border-bottom:2px solid var(--accent-soft);padding-bottom:10px;margin-bottom:14px;
+  }
+  .day-num{
+    background:var(--accent);color:#fff;font-weight:800;border-radius:10px;
+    padding:4px 12px;font-size:.95rem;white-space:nowrap;
+  }
+  .day-title{font-size:1.12rem;font-weight:800;}
+  .day-date{color:var(--sub);font-size:.9rem;}
+  .slot{display:flex;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line);}
+  .slot:last-of-type{border-bottom:none;}
+  .slot-time{
+    flex:0 0 84px;font-weight:700;color:var(--accent);font-size:.9rem;padding-top:2px;
+    white-space:nowrap;
+  }
+  .slot-body{flex:1;font-size:.95rem;}
+  .slot-body b{color:#6b3a1f;}
+  .chips{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{
+    font-size:.78rem;padding:2px 10px;border-radius:99px;white-space:nowrap;
+  }
+  .chip.t{background:var(--blue-soft);color:var(--blue);}      /* 交通 */
+  .chip.m{background:var(--gold-soft);color:#8a6516;}          /* 金額 */
+  .chip.n{background:var(--green-soft);color:var(--green);}    /* 註記 */
+  .note{
+    background:var(--gold-soft);border-left:4px solid var(--gold);
+    border-radius:8px;padding:10px 14px;margin-top:12px;font-size:.9rem;
+  }
+  .warn{
+    background:var(--accent-soft);border-left:4px solid var(--accent);
+    border-radius:8px;padding:10px 14px;margin-top:12px;font-size:.9rem;
+  }
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:640px){.cols{grid-template-columns:1fr;}}
+  .mini h3{font-size:1rem;color:#6b3a1f;margin-bottom:6px;}
+  .mini p{font-size:.92rem;margin-bottom:8px;}
+  ul.tight{padding-left:1.2em;font-size:.93rem;}
+  ul.tight li{margin-bottom:6px;}
+  .fee-table{width:100%;border-collapse:collapse;font-size:.9rem;}
+  .fee-table th,.fee-table td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;}
+  .fee-table th{background:var(--blue-soft);color:var(--blue);}
+  .src{font-size:.83rem;color:var(--sub);}
+  .src a{color:var(--blue);text-decoration:none;word-break:break-all;}
+  .src li{margin-bottom:4px;}
+  footer{margin-top:30px;text-align:center;color:var(--sub);font-size:.85rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>福岡家族自由行・6 晚 7 天</h1>
+  <p>2026/10/28（三）中午抵達 → 11/03（二）中午離開｜全程大眾運輸・不自駕｜建議住宿：博多駅周邊（連住 6 晚不換飯店）</p>
+  <div class="hero-tags">
+    <span>👨‍👩‍👧 家族（含長輩小孩）</span><span>🍜 美食屋台</span><span>⛩️ 神社寺廟</span>
+    <span>🌸 波斯菊・早楓</span><span>🛍️ 購物</span><span>🎌 唐津宮日節 11/2</span>
+  </div>
+</header>
+
+<div class="card">
+  <b>這趟的三大亮點</b>
+  <p style="font-size:.95rem;margin-top:6px;">
+    ① <b>唐津宮日節（唐津くんち）</b>：聯合國無形文化遺產的大型曳山祭典，一年只有 11/2–4 三天，你們剛好遇上 11/2 晚上最夢幻的「宵曳山」——14 台巨大曳山點燈夜巡。<br>
+    ② <b>太宰府天滿宮「新」本殿</b>：124 年來首次大改修於 2026 年 5 月完工、9 月起恢復本殿參拜，你們去的時候正是煥然一新的漆金本殿，時機絕佳。<br>
+    ③ <b>秋季花海</b>：能古島與海之中道的波斯菊花海正值尾聲見頃，加上篠栗一帶福岡最早轉紅的楓葉，深秋氣氛滿滿。
+  </p>
+</div>
+
+<h2 class="sec">行程總覽</h2>
+<div class="card" style="overflow-x:auto;">
+<table class="overview">
+  <tr><th style="width:110px;">日期</th><th>主軸</th><th>晚餐方向</th></tr>
+  <tr><td><b>10/28</b>（三）</td><td>抵達・博多舊城區散步（櫛田神社、川端通、Canal City）</td><td>中洲屋台 或 博多拉麵</td></tr>
+  <tr><td><b>10/29</b>（四）</td><td>柳川遊船＋鰻魚飯 → 太宰府天滿宮（新本殿）</td><td>天神：牛雜鍋／雞肉水炊鍋</td></tr>
+  <tr><td><b>10/30</b>（五）</td><td>柳橋市場早餐 → 大濠公園 → 能古島波斯菊</td><td>天神屋台・ONE FUKUOKA</td></tr>
+  <tr><td><b>10/31</b>（六）</td><td>海之中道海濱公園＋海洋世界水族館（親子日）</td><td>福岡塔夜景後於百道／回博多</td></tr>
+  <tr><td><b>11/01</b>（日）</td><td>篠栗南藏院臥佛（＋吞山觀音寺早楓）→ 博多駅購物</td><td>水炊き（建議先訂位）</td></tr>
+  <tr><td><b>11/02</b>（一）</td><td>悠閒上午 → 唐津：唐津城＋老街 → 夜間宵曳山 🎌</td><td>唐津：烏賊料理／唐津漢堡</td></tr>
+  <tr><td><b>11/03</b>（二）</td><td>前往機場、中午班機（文化之日，提早出門）</td><td>—</td></tr>
+</table>
+</div>
+
+<h2 class="sec">每日行程</h2>
+
+<!-- DAY 1 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 1</span>
+    <span class="day-title">抵達・博多舊城區暖身</span>
+    <span class="day-date">10/28（三）</span>
+  </div>
+  <div class="slot"><div class="slot-time">12:00</div><div class="slot-body">
+    抵達福岡機場國際線航廈。入境、領行李後，搭 <b>免費接駁巴士到國內線航廈轉地下鐵</b>（機場→博多僅 2 站約 6 分），或直接搭西鐵巴士往博多駅。
+    <div class="chips"><span class="chip t">地下鐵 博多 ¥260</span><span class="chip n">行李多建議直達巴士</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">14:30</div><div class="slot-body">
+    博多駅周邊飯店寄放行李／辦理入住，稍作休息。
+    <div class="chips"><span class="chip n">建議住博多駅步行 10 分內，之後每天進出最省力</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">15:30</div><div class="slot-body">
+    <b>東長寺</b>（福岡大佛）→ <b>櫛田神社</b>（博多總鎮守，常設展示祇園山笠飾山）→ <b>川端通商店街</b> 散步吃小點。
+    <div class="chips"><span class="chip t">地下鐵祇園駅～中洲川端駅一帶，步行可串</span><span class="chip n">全程平路，長輩友善</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">17:30</div><div class="slot-body">
+    <b>Canal City 博多</b>：運河噴水秀、拉麵競技場、逛街；小孩放電剛剛好。
+  </div></div>
+  <div class="slot"><div class="slot-time">19:00</div><div class="slot-body">
+    晚餐二選一：<b>中洲屋台</b>（河畔屋台初體驗，18 點後陸續開店）或 Canal City／博多駅內餐廳。
+    <div class="chips"><span class="chip m">屋台人均約 ¥1,500–2,500</span><span class="chip n">屋台以現金為主、座位少；帶長輩小孩建議 18:00 開店就去</span></div>
+  </div></div>
+  <div class="note">💡 抵達日行程刻意排少：飛行＋入境後體力有限，舊城區這圈步行距離短、隨時可以喊停回飯店。</div>
+</div>
+
+<!-- DAY 2 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 2</span>
+    <span class="day-title">柳川遊船 ＋ 太宰府天滿宮（新本殿）</span>
+    <span class="day-date">10/29（四）</span>
+  </div>
+  <div class="slot"><div class="slot-time">08:30</div><div class="slot-body">
+    地下鐵到 <b>西鐵福岡（天神）駅</b>，購買／出示 <b>「太宰府・柳川觀光套票」</b>（含天神⇄柳川⇄太宰府電車來回＋柳川遊船券）。搭特急直奔柳川（約 50 分）。
+    <div class="chips"><span class="chip m">套票：數位 ¥3,620／紙本 ¥3,730，兒童半價</span><span class="chip t">西鐵天神大牟田線特急</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">10:00</div><div class="slot-body">
+    <b>柳川川下り遊船</b>：船夫撐篙遊水鄉約 60–70 分，穿橋洞、看柳岸老屋，小孩很買單。
+    <div class="chips"><span class="chip n">遊船受理至 15:00，早去人少光線好</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">11:45</div><div class="slot-body">
+    午餐：柳川名物 <b>鰻魚蒸籠飯（うなぎせいろ蒸し）</b>——老舖「元祖本吉屋」或「若松屋」。飯後沖端地區、御花庭園散步。
+    <div class="chips"><span class="chip m">鰻魚飯約 ¥3,000–4,500</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">14:00</div><div class="slot-body">
+    西鐵柳川 →（西鐵二日市轉乘）→ <b>太宰府駅</b>，約 50 分。
+  </div></div>
+  <div class="slot"><div class="slot-time">15:00</div><div class="slot-body">
+    <b>太宰府天滿宮</b>：參拜 124 年來大改修後、2026 年 9 月才重新開放的<b>全新本殿</b>（漆面全部重塗、檜皮屋頂全面翻新）。參道吃現烤 <b>梅ヶ枝餅</b>、看隈研吾設計的星巴克。
+    <div class="chips"><span class="chip n">境內參拜免費</span><span class="chip n">有餘力可加九州國立博物館（週四有開）</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">17:30</div><div class="slot-body">
+    回天神（約 30 分），晚餐：<b>牛雜鍋（もつ鍋）</b>或<b>雞肉水炊鍋</b>，天神一帶名店多、多有個室適合家族。
+    <div class="chips"><span class="chip m">鍋物人均約 ¥3,000–4,500</span><span class="chip n">熱門店建議事先網路訂位</span></div>
+  </div></div>
+  <div class="note">💡 順序刻意「先柳川、回程太宰府」：太宰府離福岡近，傍晚體力下降時回程短；且遊船早場水面平靜、隊伍短。</div>
+</div>
+
+<!-- DAY 3 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 3</span>
+    <span class="day-title">市場早餐・大濠公園・能古島波斯菊</span>
+    <span class="day-date">10/30（五）</span>
+  </div>
+  <div class="slot"><div class="slot-time">08:30</div><div class="slot-body">
+    <b>柳橋連合市場</b>（「博多的廚房」）：吃海鮮丼、玉子燒當早餐，感受在地市場。
+    <div class="chips"><span class="chip t">地下鐵渡辺通駅步行 5 分</span><span class="chip n">週日・假日休市，所以排在今天（平日）</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">10:00</div><div class="slot-body">
+    <b>大濠公園</b>湖畔散步（推車、長輩都輕鬆），順看 <b>福岡城跡・舞鶴公園</b> 秋色。
+    <div class="chips"><span class="chip t">地下鐵大濠公園駅</span><span class="chip n">免費</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">11:40</div><div class="slot-body">
+    地下鐵 → <b>姪浜駅</b>，轉巴士約 15 分到 <b>姪浜渡船場</b>，搭市營渡輪 10 分鐘登 <b>能古島</b>（約每小時 1 班），再轉島上巴士約 13 分到 <b>能古島 Island Park</b>。
+    <div class="chips"><span class="chip m">渡輪單程 ¥230／兒童 ¥120</span><span class="chip m">島上巴士 ¥260／¥130</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">13:00</div><div class="slot-body">
+    <b>能古島 Island Park</b>：約 50 萬株波斯菊花海配大海背景，10 月上旬～11 月上旬是見頃，這天賞的是深秋壓軸場。園內有迷你動物區、懷舊商店街，午餐可在園內簡單解決。
+    <div class="chips"><span class="chip m">入園 大人 ¥1,500／中小學生 ¥800／幼兒 ¥500</span><span class="chip n">花況依天候變動，出發前看官網開花情報</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">16:00</div><div class="slot-body">
+    渡輪返回姪浜 → 地下鐵直達 <b>天神</b>：逛 2025 年開幕的新地標 <b>ONE FUKUOKA BLDG.（ワンビル）</b>、天神地下街。
+  </div></div>
+  <div class="slot"><div class="slot-time">18:30</div><div class="slot-body">
+    晚餐：<b>天神屋台</b>（渡辺通、昭和通沿路，選擇多、在地人也多）。
+    <div class="chips"><span class="chip n">下雨天屋台多停業 → 備案：ONE FUKUOKA B1「天神福食堂」美食街</span></div>
+  </div></div>
+  <div class="note">💡 今天全程都在地下鐵空港線沿線（渡辺通→大濠公園→姪浜→天神），可買 <b>地下鐵一日券 ¥640</b>（或直接刷感應式信用卡，當日自動封頂 ¥640）。若長輩體力有限，可跳過大濠公園、睡飽一點再出門。</div>
+</div>
+
+<!-- DAY 4 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 4</span>
+    <span class="day-title">海之中道親子日：花海 ＋ 水族館（＋福岡塔夜景）</span>
+    <span class="day-date">10/31（六）</span>
+  </div>
+  <div class="slot"><div class="slot-time">09:00</div><div class="slot-body">
+    JR 博多駅 →（香椎轉香椎線）→ <b>海ノ中道駅</b>，約 40–45 分。
+    <div class="chips"><span class="chip t">JR 香椎線</span><span class="chip n">週六人多，早點出發搶第一波</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">10:00</div><div class="slot-body">
+    <b>國營海之中道海濱公園</b>：秋季「花祭」波斯菊花田、大草坪、動物之森（水豚、袋鼠）、大型遊具，小孩天堂、長輩可租電動輔助車或悠閒賞花。
+    <div class="chips"><span class="chip m">入園 ¥450／65 歲以上 ¥210／國中以下免費</span><span class="chip n">11 月起開到 17:00（10 月至 17:30）</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">13:30</div><div class="slot-body">
+    <b>海洋世界水族館（マリンワールド海の中道）</b>：以九州近海為主題，海豚秀水槽以博多灣為背景，非常精彩。
+    <div class="chips"><span class="chip m">大人 ¥2,500／65+ ¥2,200／中小學 ¥1,200／3 歲+ ¥700</span><span class="chip t">海ノ中道駅旁</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">16:00</div><div class="slot-body">
+    <b>返程二選一</b>：<br>
+    A. 搭「うみなかライン」渡輪 20 分直達 <b>百道（Momochi）</b>，接著走到 <b>福岡塔</b> 看夕陽＋夜景（此渡輪依季節排班，出發前務必查當日是否運航）。<br>
+    B. 原路 JR 回博多休息，晚上自由活動。
+    <div class="chips"><span class="chip m">渡輪 大人 ¥1,300／小學生 ¥650</span><span class="chip m">福岡塔 大人 ¥1,000／中小學 ¥500／幼兒 ¥200</span><span class="chip n">福岡塔開到 22:00</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">19:00</div><div class="slot-body">
+    晚餐：選 A 則在西新／百道用餐後搭巴士回博多；選 B 則博多駅周邊（拉麵、鐵鍋煎餃）。
+  </div></div>
+  <div class="note">💡 若對 teamLab Forest 有興趣：就在福岡塔附近的 BOSS E・ZO FUKUOKA 5 樓（大人約 ¥2,400 起、4–15 歲 ¥1,000 起，週末 10:00–19:00），可取代夜景行程，或留作雨天備案。</div>
+</div>
+
+<!-- DAY 5 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 5</span>
+    <span class="day-title">篠栗臥佛與早楓・博多駅購物補貨</span>
+    <span class="day-date">11/01（日）</span>
+  </div>
+  <div class="slot"><div class="slot-time">09:30</div><div class="slot-body">
+    JR 博多駅搭福北ゆたか線約 25 分到 <b>城戸南藏院前駅</b>，步行 3 分即達 <b>南藏院</b>：全長 41 公尺的世界級巨大 <b>釋迦涅槃像（臥佛）</b>，氣勢震撼。
+    <div class="chips"><span class="chip n">參拜免費（臥佛體內參拜 ¥500）</span><span class="chip n">寺方要求服裝端莊、刺青需遮蓋</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">11:30</div><div class="slot-body">
+    <b>加碼選項</b>：回篠栗駅轉計程車約 15 分上 <b>吞山觀音寺</b>——福岡「最早紅」的楓葉名所，10 月下旬起千棵紅葉漸層轉色，秋季併設紅葉祭市集。體力或預算有限就跳過，直接回市區。
+    <div class="chips"><span class="chip t">篠栗駅計程車往返（建議請司機等候或約回程）</span><span class="chip n">山區氣溫低 2–3 度，帶薄外套</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">14:00</div><div class="slot-body">
+    回博多：<b>住吉神社</b>（日本三大住吉之一）順拜 → <b>博多駅商圈購物</b>：AMU PLAZA、博多阪急、KITTE、地下街；藥妝、伴手禮今天先買齊（最後一天早上來不及）。
+  </div></div>
+  <div class="slot"><div class="slot-time">18:00</div><div class="slot-body">
+    晚餐：<b>博多水炊き</b>（雞肉鍋老舖如「水たき長野」「博多華味鳥」等，多需訂位）。飯後早點休息，養精蓄銳迎接明天祭典日。
+    <div class="chips"><span class="chip m">水炊き人均約 ¥3,500–5,000</span></div>
+  </div></div>
+  <div class="note">💡 週日柳橋市場休市、部分屋台也休，所以把「寺廟＋購物」排今天最合適；明天唐津是晚歸日，伴手禮務必今天買。</div>
+</div>
+
+<!-- DAY 6 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 6</span>
+    <span class="day-title">唐津宮日節：唐津城・老街・宵曳山 🎌</span>
+    <span class="day-date">11/02（一）</span>
+  </div>
+  <div class="slot"><div class="slot-time">上午</div><div class="slot-body">
+    睡飽、退房補眠或在飯店周邊悠閒早午餐——今晚會晚歸，上午刻意留白。
+  </div></div>
+  <div class="slot"><div class="slot-time">12:30</div><div class="slot-body">
+    博多駅（或天神）搭 <b>地下鐵空港線直通 JR 筑肥線</b> 前往 <b>唐津駅</b>，約 1 小時 25–35 分（部分班次需在筑前前原同月台轉乘）。
+    <div class="chips"><span class="chip m">單程約 ¥1,290，IC 卡全程可用</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">14:30</div><div class="slot-body">
+    <b>唐津城</b>：望海天守，上山有付費電梯，長輩輕鬆登城 → 市區看 <b>舊唐津銀行</b>（辰野金吾監修洋樓）、老街感受祭典前的躁動——白天就能近距離看到停放在各町的 <b>14 台曳山</b>（鯛魚、獅子、龍頭盔等造型，金光閃閃）。
+    <div class="chips"><span class="chip m">天守閣 ¥500／中小學 ¥250</span><span class="chip m">電梯單程 ¥100</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">17:00</div><div class="slot-body">
+    提早吃晚餐佔好體力：唐津名物 <b>烏賊料理</b>（呼子直送活烏賊）、<b>唐津漢堡</b>，或祭典小吃攤（唐津駅～市中心一帶當天滿滿路邊攤）。
+    <div class="chips"><span class="chip n">18:00 起市中心交通管制，餐廳祭典日人多，能訂位就訂</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">19:30</div><div class="slot-body">
+    <b>宵曳山開始</b>：14 台點燈曳山伴著「エンヤ、エンヤ」吆喝聲夜巡市街（19:30–22:00）。建議在 <b>大手口～唐津駅前通り</b> 一帶找定點觀賞，不必跟著隊伍人擠人。
+    <div class="chips"><span class="chip n">帶小孩建議看到 20:30 左右就心滿意足撤退</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">20:45</div><div class="slot-body">
+    回程：步行回唐津駅，搭 <b>20:59 或 21:35 往筑前前原</b> 的普通車，同月台轉乘直通福岡市區的列車，約 23:00 前後回到博多。
+    <div class="chips"><span class="chip n">平日末班約 22:01，別搭到最後一班</span><span class="chip n">祭典期間 JR 常有加開／調整，當天請以車站公告與轉乘 App 為準</span></div>
+  </div></div>
+  <div class="warn">⚠️ 這天是全程最「操」的一天：晚歸＋人潮。長輩小孩若擔心太累，替代方案是<b>白天往返唐津</b>（看白天曳山展示與唐津城，傍晚回福岡）；或乾脆改成福岡市區自由日。但宵曳山一年只有這一晚，剛好遇上非常難得，值得一衝。</div>
+</div>
+
+<!-- DAY 7 -->
+<div class="card day">
+  <div class="day-head">
+    <span class="day-num">Day 7</span>
+    <span class="day-title">返程日（文化之日）</span>
+    <span class="day-date">11/03（二・國定假日）</span>
+  </div>
+  <div class="slot"><div class="slot-time">08:00</div><div class="slot-body">
+    早餐、整理行李退房。若有零星漏買的伴手禮，博多駅「マイング」9:00 開店可快閃補貨（時間抓緊）。
+  </div></div>
+  <div class="slot"><div class="slot-time">09:00</div><div class="slot-body">
+    前往機場：地下鐵 2 站到福岡空港（國內線）→ <b>免費航廈接駁巴士約 10–15 分</b>到國際線；或博多巴士總站搭直達國際線的巴士。
+    <div class="chips"><span class="chip n">中午班機建議 9:30–10:00 抵達國際線櫃檯</span><span class="chip n">當天是假日，接駁與路面車流可能較多，寧早勿晚</span></div>
+  </div></div>
+  <div class="slot"><div class="slot-time">12:00</div><div class="slot-body">
+    班機起飛，帶著滿滿的祭典回憶回家 ✈️
+  </div></div>
+</div>
+
+<h2 class="sec">交通與票券小抄</h2>
+<div class="card" style="overflow-x:auto;">
+<table class="fee-table">
+  <tr><th>票券／區間</th><th>價格</th><th>備註</th></tr>
+  <tr><td>機場 ⇄ 博多（地下鐵）</td><td>¥260／2 站約 6 分</td><td>國際線需先搭免費接駁到國內線</td></tr>
+  <tr><td>地下鐵一日券</td><td>大人 ¥640／兒童 ¥320</td><td>感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
+  <tr><td>太宰府・柳川觀光套票（西鐵）</td><td>大人 ¥3,620（數位）／¥3,730（紙本）</td><td>含來回電車＋柳川遊船＋優惠券，兒童半價</td></tr>
+  <tr><td>博多 ⇄ 唐津（地下鐵直通 JR 筑肥線）</td><td>單程約 ¥1,290／約 1.5 小時</td><td>IC 卡可直接刷通</td></tr>
+  <tr><td>姪浜 ⇄ 能古島渡輪</td><td>大人 ¥230／小児 ¥120</td><td>約 10 分、約每小時 1 班</td></tr>
+  <tr><td>海之中道（JR 香椎線）</td><td>博多出發約 40–45 分</td><td>返程可考慮うみなかライン渡輪（¥1,300，需確認當日運航）</td></tr>
+</table>
+<div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
+</div>
+
+<h2 class="sec">美食備忘錄</h2>
+<div class="card">
+  <div class="cols">
+    <div class="mini">
+      <h3>🍜 必吃在地味</h3>
+      <p>博多豚骨拉麵（一蘭本社總本店・一幸舎・Shin-Shin）、牛雜鍋、雞肉水炊鍋、鐵鍋一口煎餃、明太子料理、烏龍麵（博多是烏龍麵發祥地）、川端善哉紅豆湯。</p>
+    </div>
+    <div class="mini">
+      <h3>🏮 屋台攻略</h3>
+      <p>中洲（河畔氣氛最好）與天神（店多在地人多）兩大區，約 18:00 開始營業，<b>週日公休的店多、雨天多停業</b>；以現金為主，每人先點一杯飲料是禮貌。帶小孩選 18:00 剛開店時段最從容。</p>
+    </div>
+    <div class="mini">
+      <h3>🐟 一日遊限定</h3>
+      <p>柳川＝鰻魚蒸籠飯（本吉屋・若松屋）；唐津＝呼子烏賊活造、唐津漢堡；太宰府＝參道現烤梅ヶ枝餅。</p>
+    </div>
+    <div class="mini">
+      <h3>🎁 伴手禮</h3>
+      <p>明太子（福さ屋・やまや）、通りもん（博多西餅）、鶴乃子、努努雞（冷食炸雞）、あまおう草莓製品。博多駅マイング＆阪急 B1 一次買齊。</p>
+    </div>
+  </div>
+</div>
+
+<h2 class="sec">雨天／體力備案</h2>
+<div class="card">
+  <ul class="tight">
+    <li><b>teamLab Forest（BOSS E・ZO FUKUOKA 5F）</b>：室內光影樂園，大人約 ¥2,400 起、4–15 歲 ¥1,000 起，親子雨天首選。</li>
+    <li><b>福岡市博物館</b>（金印「漢委奴國王」真品）、<b>博多町家ふるさと館</b>：了解博多文化，都在市區交通方便。</li>
+    <li><b>九州國立博物館</b>：太宰府那天若下雨，可把重心移到館內（週一休館，10/29 週四有開）。</li>
+    <li><b>LaLaport 福岡</b>：門口有 1:1 實物大 ν鋼彈立像（整點有演出），親子購物放電備案。</li>
+    <li>能古島／海之中道賞花<b>強烈依賴天氣</b>：若遇雨，兩天行程可互換或改市區購物、博物館。</li>
+  </ul>
+</div>
+
+<h2 class="sec">行前貼士</h2>
+<div class="card">
+  <ul class="tight">
+    <li><b>天氣</b>：10 月底～11 月初福岡約 13–22°C，早晚涼、日夜溫差大，薄外套＋長袖即可；看宵曳山的晚上請多帶一件保暖。</li>
+    <li><b>訂位</b>：水炊き、鰻魚老舖、祭典日的唐津餐廳，建議提前 1–2 週網路或請飯店代訂。</li>
+    <li><b>祭典日</b>：11/2 唐津市中心 18:00 起交通管制、人潮洶湧，親子同行請約好走散集合點（例如唐津駅剪票口）。</li>
+    <li><b>假日注意</b>：11/1（日）柳橋市場休市；11/3（二）文化之日為國定假日，機場與車站人多，返程請提早。</li>
+    <li><b>花況・楓況</b>：出發前一週查能古島官網「開花情報」與吞山觀音寺紅葉情報，依當年氣候微調。</li>
+    <li><b>時刻表</b>：文中列車時刻以 2026 年 7 月查詢之現行時刻為準，行前請以 Yahoo!乘換案內／Google Maps 再確認當日班次。</li>
+  </ul>
+</div>
+
+<h2 class="sec">主要資料來源</h2>
+<div class="card">
+  <ul class="tight src">
+    <li>唐津宮日節日程與觀賞攻略：<a href="https://www.city.karatsu.lg.jp/page/4344.html">唐津市官方網站</a>・<a href="https://nagaratabi.com/karatsu-kunchi-guide/">唐津くんち2026完全ガイド（ながら旅）</a></li>
+    <li>太宰府天滿宮本殿大改修完工報導：<a href="https://news.tnc.co.jp/news/articles/NID2026051830394">福岡TNC新聞（2026/5/18）</a></li>
+    <li>太宰府・柳川觀光套票：<a href="https://www.ensen24.jp/kippu/tc/dazaifu-yanagawa/">西鐵官方（繁體中文）</a></li>
+    <li>博多⇄唐津交通：<a href="https://jp.trip.com/transport/station/hakata-station-to-karatsu-station.html">Trip.com 交通指南</a>・<a href="https://ekitan.com/timetable/railway/line-station/6-28/d1">駅探 唐津駅時刻表</a></li>
+    <li>能古島 Island Park：<a href="https://nokonoshima.com/">官方網站</a>・<a href="https://meinohama.fukuoka.jp/nokonoshima-island-park/">姪浜情報站（票價整理）</a></li>
+    <li>海之中道海濱公園：<a href="https://uminaka-park.jp/guide/open-hour/">官方（開園時間・入園料）</a>・<a href="https://uminaka-park.jp/enjoy_flower/four-seasons/cosmos.html">官方波斯菊情報</a></li>
+    <li>海洋世界水族館：<a href="https://marine-world.jp/general-guide/regular-fees/">官方料金頁</a></li>
+    <li>うみなかライン渡輪：<a href="https://yasuda-gp.net/hakata/momochi_hakata">安田產業汽船官方</a></li>
+    <li>teamLab Forest：<a href="https://www.teamlab.art/e/forest/">teamLab 官方</a></li>
+    <li>福岡塔：<a href="https://www.crossroadfukuoka.jp/spot/12343">福岡縣官方觀光網站</a></li>
+    <li>唐津城：<a href="https://karatsujo.com/user-information/">官方利用案內</a></li>
+    <li>吞山觀音寺交通：<a href="https://www.nomiyamakannonji.com/access02.html">官方 Access</a></li>
+    <li>福岡地下鐵一日券：<a href="https://subway.city.fukuoka.lg.jp/fare/card/oneday.php">福岡市地下鐵官方</a></li>
+    <li>福岡機場交通：<a href="https://www.fukuoka-airport.jp/en/access/bus.html">福岡機場官方</a></li>
+  </ul>
+</div>
+
+<footer>
+  行程為 2026 年 7 月依網路公開資訊整理，價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  祝旅途愉快 🍁 エンヤ！エンヤ！
+</footer>
+
+</div>
+</body>
+</html>
