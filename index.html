@@ -192,7 +192,27 @@
     padding:7px 14px;font-size:.92rem;font-weight:700;color:#6b3a1f;text-decoration:none;
   }
   .home-jump a:active{background:var(--accent-soft);}
+
+  /* ===== 當日路線 ===== */
+  .route-title{font-size:1.02rem;color:#6b3a1f;margin-bottom:8px;}
+  .map-box{height:250px;border-radius:12px;border:1px solid var(--line);background:#eef2ec;}
+  .map-box:empty::after{content:"地圖載入中…（需網路連線）";display:flex;height:100%;align-items:center;justify-content:center;color:var(--sub);font-size:.88rem;}
+  .map-note{font-size:.8rem;color:var(--sub);margin-top:6px;line-height:1.5;}
+  .route-btns{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+  .route-btns a{
+    display:block;background:#fff;border:1.5px solid var(--blue);border-radius:12px;
+    padding:10px 12px;font-size:.93rem;font-weight:700;color:var(--blue);text-decoration:none;
+  }
+  .route-btns a:active{background:var(--blue-soft);}
+  .leg-mode{float:right;font-size:.78em;color:var(--sub);font-weight:600;}
+  .num-pin{
+    background:var(--accent);color:#fff;border-radius:50%;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;
+    border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);
+  }
+  @media(max-width:640px){ .map-box{height:220px;} }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
 </head>
 <body>
 <div class="wrap">
@@ -376,6 +396,16 @@
   <div class="note">💡 抵達日行程刻意排少：飛行＋入境後體力有限，舊城區這圈步行距離短、隨時可以喊停回飯店。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d1" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E7%A6%8F%E5%B2%A1%E7%A9%BA%E6%B8%AF%E5%9B%BD%E9%9A%9B%E7%B7%9A%E3%82%BF%E3%83%BC%E3%83%9F%E3%83%8A%E3%83%AB&destination=%E5%8D%9A%E5%A4%9A%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 福岡空港国際線ターミナル → 博多駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E6%9D%B1%E9%95%B7%E5%AF%BA&travelmode=walking&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 東長寺<span class="leg-mode">步行</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E6%AB%9B%E7%94%B0%E7%A5%9E%E7%A4%BE&destination=%E3%82%AD%E3%83%A3%E3%83%8A%E3%83%AB%E3%82%B7%E3%83%86%E3%82%A3%E5%8D%9A%E5%A4%9A&travelmode=walking&hl=zh-TW" target="_blank" rel="noopener">🧭 櫛田神社 → キャナルシティ博多<span class="leg-mode">步行</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('home')">⬅ 總覽</button><button onclick="showPage('d2')">10/29 太宰府 ➡</button></div>
 </section>
 
@@ -419,6 +449,16 @@
   <div class="note">💡 覺得一天兩間寺廟太趕的話，南藏院（＋吞山觀音寺）可挪到 11/2 上午，與能古島二選一。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d2" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E8%A5%BF%E9%89%84%E7%A6%8F%E5%B2%A1%EF%BC%88%E5%A4%A9%E7%A5%9E%EF%BC%89%E9%A7%85&destination=%E5%A4%AA%E5%AE%B0%E5%BA%9C%E5%A4%A9%E6%BA%80%E5%AE%AE&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 西鉄福岡（天神）駅 → 太宰府天満宮<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%A4%AA%E5%AE%B0%E5%BA%9C%E5%A4%A9%E6%BA%80%E5%AE%AE&destination=%E5%8D%97%E8%94%B5%E9%99%A2&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 太宰府天満宮 → 南蔵院<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%97%E8%94%B5%E9%99%A2&destination=%E8%A5%BF%E9%89%84%E7%A6%8F%E5%B2%A1%EF%BC%88%E5%A4%A9%E7%A5%9E%EF%BC%89%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 南蔵院 → 西鉄福岡（天神）駅<span class="leg-mode">大眾運輸</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('d1')">⬅ 10/28 抵達日</button><button onclick="showPage('d3')">10/30 熱氣球 ➡</button></div>
 </section>
 
@@ -455,6 +495,16 @@
   <div class="warn">🎈 熱氣球是「有飛就是幸運」的活動——強風或降雨會取消飛行（起飛前數十分鐘現場廣播決定）。若 10/30 天候不佳，<b>把這天跟 11/2（能古島）對調</b>即可，行程完全不會亂。清晨 7:00 場最壯觀但要 5 點多出門，帶長輩建議下午場就好。歷年還有 2 個晚上舉辦熱氣球夜間點燈「夜間係留」（18:30 起，2026 場次以官方公告為準）——若剛好排在你們去的晚上，非常值得留下來，夜間係留日 JR 加開列車至 21 點台。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d3" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E6%9F%B3%E6%A9%8B%E9%80%A3%E5%90%88%E5%B8%82%E5%A0%B4&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 柳橋連合市場<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E3%83%90%E3%83%AB%E3%83%BC%E3%83%B3%E3%81%95%E3%81%8C%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → バルーンさが駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E3%83%90%E3%83%AB%E3%83%BC%E3%83%B3%E3%81%95%E3%81%8C%E9%A7%85&destination=%E5%8D%9A%E5%A4%9A%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 バルーンさが駅 → 博多駅<span class="leg-mode">大眾運輸</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('d2')">⬅ 10/29 太宰府</button><button onclick="showPage('d4')">10/31 海之中道 ➡</button></div>
 </section>
 
@@ -497,6 +547,16 @@
   <div class="note">💡 今晚是萬聖節，天神、Canal City 一帶會有裝扮人潮與應景活動，順路感受一下即可。福岡塔夜景、teamLab Forest 這天就不硬塞了，已列入備案清單。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d4" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E6%B5%B7%E3%83%8E%E4%B8%AD%E9%81%93%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 海ノ中道駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E3%83%9E%E3%83%AA%E3%83%B3%E3%83%AF%E3%83%BC%E3%83%AB%E3%83%89%E6%B5%B7%E3%81%AE%E4%B8%AD%E9%81%93&destination=%E5%8D%9A%E5%A4%9A%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 マリンワールド海の中道 → 博多駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E6%9D%B1%E9%95%B7%E5%AF%BA&travelmode=walking&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 東長寺<span class="leg-mode">步行</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('d3')">⬅ 10/30 熱氣球</button><button onclick="showPage('d5')">11/01 柳川 ➡</button></div>
 </section>
 
@@ -537,6 +597,16 @@
   <div class="note">💡 這天把原本「一天衝柳川＋太宰府」拆開了：柳川值得白天玩到晚上一次滿足，太宰府已移到 Day 2。晚歸日，隔天（11/2）行程刻意排鬆。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d5" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E8%A5%BF%E9%89%84%E7%A6%8F%E5%B2%A1%EF%BC%88%E5%A4%A9%E7%A5%9E%EF%BC%89%E9%A7%85&destination=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 西鉄福岡（天神）駅 → 西鉄柳川駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&destination=%E6%9F%B3%E5%B7%9D%E5%B7%9D%E4%B8%8B%E3%82%8A%20%E6%9D%BE%E6%9C%88%E4%B9%97%E8%88%B9%E5%A0%B4&travelmode=walking&hl=zh-TW" target="_blank" rel="noopener">🧭 西鉄柳川駅 → 柳川川下り 松月乗船場<span class="leg-mode">步行</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E6%9F%B3%E5%B7%9D%E8%97%A9%E4%B8%BB%E7%AB%8B%E8%8A%B1%E9%82%B8%20%E5%BE%A1%E8%8A%B1&destination=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 柳川藩主立花邸 御花 → 西鉄柳川駅<span class="leg-mode">大眾運輸</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('d4')">⬅ 10/31 海之中道</button><button onclick="showPage('d6')">11/02 能古島 ➡</button></div>
 </section>
 
@@ -577,6 +647,16 @@
   <div class="note">💡 主案（能古島）、備案 A（唐津）、備案 B（熱氣球）三選一就好，不要貪心——明天中午就要飛了。</div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d6" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E5%A7%AA%E6%B5%9C%E6%97%85%E5%AE%A2%E5%BE%85%E5%90%88%E6%89%80&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 姪浜旅客待合所<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E3%81%AE%E3%81%93%E3%81%AE%E3%81%97%E3%81%BE%E3%82%A2%E3%82%A4%E3%83%A9%E3%83%B3%E3%83%89%E3%83%91%E3%83%BC%E3%82%AF&destination=%E5%8D%9A%E5%A4%9A%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 のこのしまアイランドパーク → 博多駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E5%94%90%E6%B4%A5%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 唐津駅<span class="leg-mode">大眾運輸</span></a>
+  </div>
+<div class="map-note">🔄 備案日：最後一顆按鈕為唐津方向導航。</div></div>
 <div class="pager"><button onclick="showPage('d5')">⬅ 11/01 柳川</button><button onclick="showPage('d7')">11/03 回程 ➡</button></div>
 </section>
 
@@ -606,11 +686,19 @@
   </div></div>
 </div>
 
+<div class="card route-card">
+  <h3 class="route-title">🗺 當日路線</h3>
+  <div id="map-d7" class="map-box" aria-label="當日路線示意地圖"></div>
+  <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
+  <div class="route-btns">
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E7%A6%8F%E5%B2%A1%E7%A9%BA%E6%B8%AF%E5%9B%BD%E9%9A%9B%E7%B7%9A%E3%82%BF%E3%83%BC%E3%83%9F%E3%83%8A%E3%83%AB&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 福岡空港国際線ターミナル<span class="leg-mode">大眾運輸</span></a>
+  </div>
+</div>
 <div class="pager"><button onclick="showPage('d6')">⬅ 11/02 能古島</button><button onclick="showPage('home')">回總覽 ➡</button></div>
 </section>
 
 <footer>
-  行程為 2026 年 7 月依網路公開資訊整理（7/21 v4.2：交通・美食・攻略整併至總覽頁；每日行程分頁＋景點照片），價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  行程為 2026 年 7 月依網路公開資訊整理（7/21 v4.3：每日分頁新增路線示意地圖（OpenStreetMap）與 Google Maps 導航按鈕），價格與時刻可能變動，出發前請以各官方網站為準。<br>
   祝旅途愉快 🎈🏮🛶
 </footer>
 
@@ -630,6 +718,7 @@
     var t=document.getElementById('tab-'+id);
     if(t && t.scrollIntoView){ try{t.scrollIntoView({block:'nearest',inline:'center'});}catch(e){} }
     window.scrollTo(0,0);
+    if(window.__initDayMap){ setTimeout(function(){window.__initDayMap(id);},80); }
     if(updateHash!==false){ try{history.replaceState(null,'','#'+id);}catch(e){ location.hash=id; } }
   }
   window.showPage=show;
@@ -649,6 +738,36 @@
     var g=(location.hash||'').replace('#','');
     if(pages.indexOf(g)>=0) show(g,false);
   });
+})();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+  var DATA={"d1": [["福岡機場(國際線)", 33.5847, 130.4404], ["博多駅", 33.5902, 130.4207], ["東長寺", 33.5937, 130.4139], ["櫛田神社", 33.593, 130.4104], ["Canal City", 33.5899, 130.4114], ["中洲屋台", 33.5925, 130.4075]], "d2": [["西鐵福岡(天神)駅", 33.5876, 130.3989], ["太宰府天満宮", 33.5215, 130.5347], ["南藏院", 33.6224, 130.573], ["博多駅", 33.5902, 130.4207]], "d3": [["博多駅", 33.5902, 130.4207], ["柳橋連合市場", 33.5836, 130.4056], ["熱氣球會場(バルーンさが駅)", 33.245, 130.2465]], "d4": [["博多駅", 33.5902, 130.4207], ["海之中道海濱公園", 33.6595, 130.3652], ["海洋世界水族館", 33.656, 130.353], ["千年煌夜(東長寺一帶)", 33.5937, 130.4139]], "d5": [["西鐵福岡(天神)駅", 33.5876, 130.3989], ["西鐵柳川駅", 33.1772, 130.4172], ["松月乘船場(川下り)", 33.1745, 130.4125], ["御花・沖端", 33.1595, 130.3985]], "d6": [["博多駅", 33.5902, 130.4207], ["姪浜渡船場", 33.6013, 130.3237], ["能古渡船場", 33.61, 130.3117], ["能古島 Island Park", 33.628, 130.312]], "d7": [["博多駅", 33.5902, 130.4207], ["福岡機場(國際線)", 33.5847, 130.4404]]};
+  var maps={};
+  window.__initDayMap=function(id){
+    if(!DATA[id]) return;
+    if(typeof L==="undefined"){var el=document.getElementById("map-"+id);if(el)el.style.display="none";return;}
+    if(maps[id]){ maps[id].invalidateSize(); return; }
+    var el=document.getElementById("map-"+id);
+    if(!el||el.offsetParent===null) return;
+    try{
+      var m=L.map(el,{dragging:true,scrollWheelZoom:false,tap:true});
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:18,attribution:"&copy; OpenStreetMap contributors"}).addTo(m);
+      var pts=[];
+      DATA[id].forEach(function(sp,i){
+        var ll=[sp[1],sp[2]]; pts.push(ll);
+        L.marker(ll,{icon:L.divIcon({className:"",html:"<div class=\"num-pin\">"+(i+1)+"</div>",iconSize:[24,24],iconAnchor:[12,12]})})
+          .addTo(m).bindPopup((i+1)+". "+sp[0]);
+      });
+      L.polyline(pts,{color:"#c2492f",weight:3,dashArray:"6 8",opacity:.85}).addTo(m);
+      m.fitBounds(pts,{padding:[28,28]});
+      maps[id]=m;
+    }catch(e){ el.style.display="none"; }
+  };
+  var act=document.querySelector(".page.active");
+  if(act) setTimeout(function(){window.__initDayMap(act.id.replace("pg-",""));},120);
 })();
 </script>
 </body>
