@@ -814,7 +814,7 @@
 </section>
 
 <footer>
-  行程為 2026 年 7 月依公開資訊整理（7/22 v4.4：資料修正、每日摘要、閱讀工具、收合地圖、列印與無障礙優化），價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  行程為 2026 年 7 月依公開資訊整理（7/22 v4.4.1：頁籤切換納入瀏覽器歷史（可用返回鍵回上一個分頁）；資料修正、每日摘要、閱讀工具、收合地圖、列印與無障礙優化），價格與時刻可能變動，出發前請以各官方網站為準。<br>
   祝旅途愉快 🎈🏮🛶
 </footer>
 
@@ -836,7 +836,7 @@
     if(t && t.scrollIntoView){ try{t.scrollIntoView({block:'nearest',inline:'center'});}catch(e){} }
     window.scrollTo(0,0);
     if(window.__initDayMap){ setTimeout(function(){window.__initDayMap(id);},80); }
-    if(updateHash!==false){ try{history.replaceState(null,'','#'+id);}catch(e){ location.hash=id; } }
+    if(updateHash!==false && location.hash!=='#'+id){ try{history.pushState(null,'','#'+id);}catch(e){ location.hash=id; } }
   }
   window.showPage=show;
   document.querySelectorAll('.tab').forEach(function(el){
@@ -880,6 +880,7 @@
   window.addEventListener('hashchange',function(){
     var g=(location.hash||'').replace('#','');
     if(pages.indexOf(g)>=0) show(g,false);
+    else if(!g) show('home',false);
     else if(g.indexOf('sec-')===0){show('home',false);setTimeout(function(){var anchor=document.getElementById(g);if(anchor)anchor.scrollIntoView();},0);}
   });
 })();
