@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>福岡家族自由行 2026/10/28–11/03（不自駕）｜閱讀優化版 v4.4</title>
+<title>福岡家族自由行 2026/10/28–11/03（不自駕）｜行動閱讀版 v4.5</title>
 <style>
   :root{
     --bg:#faf6f0;
@@ -22,24 +22,27 @@
     --radius:14px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  html{
+    font-size:17px;-webkit-text-size-adjust:100%;text-size-adjust:100%;
+    scroll-padding-top:96px;
+  }
   body{
     font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,sans-serif;
-    background:var(--bg);color:var(--ink);font-size:17px;line-height:1.72;
+    background:var(--bg);color:var(--ink);font-size:1rem;line-height:1.72;
     -webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:960px;margin:0 auto;padding:24px 18px 60px;}
   header.hero{
-    background:linear-gradient(135deg,#7a2e1d 0%,#c2492f 55%,#d97b3f 100%);
+    background:linear-gradient(135deg,#682416 0%,#963622 55%,#a4512d 100%);
     color:#fff;border-radius:18px;padding:38px 30px;margin-bottom:26px;
     position:relative;overflow:hidden;
   }
   header.hero::after{
-    content:"🎈";position:absolute;right:26px;top:18px;font-size:64px;opacity:.3;z-index:0;
+    content:"🎈";position:absolute;right:26px;top:18px;font-size:64px;opacity:.22;z-index:0;
   }
   header.hero h1,header.hero p,.hero-tags{position:relative;z-index:1;}
   header.hero h1{font-size:1.7rem;letter-spacing:.5px;margin-bottom:8px;}
-  header.hero p{opacity:.95;font-size:.98rem;}
+  header.hero p{opacity:1;font-size:.98rem;max-width:72ch;}
   .hero-tags{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;}
   .hero-tags span{
     background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);
@@ -68,7 +71,7 @@
     background:var(--accent);color:#fff;font-weight:800;border-radius:10px;
     padding:4px 12px;font-size:.95rem;white-space:nowrap;
   }
-  .day-title{font-size:1.12rem;font-weight:800;}
+  .day-title{font-size:1.12rem;font-weight:800;margin:0;line-height:1.45;}
   .day-date{color:var(--sub);font-size:.9rem;}
   .day-glance{
     display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;
@@ -78,8 +81,8 @@
     background:#fffaf5;border:1px solid var(--line);border-radius:10px;
     padding:8px 10px;min-width:0;
   }
-  .day-glance span{display:block;color:var(--sub);font-size:.76rem;line-height:1.35;margin-bottom:2px;}
-  .day-glance strong{display:block;color:#6b3a1f;font-size:.88rem;line-height:1.45;overflow-wrap:anywhere;}
+  .day-glance span,.day-glance dt{display:block;color:var(--sub);font-size:.76rem;line-height:1.35;margin-bottom:2px;}
+  .day-glance strong,.day-glance dd{display:block;color:#6b3a1f;font-size:.88rem;font-weight:800;line-height:1.45;overflow-wrap:anywhere;margin:0;}
   .slot{display:flex;gap:14px;padding:9px 0;border-bottom:1px dashed var(--line);}
   .slot:last-of-type{border-bottom:none;}
   .slot-time{
@@ -90,7 +93,7 @@
   .slot-body b{color:#6b3a1f;}
   .chips{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;}
   .chip{
-    font-size:.84rem;padding:4px 10px;border-radius:12px;
+    font-size:.84rem;padding:4px 9px;border-radius:7px;
     line-height:1.55;word-break:break-word;max-width:100%;
   }
   .chip.t{background:var(--blue-soft);color:#35526b;}          /* 交通 */
@@ -127,14 +130,19 @@
     table.overview,.fee-table,
     table.overview tbody,.fee-table tbody,
     table.overview tr,.fee-table tr,
-    table.overview td,.fee-table td{display:block;width:100%;}
-    table.overview tr:first-child,.fee-table tr:first-child{display:none;} /* 隱藏表頭列 */
+    table.overview td,.fee-table td,
+    table.overview th[scope="row"]{display:block;width:100%;}
+    table.overview thead,.fee-table thead{
+      position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+      overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);
+      white-space:nowrap;border:0;
+    } /* 視覺隱藏但保留螢幕閱讀器的欄位關聯 */
     table.overview tr,.fee-table tr{
       border:1px solid var(--line);border-radius:10px;
       padding:8px 12px;margin-bottom:10px;background:#fffdf9;
     }
     table.overview td,.fee-table td{border-bottom:none;padding:2px 0;}
-    table.overview td:first-child,.fee-table td:first-child{
+    table.overview th[scope="row"],.fee-table td:first-child{
       font-weight:800;color:#8c321f;border-bottom:1px dashed var(--line);
       padding-bottom:4px;margin-bottom:4px;
     }
@@ -152,6 +160,7 @@
   .fee-table th{background:var(--blue-soft);color:var(--blue);}
   .src{font-size:.83rem;color:var(--sub);}
   .src a{color:var(--blue);text-decoration:none;word-break:break-all;}
+  .src a,.photo figcaption a,.inline-link{text-decoration:underline;text-underline-offset:2px;}
   .src li{margin-bottom:4px;}
   footer{margin-top:30px;text-align:center;color:var(--sub);font-size:.85rem;}
 
@@ -172,7 +181,7 @@
   }
   .tab .tab-w{font-size:.76em;color:var(--sub);font-weight:600;}
   .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
-  .tab.active .tab-w{color:#fbe9e2;}
+  .tab.active .tab-w{color:#fff;}
   .page{display:none;}
   .page.active{display:block;animation:fadein .22s ease;}
   @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
@@ -186,6 +195,7 @@
   table.overview tr.clickable{cursor:pointer;}
   table.overview tr.clickable:hover td{background:#fdf3ee;}
   .tap-hint{font-size:.9rem;color:var(--sub);margin:-8px 0 10px;}
+  .tab-swipe-hint{display:none;color:var(--sub);font-size:.78rem;text-align:right;margin:-9px 2px 12px;}
 
   /* ===== 景點照片 ===== */
   .photo{margin:4px 0 12px;}
@@ -195,7 +205,7 @@
     background:#efe6d8;display:block;border:1px solid var(--line);
   }
   .photo figcaption{font-size:.8rem;color:var(--sub);margin-top:5px;line-height:1.5;}
-  .photo figcaption a{color:var(--blue);text-decoration:none;}
+  .photo figcaption a{color:var(--blue);}
 
   .home-jump{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;}
   .home-jump a{
@@ -232,16 +242,44 @@
   .reader-tools{display:flex;justify-content:flex-end;gap:8px;margin:-4px 0 14px;}
   .reader-tools button{
     min-height:42px;border:1.5px solid var(--line);background:#fff;color:#6b3a1f;
-    border-radius:10px;padding:7px 12px;font:700 .88rem/1.2 inherit;cursor:pointer;
+    border-radius:10px;padding:7px 12px;font-family:inherit;font-size:.88rem;
+    font-weight:700;line-height:1.2;cursor:pointer;
   }
+  .reader-tools button:disabled{opacity:.45;cursor:not-allowed;}
+  .sr-only{
+    position:absolute!important;width:1px!important;height:1px!important;padding:0!important;
+    margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;
+    white-space:nowrap!important;border:0!important;
+  }
+  .control-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .control-head h2{font-size:1.08rem;color:#6b3a1f;}
+  .control-head p{font-size:.8rem;color:var(--sub);white-space:nowrap;}
+  .control-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .control-grid section{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px 14px;}
+  .control-grid h3{font-size:.95rem;color:#6b3a1f;margin-bottom:6px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+  .control-grid ul{padding-left:1.15em;font-size:.88rem;}
+  .control-grid li{margin-bottom:4px;}
+  .status-tag{display:inline-flex;align-items:center;border-radius:99px;padding:2px 8px;font-size:.72rem;font-weight:800;line-height:1.5;}
+  .status-tag.need{background:var(--accent-soft);color:#8c321f;}
+  .status-tag.wait{background:var(--gold-soft);color:#6e5210;}
+  .status-tag.check{background:var(--blue-soft);color:#35526b;}
+  .status-tag.ok{background:var(--green-soft);color:#41603a;}
+  .privacy-note{font-size:.8rem;color:var(--sub);margin-top:10px;}
+  .day-link{color:#8c321f;text-decoration:underline;text-underline-offset:3px;}
+  .decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 14px;}
+  .decision-grid article{border:1px solid var(--line);background:#fffaf5;border-radius:10px;padding:10px 11px;}
+  .decision-grid h3{font-size:.9rem;color:#6b3a1f;margin:5px 0 3px;}
+  .decision-grid p{font-size:.8rem;line-height:1.55;color:var(--sub);}
   button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex]:focus-visible{
     outline:3px solid #235f91;outline-offset:3px;
   }
   @media(max-width:640px){
     .highlight-grid{grid-template-columns:1fr;}
+    .control-grid,.decision-grid{grid-template-columns:1fr;}
     .reader-tools{justify-content:stretch;}
     .reader-tools button{flex:1;padding-inline:8px;}
-    .photo img{aspect-ratio:3/2;}
+    .photo img{aspect-ratio:16/9;max-height:180px;}
+    .tab-swipe-hint{display:block;}
   }
   @media(prefers-reduced-motion:reduce){
     *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;}
@@ -249,20 +287,26 @@
   @media print{
     body{background:#fff;font-size:11pt;line-height:1.55;}
     .wrap{max-width:none;padding:0;}
-    .tabbar,.reader-tools,.home-jump,.pager,.route-card,.tap-hint{display:none!important;}
+    .tabbar,.tab-swipe-hint,.reader-tools,.home-jump,.pager,.tap-hint{display:none!important;}
     .page{display:block!important;animation:none!important;}
     .page:not(#pg-home){break-before:page;}
     header.hero{background:#fff!important;color:#000;border:2px solid #7a2e1d;padding:20px;}
     header.hero::after{display:none;}
-    .card{box-shadow:none;break-inside:avoid;}
+    .card{box-shadow:none;break-inside:auto;}
+    .slot,.note,.warn,.alt,.day-head,.day-glance,.control-grid section{break-inside:avoid;}
     .photo{display:none;}
     a{color:inherit;text-decoration:none;}
     .day-glance{grid-template-columns:repeat(4,1fr);}
-    details.option>div,details.fold>ul{display:block!important;}
+    .map-box,.route-card>.map-note{display:none!important;}
+    details.route-card>summary{display:none!important;}
+    details.option>div,details.fold>ul,.route-btns{display:block!important;}
+    .route-btns a{margin-bottom:6px;border-color:#aaa;}
     footer{margin-top:24px;}
   }
   .map-box{height:250px;border-radius:12px;border:1px solid var(--line);background:#eef2ec;}
   .map-box:empty::after{content:"地圖載入中…（需網路連線）";display:flex;height:100%;align-items:center;justify-content:center;color:var(--sub);font-size:.88rem;}
+  .map-box.map-failed{height:100px;background:#fffaf5;}
+  .map-box.map-failed::after{content:"地圖無法載入，請使用下方導航按鈕。";display:flex;height:100%;align-items:center;justify-content:center;color:var(--sub);font-size:.88rem;padding:12px;text-align:center;}
   .map-note{font-size:.8rem;color:var(--sub);margin-top:6px;line-height:1.5;}
   .route-btns{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
   .route-btns a{
@@ -283,24 +327,30 @@
 <body>
 <div class="wrap">
 <nav class="tabbar" id="tabbar" aria-label="頁面切換" role="tablist">
-  <button type="button" class="tab" id="tab-home" data-p="home" role="tab" aria-controls="pg-home"><span>🏠 總覽</span></button>
-  <button type="button" class="tab" id="tab-d1" data-p="d1" role="tab" aria-controls="pg-d1"><span>10/28</span><span class="tab-w">三・抵達</span></button>
-  <button type="button" class="tab" id="tab-d2" data-p="d2" role="tab" aria-controls="pg-d2"><span>10/29</span><span class="tab-w">四・太宰府</span></button>
-  <button type="button" class="tab" id="tab-d3" data-p="d3" role="tab" aria-controls="pg-d3"><span>10/30</span><span class="tab-w">五・熱氣球</span></button>
-  <button type="button" class="tab" id="tab-d4" data-p="d4" role="tab" aria-controls="pg-d4"><span>10/31</span><span class="tab-w">六・海之中道</span></button>
-  <button type="button" class="tab" id="tab-d5" data-p="d5" role="tab" aria-controls="pg-d5"><span>11/01</span><span class="tab-w">日・柳川</span></button>
-  <button type="button" class="tab" id="tab-d6" data-p="d6" role="tab" aria-controls="pg-d6"><span>11/02</span><span class="tab-w">一・能古島</span></button>
-  <button type="button" class="tab" id="tab-d7" data-p="d7" role="tab" aria-controls="pg-d7"><span>11/03</span><span class="tab-w">二・回程</span></button>
+  <button type="button" class="tab active" id="tab-home" data-p="home" role="tab" aria-controls="pg-home" aria-selected="true" tabindex="0"><span>🏠 總覽</span></button>
+  <button type="button" class="tab" id="tab-d1" data-p="d1" role="tab" aria-controls="pg-d1" aria-selected="false" tabindex="-1"><span>10/28</span><span class="tab-w">三・抵達</span></button>
+  <button type="button" class="tab" id="tab-d2" data-p="d2" role="tab" aria-controls="pg-d2" aria-selected="false" tabindex="-1"><span>10/29</span><span class="tab-w">四・太宰府</span></button>
+  <button type="button" class="tab" id="tab-d3" data-p="d3" role="tab" aria-controls="pg-d3" aria-selected="false" tabindex="-1"><span>10/30</span><span class="tab-w">五・熱氣球</span></button>
+  <button type="button" class="tab" id="tab-d4" data-p="d4" role="tab" aria-controls="pg-d4" aria-selected="false" tabindex="-1"><span>10/31</span><span class="tab-w">六・海之中道</span></button>
+  <button type="button" class="tab" id="tab-d5" data-p="d5" role="tab" aria-controls="pg-d5" aria-selected="false" tabindex="-1"><span>11/01</span><span class="tab-w">日・柳川</span></button>
+  <button type="button" class="tab" id="tab-d6" data-p="d6" role="tab" aria-controls="pg-d6" aria-selected="false" tabindex="-1"><span>11/02</span><span class="tab-w">一・三選一</span></button>
+  <button type="button" class="tab" id="tab-d7" data-p="d7" role="tab" aria-controls="pg-d7" aria-selected="false" tabindex="-1"><span>11/03</span><span class="tab-w">二・回程</span></button>
 </nav>
+<p class="tab-swipe-hint" aria-hidden="true">← 日期頁籤可左右滑動 →</p>
 <div class="reader-tools" aria-label="閱讀工具">
   <button type="button" id="font-down" aria-label="縮小字體">A−</button>
   <button type="button" id="font-up" aria-label="放大字體">A＋</button>
   <button type="button" onclick="window.print()">🖨 列印全部</button>
+  <output id="font-status" class="sr-only" aria-live="polite">目前字級 17</output>
 </div>
+<noscript>
+  <style>.page{display:block!important}.tabbar,.tab-swipe-hint,.reader-tools,.pager{display:none!important}.route-card>.map-box,.route-card>.map-box+.map-note{display:none!important}</style>
+  <div class="card warn">此頁的日期切換需要 JavaScript；目前已自動展開全部行程供閱讀。</div>
+</noscript>
 
-<section class="page" id="pg-home" role="tabpanel" aria-labelledby="tab-home">
+<section class="page active" id="pg-home" role="tabpanel" aria-labelledby="tab-home" aria-hidden="false">
 <header class="hero">
-  <h1>福岡家族自由行・6 晚 7 天</h1>
+  <h1 tabindex="-1">福岡家族自由行・6 晚 7 天</h1>
   <p>2026/10/28（三）中午抵達 → 11/03（二）中午離開｜全程大眾運輸・不自駕｜建議住宿：博多駅周邊（連住 6 晚不換飯店）</p>
   <div class="hero-tags">
     <span>👵👴 與長輩同行・慢節奏</span><span>🎈 佐賀熱氣球節</span><span>🏮 千年煌夜點燈</span>
@@ -319,28 +369,47 @@
   <p style="color:var(--sub);font-size:.88rem;margin-top:10px;">唐津宮日節 11/2–4 已收錄為 Day 6 備案；當天只選能古島、唐津或熱氣球其中一項。</p>
 </div>
 
-<div class="card status-card">
-  <h2>出發前仍要確認的 4 件事 <span style="font-size:.78em;color:var(--sub);">（資料更新：2026/7/22）</span></h2>
-  <ul>
-    <li>JR 九州公布 2026 熱氣球節臨時列車後，更新去回班次。</li>
-    <li>填入實際航班號、航空公司報到截止時間與飯店日文地址。</li>
-    <li>10/15 前確認千年煌夜早鳥票；11/1 柳川乘船目前為候補。</li>
-    <li>出發前一週依花況與天氣，在能古島／唐津／熱氣球補場中做最後選擇。</li>
-  </ul>
+<div class="card status-card" aria-labelledby="control-title">
+  <div class="control-head">
+    <h2 id="control-title">出發前總控</h2>
+    <p>資料更新：2026/7/22</p>
+  </div>
+  <div class="control-grid">
+    <section>
+      <h3>✈️ 航班與住宿 <span class="status-tag need">待填</span></h3>
+      <ul><li>航班號、航空公司、起飛時間與報到截止</li><li>飯店日文名稱、地址、電話與入住人姓名</li></ul>
+    </section>
+    <section>
+      <h3>🎫 預約進度 <span class="status-tag wait">有期限</span></h3>
+      <ul><li>千年煌夜：10/15 前決定早鳥票</li><li>柳川 11/1 祭典船：目前候補；岸邊觀賞免預約</li><li>鰻魚飯、鍋物晚餐：熱門時段建議訂位</li></ul>
+    </section>
+    <section>
+      <h3>🚆 班次與硬截止 <span class="status-tag check">需查證</span></h3>
+      <ul><li>JR 熱氣球臨時列車公布後補入去回班次</li><li>柳川行前填入預定回程與備用班次；安全版 20:30 未見煙火也離場</li><li>填妥返程航班後，重算 Day 7 離店時間</li></ul>
+    </section>
+    <section>
+      <h3>🌦 Day 6 決策 <span class="status-tag check">分三階段</span></h3>
+      <ul><li>出發前一週：依花況與班次先排能古島／唐津優先序</li><li>10/30 晚：若熱氣球取消，才啟用 11/2 下午補場選項</li><li>11/1 晚：依最新天氣與長輩體力定案；隔日只選一案</li></ul>
+    </section>
+  </div>
+  <p class="privacy-note">🔒 訂位代碼、護照資料、保單號碼與私人電話建議另存於不公開版本，避免分享行程時一併外流。</p>
 </div>
 
 <h2 class="sec">行程總覽</h2>
-<p class="tap-hint">👆 點任一天，可直接開啟當日詳細行程</p>
+<p class="tap-hint">👆 點日期，可直接開啟當日詳細行程</p>
 <div class="card" style="overflow-x:auto;">
 <table class="overview">
-  <tr><th style="width:110px;">日期</th><th>主軸</th><th>晚上</th></tr>
-  <tr><td><b>10/28</b>（三）</td><td data-l="白天">抵達・博多舊城區散步（櫛田神社、川端通、Canal City）</td><td data-l="晚上">中洲屋台 或 博多拉麵</td></tr>
-  <tr><td><b>10/29</b>（四）</td><td data-l="白天">太宰府天滿宮（新本殿）→ 篠栗南藏院臥佛（＋吞山早楓）</td><td data-l="晚上">天神購物＋鍋物晚餐</td></tr>
-  <tr><td><b>10/30</b>（五）</td><td data-l="白天">柳橋市場早餐 → 佐賀國際熱氣球節（下午競技場次）🎈</td><td data-l="晚上">天神屋台</td></tr>
-  <tr><td><b>10/31</b>（六）</td><td data-l="白天">海之中道海濱公園＋海洋世界水族館（花海散策日）</td><td data-l="晚上">千年煌夜點燈散步 🏮</td></tr>
-  <tr><td><b>11/01</b>（日）</td><td data-l="白天">柳川：川下り遊船＋鰻魚飯 → 傍晚白秋祭水上遊行 🛶🎆</td><td data-l="晚上">柳川晚歸（約 22:00 回博多）</td></tr>
-  <tr><td><b>11/02</b>（一）</td><td data-l="白天">能古島波斯菊悠閒場＋伴手禮採買 <span style="color:var(--sub);">（備案：唐津宮日節／熱氣球補場）</span></td><td data-l="晚上">補吃清單上的鍋物</td></tr>
-  <tr><td><b>11/03</b>（二）</td><td data-l="白天">前往機場、中午班機（文化之日，提早出門）</td><td data-l="晚上">—</td></tr>
+  <caption class="sr-only">2026 年福岡七天行程總覽</caption>
+  <thead><tr><th style="width:110px;" scope="col">日期</th><th scope="col">主軸</th><th scope="col">晚上</th></tr></thead>
+  <tbody>
+  <tr><th scope="row"><a class="day-link" href="#pg-d1" data-page="d1"><b>10/28</b>（三）</a></th><td data-l="白天">抵達・博多舊城區散步（櫛田神社、川端通、Canal City）</td><td data-l="晚上">中洲屋台 或 博多拉麵</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d2" data-page="d2"><b>10/29</b>（四）</a></th><td data-l="白天">標準版：太宰府天滿宮 → 篠栗南藏院；國博版會取代南藏院</td><td data-l="晚上">天神購物＋鍋物晚餐</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d3" data-page="d3"><b>10/30</b>（五）</a></th><td data-l="白天">柳橋市場早餐 → 佐賀國際熱氣球節（下午競技場次）🎈</td><td data-l="晚上">博多或天神晚餐</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d4" data-page="d4"><b>10/31</b>（六）</a></th><td data-l="白天">海之中道海濱公園／海洋世界水族館（體力有限擇一）</td><td data-l="晚上">千年煌夜點燈散步 🏮</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d5" data-page="d5"><b>11/01</b>（日）</a></th><td data-l="白天">柳川：川下り遊船＋鰻魚飯 → 傍晚白秋祭水上遊行 🛶🎆</td><td data-l="晚上">煙火後返程；安全版最晚 20:30 離場</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d6" data-page="d6"><b>11/02</b>（一）</a></th><td data-l="白天">能古島／唐津宮日節／熱氣球補場三選一</td><td data-l="晚上">主案為採買、晚餐與收行李</td></tr>
+  <tr><th scope="row"><a class="day-link" href="#pg-d7" data-page="d7"><b>11/03</b>（二）</a></th><td data-l="白天">前往機場、暫定中午班機（填妥航班後重算離店時間）</td><td data-l="晚上">—</td></tr>
+  </tbody>
 </table>
 </div>
 <div class="home-jump"><a href="#sec-transport">🚃 交通與票券</a><a href="#sec-food">🍜 美食備忘錄</a><a href="#sec-backup">🌧 備案</a><a href="#sec-tips">📋 行前貼士</a></div>
@@ -353,17 +422,20 @@
 <h2 class="sec" id="sec-transport">交通與票券小抄</h2>
 <div class="card" style="overflow-x:auto;">
 <table class="fee-table">
-  <tr><th>票券／區間</th><th>價格</th><th>備註</th></tr>
+  <caption class="sr-only">交通票券與價格摘要</caption>
+  <thead><tr><th scope="col">票券／區間</th><th scope="col">價格</th><th scope="col">備註</th></tr></thead>
+  <tbody>
   <tr><td>機場 ⇄ 博多（地下鐵）</td><td data-l="價格">¥260／2 站約 6 分</td><td data-l="備註">國際線需先搭免費接駁到國內線</td></tr>
   <tr><td>地下鐵一日券</td><td data-l="價格">大人 ¥640</td><td data-l="備註">感應式信用卡搭乘同樣每日封頂 ¥640</td></tr>
   <tr><td>太宰府散策きっぷ（西鐵）</td><td data-l="價格">來回車票＋梅ヶ枝餅券</td><td data-l="備註">天神站購買，價格以西鐵官網為準</td></tr>
   <tr><td>天神 ⇄ 柳川（西鐵特急）</td><td data-l="價格">特急自由席不另收費</td><td data-l="備註">約 50 分；川下り現場購票 大人 ¥2,200</td></tr>
   <tr><td>博多 ⇄ バルーンさが（JR）</td><td data-l="價格">特急約 40–50 分</td><td data-l="備註">大會期間部分特急直停臨時站；普通車 10–15 分一班加開；IC 卡可用</td></tr>
-  <tr><td>姪浜 ⇄ 能古島渡輪</td><td data-l="價格">大人 ¥230</td><td data-l="備註">約 10 分、約每小時 1 班</td></tr>
+  <tr><td>姪浜 ⇄ 能古島渡輪</td><td data-l="價格">大人 ¥230</td><td data-l="備註">約 10 分；主案回程 15:00，備用 16:00</td></tr>
   <tr><td>海之中道（JR 香椎線）</td><td data-l="價格">博多出發約 40–45 分</td><td data-l="備註">—</td></tr>
   <tr><td>博多 ⇄ 唐津（備案用）</td><td data-l="價格">單程約 ¥1,290／約 1.5 小時</td><td data-l="備註">地下鐵直通 JR 筑肥線，IC 卡可刷通</td></tr>
+  </tbody>
 </table>
-<div class="note">💳 建議每人辦一張 IC 卡（nimoca／はやかけん，手機 Suica 亦可）走遍地下鐵、JR、西鐵、巴士與熱氣球節臨時站；福岡地下鐵也支援 Visa／Mastercard 感應直接進站。</div>
+<div class="note">💳 建議每人各用一張固定的 IC 卡或感應信用卡，進出站不要交換卡片。另備小額現金與硬幣供屋台、寺社、渡輪／島上巴士與臨時攤位使用；每天出門前確認卡片餘額。</div>
 </div>
 <h2 class="sec" id="sec-food">美食備忘錄</h2>
 <figure class="photo">
@@ -417,10 +489,12 @@
     <li><b>預約清單</b>：千年煌夜預售票（線上）、鍋物晚餐訂位、（若要搭船）白秋祭乘船預約——11/1 場次已候補中，岸邊觀賞則免預約免費。</li>
     <li><b>熱氣球心態</b>：飛不飛看天，起飛前數十分鐘才廣播決定；把 11/2 留作補場日就不怕撲空。</li>
     <li><b>假日注意</b>：11/1（日）柳橋市場休市；11/3（二）文化之日為國定假日，機場與車站人多，返程請提早。</li>
-    <li><b>花況・楓況</b>：出發前一週查能古島官網「開花情報」與吞山觀音寺紅葉情報，依當年氣候微調。</li>
+    <li><b>花況</b>：出發前一週查能古島官網「開花情報」，依當年氣候決定是否採用 Day 6 主案。</li>
     <li><b>時刻表</b>：文中列車時刻以 2026 年 7 月查詢之現行資訊為準，行前請以 Yahoo!乘換案內／Google Maps 與各官方公告再確認（熱氣球節、祭典期間常有臨時加開）。</li>
     <li><b>長輩節奏</b>：每天安排 1–2 個咖啡館或茶屋休息點，午後留一段回飯店小憩的彈性；地下鐵與 JR 主要車站都有電梯。</li>
     <li><b>走散對策</b>：熱氣球會場與祭典人潮多，先約好集合點（例如車站剪票口），長輩隨身帶飯店名片與緊急聯絡卡。</li>
+    <li><b>緊急資訊</b>：日本警察 110、救護／消防 119；每人手機與紙本都留飯店電話、旅平險協助電話、緊急聯絡人及藥物／食物過敏日文說明。</li>
+    <li><b>行李與電力</b>：前一晚秤重並預留伴手禮空間；每天攜帶行動電源、充電線、防滑好走鞋與輕便雨具。</li>
   </ul>
 </div>
 
@@ -428,14 +502,15 @@
 <details class="card fold">
   <summary>查看官方資料來源</summary>
   <ul class="tight src">
-    <li>佐賀國際熱氣球節：<a href="https://www.sibf.jp/news/2026/20260311a.html">官方 2026 開催日公告（10/30–11/3）</a>・<a href="https://www.sibf.jp/access/jr.html">官方 JR バルーンさが駅交通</a>・<a href="https://www.asobo-saga.jp/articles/detail/fdda7ed5-113c-4498-a04e-0168b68779b3">佐賀縣觀光 完全指南（場次・注意事項）</a></li>
+    <li>佐賀國際熱氣球節：<a href="https://www.sibf.jp/2026/schedule/">官方 2026 大會賽程</a>・<a href="https://www.sibf.jp/balloon/">競技飛行說明</a>・<a href="https://www.sibf.jp/montgolfier/">夜間係留（11/2、11/3 18:30 起）</a>・<a href="https://www.sibf.jp/access/jr.html">JR バルーンさが駅交通</a></li>
     <li>博多舊市街點燈漫步「千年煌夜」：<a href="https://www.hakata-light.jp/">官方網站（10/31–11/3・票價）</a></li>
     <li>柳川白秋祭水上パレード：<a href="https://www.yanagawa-net.com/news_event_list/6059/">柳川市觀光協會 第74回公告（11/1–3・乘船預約）</a>・<a href="https://www.crossroadfukuoka.jp/event/12873">福岡縣觀光網站</a></li>
     <li>柳川川下り料金：<a href="https://www.yanagawakk.co.jp/kawakudari/nishitetsu.html">柳川觀光開發（松月乘船場）</a></li>
     <li>唐津宮日節（備案）：<a href="https://www.city.karatsu.lg.jp/page/4344.html">唐津市官方</a>・<a href="https://nagaratabi.com/karatsu-kunchi-guide/">唐津くんち2026完全ガイド</a>・<a href="https://ekitan.com/timetable/railway/line-station/6-28/d1">駅探 唐津駅時刻表</a></li>
     <li>太宰府天滿宮本殿大改修完工：<a href="https://news.tnc.co.jp/news/articles/NID2026051830394">福岡TNC新聞（2026/5/18）</a></li>
+    <li>南藏院：<a href="https://nanzoin.net/">官方參拜費、服裝與入場時間</a></li>
     <li>西鐵優惠票券：<a href="https://www.ensen24.jp/kippu/">西鐵 お得きっぷ 一覽</a></li>
-    <li>能古島 Island Park：<a href="https://nokonoshima.com/">官方網站</a>・<a href="https://meinohama.fukuoka.jp/nokonoshima-island-park/">姪浜情報站（票價整理）</a></li>
+    <li>能古島 Island Park：<a href="https://nokonoshima.com/">官方網站</a>・<a href="https://www.city.fukuoka.lg.jp/kowan/kyakusen/hakata-port/hyo.html">福岡市營渡船時刻與票價</a>・<a href="https://meinohama.fukuoka.jp/nokonoshima-island-park/">姪浜情報站（島上交通整理）</a></li>
     <li>海之中道海濱公園：<a href="https://uminaka-park.jp/guide/open-hour/">官方（開園時間・入園料）</a>；海洋世界：<a href="https://marine-world.jp/general-guide/regular-fees/">官方料金頁</a></li>
     <li>teamLab Forest：<a href="https://www.teamlab.art/e/forest/">teamLab 官方</a>；福岡塔：<a href="https://www.crossroadfukuoka.jp/spot/12343">福岡縣觀光網站</a></li>
     <li>福岡地下鐵一日券：<a href="https://subway.city.fukuoka.lg.jp/fare/card/oneday.php">福岡市地下鐵官方</a>；機場交通：<a href="https://www.fukuoka-airport.jp/en/access/bus.html">福岡機場官方</a></li>
@@ -448,13 +523,13 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 1</span>
-    <span class="day-title">抵達・博多舊城區暖身</span>
+    <h2 class="day-title" tabindex="-1">抵達・博多舊城區暖身</h2>
     <span class="day-date">10/28（三）</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>輕鬆</strong></div><div><span>天氣影響</span><strong>低</strong></div>
-    <div><span>預約</span><strong>無</strong></div><div><span>預計收工</span><strong>20:00 前後</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>輕鬆</dd></div><div><dt>天氣</dt><dd>低影響</dd></div>
+    <div><dt>預約</dt><dd>無</dd></div><div><dt>硬截止</dt><dd>20:00 前後收工</dd></div>
+  </dl>
   <figure class="photo">
   <a href="https://commons.wikimedia.org/wiki/File:Kushida_Shrine_the_haiden_1-41_Kami-kawabatamachi_Hakata-ku_Fukuoka_20230801.jpg" target="_blank" rel="noopener">
     <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Kushida_Shrine_the_haiden_1-41_Kami-kawabatamachi_Hakata-ku_Fukuoka_20230801.jpg?width=900" alt="櫛田神社拝殿" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
@@ -501,13 +576,13 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 2</span>
-    <span class="day-title">太宰府新本殿 ＋ 篠栗臥佛（寺社日）</span>
+    <h2 class="day-title" tabindex="-1">太宰府＋篠栗南藏院（標準版）</h2>
     <span class="day-date">10/29（四）</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>中高</strong></div><div><span>建議取捨</span><strong>吞山觀音可刪</strong></div>
-    <div><span>南藏院</span><strong>末入場 16:45</strong></div><div><span>預計收工</span><strong>晚餐後</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>中高</dd></div><div><dt>天氣</dt><dd>中度影響</dd></div>
+    <div><dt>預約</dt><dd>晚餐建議訂位</dd></div><div><dt>硬截止</dt><dd>12:15 離開太宰府</dd></div>
+  </dl>
   <figure class="photo">
   <a href="https://commons.wikimedia.org/wiki/File:Taiko_Bridge,_Dazaifu_Tenmang%C5%AB_-_Dec_5,_2010.jpg" target="_blank" rel="noopener">
     <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Taiko_Bridge,_Dazaifu_Tenmang%C5%AB_-_Dec_5,_2010.jpg?width=900" alt="太宰府天滿宮心字池太鼓橋" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
@@ -519,25 +594,26 @@
     <div class="chips"><span class="chip t">西鐵天神大牟田線＋太宰府線</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">09:30</div><div class="slot-body">
-    <b>太宰府天滿宮</b>：參拜 124 年來大改修後、2026 年 9 月才重新開放的<b>全新本殿</b>（漆面全部重塗、檜皮屋頂全面翻新）。參道吃現烤 <b>梅ヶ枝餅</b>、看隈研吾設計的星巴克；有餘力可加 <b>九州國立博物館</b>（週四有開）。
-    <div class="chips"><span class="chip n">境內參拜免費</span></div>
+    <b>太宰府天滿宮</b>：參拜 124 年來大改修後、預計 2026 年 9 月恢復參拜動線的本殿。參道吃現烤 <b>梅ヶ枝餅</b>、看隈研吾設計的星巴克。標準版不加塞其他景點；若想完整逛九州國立博物館，請改走下方「國博版」，並取消南藏院。
+    <div class="chips"><span class="chip n">境內參拜免費</span><span class="chip n">本殿動線行前再查官方公告</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">12:00</div><div class="slot-body">
-    參道午餐後返程：西鐵回天神 → 地下鐵到博多 → 轉 <b>JR 福北ゆたか線</b>（約 25 分）。
+    參道午餐後返程：西鐵回天神 → 地下鐵到博多 → 轉 <b>JR 福北ゆたか線</b>（約 25 分）。<b>要去南藏院，12:15 為建議離開太宰府的硬截止</b>。
   </div></div>
   <div class="slot"><div class="slot-time">14:30</div><div class="slot-body">
     <b>南藏院</b>（城戸南藏院前駅步行 3 分）：全長 41 公尺的世界級巨大<b>釋迦涅槃像（臥佛）</b>，氣勢震撼。
     <div class="chips"><span class="chip m">19 歲以上、非日本居住者參拜費 ¥500</span><span class="chip n">臥佛區最晚 16:45 入場</span><span class="chip n">肩膀、腹部及膝上肌膚不可露出；刺青需完全遮蓋，現場不借遮蔽布</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">16:00</div><div class="slot-body">
-    <b>加碼選項</b>：篠栗駅轉計程車約 15 分上 <b>吞山觀音寺</b>——福岡「最早紅」的楓葉名所，10 月下旬起千棵紅葉漸層轉色。體力有限就跳過。
-    <div class="chips"><span class="chip t">計程車往返，建議請司機等候</span></div>
+    <b>標準版直接回天神</b>，不要臨時再繞吞山觀音寺；南藏院參觀、回程轉乘與長輩休息都需要緩衝。
+    <div class="chips"><span class="chip t">城戸南藏院前駅 → 博多／天神</span><span class="chip n">吞山觀音留待另一趟包車行程</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">17:30</div><div class="slot-body">
     回天神：逛 2025 年開幕的新地標 <b>ONE FUKUOKA BLDG.（ワンビル）</b>、天神地下街。晚餐吃 <b>牛雜鍋（もつ鍋）</b>或<b>雞肉水炊鍋</b>，多有個室適合家族。
     <div class="chips"><span class="chip m">鍋物人均約 ¥3,000–4,500</span><span class="chip n">熱門店建議事先網路訂位</span></div>
   </div></div>
-  <div class="note">💡 長輩同行的預設版本建議「太宰府＋南藏院」就好；吞山觀音寺只在體力、天氣和時間都充裕時加碼。若午前想逛九州國立博物館，當天就直接刪除吞山觀音。</div>
+  <details class="alt option"><summary>🏛 國博版｜以九州國立博物館取代南藏院（點擊展開）</summary><div><b>09:30–10:45</b> 天滿宮參拜 → <b>10:45–12:45</b> 九州國立博物館 → <b>13:00</b> 太宰府午餐 → <b>14:00</b> 返回天神，下午改成咖啡休息或室內購物。這一版不去南藏院，也不加吞山觀音。</div></details>
+  <div class="note">💡 長輩同行預設走「太宰府＋南藏院」。想看國博就整段替換南藏院，不把三個郊區景點塞在同一天。</div>
 </div>
 
 <details class="card route-card">
@@ -558,33 +634,33 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 3</span>
-    <span class="day-title">佐賀國際熱氣球節 🎈（下午競技場次）</span>
+    <h2 class="day-title" tabindex="-1">佐賀國際熱氣球節 🎈（下午競技場次）</h2>
     <span class="day-date">10/30（五）・活動首日</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>中等</strong></div><div><span>天氣影響</span><strong>非常高</strong></div>
-    <div><span>必查</span><strong>當日飛行公告</strong></div><div><span>預計回博多</span><strong>18:30–19:00</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>中等</dd></div><div><dt>天氣</dt><dd>影響非常高</dd></div>
+    <div><dt>預約</dt><dd>免票；必查官方公告</dd></div><div><dt>硬截止</dt><dd>12:30 前往會場</dd></div>
+  </dl>
   <div class="slot"><div class="slot-time">08:30</div><div class="slot-body">
     <b>柳橋連合市場</b>（「博多的廚房」）：吃海鮮丼、玉子燒當早餐。
     <div class="chips"><span class="chip t">地下鐵渡辺通駅步行 5 分</span><span class="chip n">週日・假日休市，所以排在今天（平日）</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">10:00</div><div class="slot-body">
-    回飯店休息整備，或順路 <b>大濠公園</b> 湖畔散散步。中午前後簡單吃，留肚子給會場屋台。
+    回飯店休息整備，中午前後簡單吃，留肚子給會場屋台。今天不再繞去大濠公園，保留體力與列車緩衝。
   </div></div>
   <div class="slot"><div class="slot-time">12:30</div><div class="slot-body">
     博多駅搭 <b>JR 往佐賀方向</b>：大會期間部分特急直接停靠會場旁的臨時站 <b>「バルーンさが駅」</b>（特急約 40–50 分；普通車於鳥栖～江北間加開、約 10–15 分一班），出站即會場，IC 卡可用。
     <div class="chips"><span class="chip t">JR 長崎本線 バルーンさが臨時駅</span><span class="chip n">班次當日以 JR 九州公告為準</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">15:00</div><div class="slot-body">
-    <b>下午競技場次（15:00–17:00）</b>：百餘顆熱氣球陸續升空點滿嘉瀨川河畔天空。搭配北側「うまかもん市場」在地美食屋台、官方商品店，邊吃邊看非常悠閒。
-    <div class="chips"><span class="chip n">入場免費</span><span class="chip n">河川敷無遮蔽：防曬保暖、帶野餐墊或折疊椅讓長輩隨時能坐</span></div>
+    <b>下午競技場次（預定 15:00–17:00）</b>：競技內容與結束時間會依當日風向、任務調整，可能從會場外起飛或飛往其他方向；即使場次未取消，也不保證能在河川敷看到百球同時升空。搭配北側「うまかもん市場」與官方商品店彈性觀賞。
+    <div class="chips"><span class="chip n">入場免費</span><span class="chip n">河川敷無遮蔽：防曬保暖、帶坐墊讓長輩隨時能坐</span><a class="inline-link" href="https://www.sibf.jp/news/" target="_blank" rel="noopener">查看當日官方公告</a></div>
   </div></div>
   <div class="slot"><div class="slot-time">17:00</div><div class="slot-body">
     散場（人潮多，抓緩衝）→ 搭 JR 回博多，約 18:30–19:00 到。
   </div></div>
-  <div class="slot"><div class="slot-time">19:00</div><div class="slot-body">
-    晚餐：<b>天神屋台</b>（渡辺通、昭和通沿路）或博多駅周邊。
+  <div class="slot"><div class="slot-time">19:30</div><div class="slot-body">
+    抓散場與轉乘緩衝後再吃晚餐：優先選<b>博多駅周邊</b>；仍有體力才去天神屋台（渡辺通、昭和通沿路）。
     <div class="chips"><span class="chip n">下雨天屋台多停業 → 備案：ONE FUKUOKA B1「天神福食堂」</span></div>
   </div></div>
   <div class="warn"><b>🎈 飛行判斷與備案</b><ul class="tight" style="margin-top:6px;">
@@ -613,13 +689,13 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 4</span>
-    <span class="day-title">海之中道花海散策 ＋ 千年煌夜點燈夜 🏮</span>
+    <h2 class="day-title" tabindex="-1">海之中道花海散策 ＋ 千年煌夜點燈夜 🏮</h2>
     <span class="day-date">10/31（六）・萬聖節</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>高</strong></div><div><span>輕鬆版</span><strong>公園／水族館擇一</strong></div>
-    <div><span>預約</span><strong>千年煌夜票</strong></div><div><span>預計收工</span><strong>21:00 前後</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>高；輕鬆版擇一</dd></div><div><dt>天氣</dt><dd>中度影響</dd></div>
+    <div><dt>預約</dt><dd>千年煌夜票</dd></div><div><dt>硬截止</dt><dd>最早 20:45 停止入場</dd></div>
+  </dl>
   <figure class="photo">
   <a href="https://commons.wikimedia.org/wiki/File:Ferris_wheel_and_nemophila_in_Umino_Nakamichi_Seaside_Park.JPG" target="_blank" rel="noopener">
     <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Ferris_wheel_and_nemophila_in_Umino_Nakamichi_Seaside_Park.JPG?width=900" alt="海之中道海濱公園花田與摩天輪" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
@@ -634,8 +710,11 @@
     <b>國營海之中道海濱公園</b>：秋季「花祭」波斯菊花田、大草坪、動物之森（水豚、袋鼠）。園區廣，行程只鎖定花田與動物之森這一帶，量力散步就好。
     <div class="chips"><span class="chip m">入園 ¥450／65 歲以上 ¥210</span><span class="chip n">10 月開到 17:30</span><span class="chip n">入園窗口只收現金；銀髮票帶年齡證明</span></div>
   </div></div>
+  <div class="slot"><div class="slot-time">12:15</div><div class="slot-body">
+    園內午餐與休息，先找洗手間、補水並確認長輩體力。若已明顯疲累，午餐後直接返回博多，不再進水族館。
+  </div></div>
   <div class="slot"><div class="slot-time">13:30</div><div class="slot-body">
-    <b>海洋世界水族館（マリンワールド海の中道）</b>：以九州近海為主題，海豚秀水槽以博多灣為背景，非常精彩。
+    <b>完整版才進海洋世界水族館（マリンワールド海の中道）</b>：以九州近海為主題，海豚秀水槽以博多灣為背景。若早上已走很多，改成公園後直接回飯店。
     <div class="chips"><span class="chip m">大人 ¥2,500／65 歲以上 ¥2,200</span><span class="chip t">海ノ中道駅旁</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">16:00</div><div class="slot-body">
@@ -645,10 +724,11 @@
     博多駅或祇園一帶<b>提早吃晚餐</b>（拉麵、鐵鍋煎餃、烏龍麵都在這區）。
   </div></div>
   <div class="slot"><div class="slot-time">18:30</div><div class="slot-body">
-    <b>博多舊市街點燈漫步「千年煌夜」</b>（10/31–11/3，17:30–21:00）：東長寺、承天寺、妙樂寺、櫛田神社、博多千年門等十多處寺社夜間點燈，從飯店走路就能逛，秋夜氣氛極好。
-    <div class="chips"><span class="chip m">10/15 前電子早鳥 ¥1,950／預售 ¥2,250／當日 ¥2,450</span><span class="chip n">可用官方即時等待時間與數位地圖挑人少會場</span><span class="chip n">部分場地有無障礙協助；寺境內石疊夜間較暗</span></div>
+    <b>博多舊市街點燈漫步「千年煌夜」</b>（10/31–11/3）：御供所・冷泉區 17:30–21:00、20:45 停止入場；呉服町區 17:30–21:30、21:15 停止入場。今晚只挑 2–3 個會場，不追求全走完。
+    <div class="chips"><span class="chip m">10/15 前電子早鳥 ¥1,950／預售 ¥2,250／當日 ¥2,450</span><span class="chip n">用官方即時等待時間與數位地圖挑人少會場</span><span class="chip n">部分場地可請工作人員協助；石板路夜間較暗</span></div>
   </div></div>
-  <div class="note">💡 今晚是萬聖節，天神、Canal City 一帶會有裝扮人潮與應景活動，順路感受一下即可。福岡塔夜景、teamLab Forest 這天就不硬塞了，已列入備案清單。</div>
+  <details class="alt option"><summary>輕鬆版二選一（點擊展開）</summary><div><b>A｜公園版：</b>上午花田＋動物之森，午餐後直接回飯店，晚上保留點燈。<br><b>B｜水族館版：</b>上午直接進水族館，下午提早回飯店，取消大範圍公園散步。</div></details>
+  <div class="note">💡 這天的核心是「白天一個主景點＋晚上點燈」。福岡塔、teamLab 與萬聖節人潮都不再加進來。</div>
 </div>
 
 <details class="card route-card">
@@ -669,13 +749,13 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 5</span>
-    <span class="day-title">柳川一日：白天遊船・傍晚白秋祭水上遊行 🛶🎆</span>
+    <h2 class="day-title" tabindex="-1">柳川一日：白天遊船・傍晚白秋祭水上遊行 🛶🎆</h2>
     <span class="day-date">11/01（日）・白秋祭首日</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>高・晚歸</strong></div><div><span>預約</span><strong>鰻魚飯建議訂位</strong></div>
-    <div><span>乘船</span><strong>11/1 已候補</strong></div><div><span>預計回博多</span><strong>21:30–22:00</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>高・晚歸</dd></div><div><dt>天氣</dt><dd>中高影響</dd></div>
+    <div><dt>預約</dt><dd>祭典船候補；鰻魚飯</dd></div><div><dt>硬截止</dt><dd>安全版 20:30 離場</dd></div>
+  </dl>
   <div class="slot"><div class="slot-time">09:00</div><div class="slot-body">
     西鐵福岡（天神）駅搭<b>特急</b>直奔 <b>柳川</b>（約 50 分，特急自由席不另收費）。
     <div class="chips"><span class="chip t">西鐵天神大牟田線特急</span></div>
@@ -689,20 +769,25 @@
     <div class="chips"><span class="chip m">約 ¥3,000–4,500</span><span class="chip n">週日中午人多，開店前到或先預約</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">14:00</div><div class="slot-body">
-    <b>沖端地區</b>悠閒散步：御花（柳川藩主立花邸）、北原白秋生家、老街小舖；找間咖啡店讓長輩充電休息。
+    <b>沖端地區</b>悠閒散步：御花、北原白秋生家、老街小舖。只選 1–2 處，不追景點數量。
   </div></div>
-  <div class="slot"><div class="slot-time">16:30</div><div class="slot-body">
-    在遊行水路沿線找好<b>岸邊觀賞點</b>（全程約 4 公里、沿線多處設有表演舞台，橋上與河岸皆可自由觀看）。先買點祭典小吃墊肚子。
+  <div class="slot"><div class="slot-time">15:30</div><div class="slot-body">
+    <b>固定休息＋早晚餐</b>：在沖端坐下吃一份熱食、上洗手間、補水與暖暖包。16:00 檢查每個人的腳力；已疲累就改走「提早離場版」。
+  </div></div>
+  <div class="slot"><div class="slot-time">16:15</div><div class="slot-body">
+    先到<b>柳川市觀光案內所</b>確認當晚官方路線、預估煙火時間、洗手間與回站接駁，再一次選定岸邊觀賞點，之後不要沿 4 公里水路追船。優先選能坐、可避風、方便叫計程車的位置，避免長時間站在橋上。
+    <div class="chips"><span class="chip n">當日集合點：觀光案內所入口</span><span class="chip n">離場前 20–30 分請案內所或店家協助叫車</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">17:00</div><div class="slot-body">
     <b>白秋祭水上遊行</b>：17:00 開會式、18:00 燈舟出發——約 130 艘點燈どんこ舟緩緩巡遊水鄉，沿岸太鼓、合唱、樂隊輪番演出，水面漂著燈籠，<b>終點以煙火壓軸</b>。紀念詩人北原白秋（11/2 是他的忌日）的柳川年度盛事。
     <div class="chips"><span class="chip n">岸邊觀賞免費</span><span class="chip n">想搭船同遊需預約：乗合舟 ¥11,000／人（2026 年 7/1 起受理，11/1 場次已候補）</span></div>
   </div></div>
-  <div class="slot"><div class="slot-time">20:00</div><div class="slot-body">
-    盡興後前往柳川駅，搭特急回天神，約 21:30–22:00 回到博多。
-    <div class="chips"><span class="chip t">長輩同行優先計程車／巴士回站；步行僅作備案</span><span class="chip n">先決定觀賞點，出發前截圖回站路線與可接受的最後班次</span><span class="chip n">夜間水邊涼，保暖衣物帶著</span></div>
+  <div class="slot"><div class="slot-time">最晚 20:30</div><div class="slot-body">
+    官方流程以終點煙火收尾，但時間會依當日進度浮動。<b>煙火已結束就立刻離場；20:30 仍未施放，也採安全版離場</b>，搭事先確認的計程車／巴士前往西鐵柳川駅，再搭預定或備用班次回天神。
+    <div class="chips"><span class="chip t">長輩同行優先計程車／巴士回站；步行只作短距離備案</span><span class="chip n">行前把「預定回程＋下一班」截圖存手機</span><span class="chip n">若車輛或列車異常，立刻請案內所／店家協助，不在岸邊繼續等</span></div>
   </div></div>
-  <div class="note">💡 這天把原本「一天衝柳川＋太宰府」拆開了：柳川值得白天玩到晚上一次滿足，太宰府已移到 Day 2。晚歸日，隔天（11/2）行程刻意排鬆。</div>
+  <details class="alt option"><summary>🪶 提早離場版｜長輩疲累時（點擊展開）</summary><div><b>18:00</b> 看第一段燈舟與沿岸演出 → <b>19:30</b> 不等煙火，叫車回西鐵柳川駅 → 搭可接受的下一班回天神。把「看過氣氛、平安回飯店」當作完成，不用撐到壓軸。</div></details>
+  <div class="note">💡 柳川晚歸後，Day 6 不採 07:00 熱氣球清晨場。行前仍要填入西鐵預定回程與備用班次；20:30 是體力安全截止，不是末班車時間。</div>
 </div>
 
 <details class="card route-card">
@@ -712,10 +797,10 @@
   <div class="route-btns">
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E8%A5%BF%E9%89%84%E7%A6%8F%E5%B2%A1%EF%BC%88%E5%A4%A9%E7%A5%9E%EF%BC%89%E9%A7%85&destination=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 西鉄福岡（天神）駅 → 西鉄柳川駅<span class="leg-mode">大眾運輸</span></a>
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&destination=%E6%9F%B3%E5%B7%9D%E5%B7%9D%E4%B8%8B%E3%82%8A%20%E6%9D%BE%E6%9C%88%E4%B9%97%E8%88%B9%E5%A0%B4&travelmode=walking&hl=zh-TW" target="_blank" rel="noopener">🧭 西鉄柳川駅 → 柳川川下り 松月乗船場<span class="leg-mode">步行</span></a>
-<a href="https://www.google.com/maps/dir/?api=1&origin=%E6%9F%B3%E5%B7%9D%E8%97%A9%E4%B8%BB%E7%AB%8B%E8%8A%B1%E9%82%B8%20%E5%BE%A1%E8%8A%B1&destination=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 柳川藩主立花邸 御花 → 西鉄柳川駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E6%9F%B3%E5%B7%9D%E5%B8%82%E8%A6%B3%E5%85%89%E6%A1%88%E5%86%85%E6%89%80&destination=%E8%A5%BF%E9%89%84%E6%9F%B3%E5%B7%9D%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 柳川市観光案内所 → 西鉄柳川駅<span class="leg-mode">計程車／巴士</span></a>
   </div>
 </details>
-<div class="pager"><button type="button" onclick="showPage('d4')">⬅ 10/31 海之中道</button><button type="button" onclick="showPage('d6')">11/02 能古島 ➡</button></div>
+<div class="pager"><button type="button" onclick="showPage('d4')">⬅ 10/31 海之中道</button><button type="button" onclick="showPage('d6')">11/02 三選一 ➡</button></div>
 </section>
 
 <section class="page" id="pg-d6" role="tabpanel" aria-labelledby="tab-d6">
@@ -723,12 +808,17 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 6</span>
-    <span class="day-title">能古島波斯菊悠閒場 ＋ 整備採買</span>
+    <h2 class="day-title" tabindex="-1">三選一彈性日 ＋ 整備採買</h2>
     <span class="day-date">11/02（一）</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>中等</strong></div><div><span>三選一</span><strong>能古島／唐津／熱氣球</strong></div>
-    <div><span>必查</span><strong>天氣、花況、船班</strong></div><div><span>晚上</span><strong>採買＋收行李</strong></div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>中等至很高</dd></div><div><dt>天氣</dt><dd>影響非常高</dd></div>
+    <div><dt>預約</dt><dd>晚餐建議訂位</dd></div><div><dt>硬截止</dt><dd>11/1 晚完成三選一</dd></div>
+  </dl>
+  <div class="decision-grid" aria-label="Day 6 三個方案比較">
+    <article><span class="status-tag ok">主案</span><h3>能古島＋採買</h3><p>花況佳、風雨小時採用；目標 15:00 回程船，錯過改 16:00。</p></article>
+    <article><span class="status-tag need">安全縮短版</span><h3>唐津日間行</h3><p>只看白天祭典氣氛，17:00 前返程；本行程不排 19:30–22:00 夜巡。</p></article>
+    <article><span class="status-tag wait">天候補場</span><h3>佐賀熱氣球</h3><p>只有 10/30 取消才啟用；長輩版只看 15:00 場，不排 7:00 或夜間係留。</p></article>
   </div>
   <figure class="photo">
   <a href="https://commons.wikimedia.org/wiki/File:Shikanoshima_Island_and_canola_field_in_Nokonoshima_Island_Park_21.jpg" target="_blank" rel="noopener">
@@ -738,14 +828,15 @@
 </figure>
   <div class="slot"><div class="slot-time">08:45</div><div class="slot-body">
     從博多出發：地下鐵到 <b>姪浜駅</b>，轉巴士約 15 分到 <b>姪浜渡船場</b>，目標搭 <b>10:15 渡輪</b>（航程 10 分）登能古島，再轉島上巴士約 13 分。
-    <div class="chips"><span class="chip m">渡輪單程 ¥230</span><span class="chip m">島上巴士 ¥260</span><span class="chip n">若想 09:30 才離開博多，入園時間請改抓 12:00 左右</span></div>
+    <div class="chips"><span class="chip m">渡輪單程 ¥230</span><span class="chip m">島上巴士 ¥260</span><span class="chip n">錯過 10:15 可搭 11:15；再晚就改成博多採買休息日</span></div>
   </div></div>
   <div class="slot"><div class="slot-time">11:00</div><div class="slot-body">
     <b>能古島 Island Park</b>：約 50 萬株波斯菊花海配大海背景（10 月上旬～11 月上旬見頃，這天賞的是深秋壓軸場）。園內有迷你動物區、懷舊商店街，午餐園內簡單解決。
     <div class="chips"><span class="chip m">入園 大人 ¥1,500</span><span class="chip n">花況依天候變動，出發前看官網開花情報</span><span class="chip n">園內坡道緩，配合長輩腳程慢慢逛</span></div>
   </div></div>
-  <div class="slot"><div class="slot-time">15:00</div><div class="slot-body">
-    渡輪返回姪浜 → 回博多。
+  <div class="slot"><div class="slot-time">14:00</div><div class="slot-body">
+    離園並搭島上巴士回能古渡船場，<b>目標搭 15:00 能古發渡輪；錯過就搭 16:00</b>，再返回姪浜、博多。入園時先向園方確認當日 14 時前後的島上巴士，手機設好離園鬧鐘。
+    <div class="chips"><span class="chip t">15:00 → 15:10 姪浜</span><span class="chip n">備用：16:00 → 16:10 姪浜</span><a class="inline-link" href="https://www.city.fukuoka.lg.jp/kowan/kyakusen/hakata-port/hyo.html" target="_blank" rel="noopener">福岡市營渡船時刻表</a></div>
   </div></div>
   <div class="slot"><div class="slot-time">16:30</div><div class="slot-body">
     <b>博多駅商圈採買日</b>：AMU PLAZA、博多阪急、KITTE、マイング，藥妝與伴手禮今天買齊（明天早上來不及）；體力有餘順拜駅旁的 <b>住吉神社</b>。
@@ -754,9 +845,9 @@
     晚餐：把清單上還沒吃到的補起來——<b>水炊き</b>／<b>もつ鍋</b>／鐵鍋煎餃。飯後收行李。
     <div class="chips"><span class="chip m">水炊き人均約 ¥3,500–5,000</span><span class="chip n">建議訂位</span></div>
   </div></div>
-  <details class="alt option"><summary>🔄 備案 A｜唐津宮日節（點擊展開）</summary><div>聯合國無形文化遺產大祭，今天正是「宵曳山」之夜！白天到唐津市內可近距離看停放各町的 14 台巨大曳山（鯛魚、獅子、龍頭盔造型）＋唐津城（上山有付費電梯單程 ¥100、<b>70 歲以上免費</b>，天守閣 ¥500）；19:30–22:00 十四台曳山點燈夜巡（大手口～唐津駅前通り一帶定點觀賞即可）。交通：地下鐵直通 JR 筑肥線約 1.5 小時、單程約 ¥1,290；回程班次與祭典加開車請於出發前再次確認；市中心 18:00 起交通管制。<b>選這個就把能古島捨掉</b>，晚歸請留體力。</div></details>
-  <details class="alt option"><summary>🔄 備案 B｜熱氣球節補場（點擊展開）</summary><div>若 10/30 因天候取消飛行，今天回佐賀補看。官方時程為早上 7:00、下午 15:00 競技飛行，並在 18:00 安排夜間係留；所有飛行仍視當日天候決定，JR 去回班次以出發前公告為準。</div></details>
-  <div class="note">💡 主案（能古島）、備案 A（唐津）、備案 B（熱氣球）三選一就好，不要貪心——明天中午就要飛了。</div>
+  <details class="alt option"><summary>🔄 備案 A｜唐津日間安全版（點擊展開）</summary><div><b>08:00</b> 行李先收到 80% → <b>09:00</b> 博多駅買必要伴手禮 → <b>10:00</b> 出發 → <b>11:30–16:30</b> 唐津午餐、曳山展示場與唐津城擇二 → <b>17:00 前</b> 搭車返博多 → <b>19:00</b> 晚餐並完成行李。本版刻意不等 19:30–22:00 宵曳山；若夜巡是必看，需另改住宿或航班，不併入目前長輩行程。</div></details>
+  <details class="alt option"><summary>🔄 備案 B｜熱氣球下午補場（點擊展開）</summary><div>僅在 10/30 因天候取消時啟用。<b>08:00</b> 行李收至 80% → <b>09:00–11:00</b> 博多駅採買 → <b>11:30</b> 午餐 → <b>12:30 左右</b> 搭 JR 前往會場 → <b>15:00</b> 競技飛行 → <b>17:00 左右</b> 依官方進度離場 → <b>19:00 前後</b> 回博多晚餐、完成打包。柳川晚歸後不排 07:00 場；18:30 夜間係留也不納入，避免隔日搭機前再晚歸。</div></details>
+  <div class="note">💡 三案都保留「採買＋收行李」時間，而且只選一案。11/1 晚若長輩明顯疲累、風雨不穩或回程班次未確認，直接改成博多休息採買日。</div>
 </div>
 
 <details class="card route-card">
@@ -765,10 +856,12 @@
   <div class="map-note">上圖為路線示意（依編號順序 1→2→3…）；實際轉乘請點下方按鈕，會直接開啟 Google Maps 導航。</div>
   <div class="route-btns">
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E5%A7%AA%E6%B5%9C%E6%97%85%E5%AE%A2%E5%BE%85%E5%90%88%E6%89%80&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 姪浜旅客待合所<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E8%83%BD%E5%8F%A4%E6%B8%A1%E8%88%B9%E5%A0%B4&destination=%E3%81%AE%E3%81%93%E3%81%AE%E3%81%97%E3%81%BE%E3%82%A2%E3%82%A4%E3%83%A9%E3%83%B3%E3%83%89%E3%83%91%E3%83%BC%E3%82%AF&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 能古渡船場 → Island Park<span class="leg-mode">島上巴士</span></a>
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E3%81%AE%E3%81%93%E3%81%AE%E3%81%97%E3%81%BE%E3%82%A2%E3%82%A4%E3%83%A9%E3%83%B3%E3%83%89%E3%83%91%E3%83%BC%E3%82%AF&destination=%E5%8D%9A%E5%A4%9A%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 のこのしまアイランドパーク → 博多駅<span class="leg-mode">大眾運輸</span></a>
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E5%94%90%E6%B4%A5%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 唐津駅<span class="leg-mode">大眾運輸</span></a>
+<a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E3%83%90%E3%83%AB%E3%83%BC%E3%83%B3%E3%81%95%E3%81%8C%E9%A7%85&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → バルーンさが駅<span class="leg-mode">熱氣球備案</span></a>
   </div>
-<div class="map-note">🔄 備案日：最後一顆按鈕為唐津方向導航。</div></details>
+<div class="map-note">🔄 地圖只畫能古島主案；下方另附唐津與熱氣球備案導航。</div></details>
 <div class="pager"><button type="button" onclick="showPage('d5')">⬅ 11/01 柳川</button><button type="button" onclick="showPage('d7')">11/03 回程 ➡</button></div>
 </section>
 
@@ -777,13 +870,13 @@
 <div class="card day">
   <div class="day-head">
     <span class="day-num">Day 7</span>
-    <span class="day-title">返程日（文化之日）</span>
+    <h2 class="day-title" tabindex="-1">返程日（文化之日）</h2>
     <span class="day-date">11/03（二・國定假日）</span>
   </div>
-  <div class="day-glance" aria-label="今日摘要">
-    <div><span>體力</span><strong>輕鬆</strong></div><div><span>離開飯店</span><strong>08:30 建議</strong></div>
-    <div><span>必填</span><strong>航班號／報到截止</strong></div><div><span>目標抵達</span><strong>國際線 09:00–09:30</strong></div>
-  </div>
+  <dl class="day-glance" aria-label="今日摘要">
+    <div><dt>體力</dt><dd>輕鬆</dd></div><div><dt>天氣</dt><dd>低影響</dd></div>
+    <div><dt>預約</dt><dd>航班／報到截止必填</dd></div><div><dt>硬截止</dt><dd>暫定 08:30；填航班後重算</dd></div>
+  </dl>
   <figure class="photo">
   <a href="https://commons.wikimedia.org/wiki/File:Hakata_Station_Hakata_Exit_INT_the_SE_view_from_the_NW_corner_Hakata-eki-ch%C5%AB%C5%8Dgai_Hakata-ku_Fukuoka_20250110.jpg" target="_blank" rel="noopener">
     <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Hakata_Station_Hakata_Exit_INT_the_SE_view_from_the_NW_corner_Hakata-eki-ch%C5%AB%C5%8Dgai_Hakata-ku_Fukuoka_20250110.jpg?width=900" alt="JR 博多駅博多口" loading="lazy" onerror="this.onerror=null;this.src=this.src.split('?')[0];">
@@ -791,14 +884,14 @@
   <figcaption>JR 博多駅——住在這裡，六個晚上的「家門口」 ・ 圖：<a href="https://commons.wikimedia.org/wiki/File:Hakata_Station_Hakata_Exit_INT_the_SE_view_from_the_NW_corner_Hakata-eki-ch%C5%AB%C5%8Dgai_Hakata-ku_Fukuoka_20250110.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>（點圖見原檔與授權）</figcaption>
 </figure>
   <div class="slot"><div class="slot-time">08:00</div><div class="slot-body">
-    早餐、整理行李退房。若有零星漏買的伴手禮，博多駅「マイング」9:00 開店可快閃補貨（時間抓緊）。
+    早餐、最後確認護照／機票／行動電源後退房。伴手禮已在 Day 6 買齊，今天不再等待 09:00 才開門的商店。
   </div></div>
-  <div class="slot"><div class="slot-time">08:30</div><div class="slot-body">
-    前往機場：地下鐵 2 站到福岡空港（國內線）→ <b>免費航廈接駁巴士約 10–15 分</b>到國際線；或博多巴士總站搭直達國際線的巴士。
-    <div class="chips"><span class="chip n">中午班機建議 09:00–09:30 抵達國際線櫃檯</span><span class="chip n">前一晚填入航班號與航空公司報到截止時間</span><span class="chip n">文化之日假日人多、路面車流多，寧早勿晚</span></div>
+  <div class="slot"><div class="slot-time">暫定 08:30</div><div class="slot-body">
+    前往機場：地下鐵 2 站到福岡空港（國內線）→ <b>免費航廈接駁巴士約 10–15 分</b>到國際線；或博多巴士總站搭直達國際線的巴士。<b>填入實際航班後，以起飛前 3 小時 30 分離店為預設；航空公司要求更早就再提前。</b>
+    <div class="chips"><span class="chip n">若 12:00 起飛：08:30 離店、09:00–09:30 抵達國際線</span><span class="chip n">前一晚再核對航班號、航廈與報到截止</span><span class="chip n">文化之日假日人多、路面車流多，寧早勿晚</span></div>
   </div></div>
-  <div class="slot"><div class="slot-time">12:00</div><div class="slot-body">
-    班機起飛 ✈️（熱氣球節、千年煌夜、白秋祭、唐津くんち今天都還在進行——只能忍痛說再見，這就是下次再來的理由。）
+  <div class="slot"><div class="slot-time">暫定 12:00</div><div class="slot-body">
+    班機起飛 ✈️（此時間只是目前行程假設，填妥實際航班後須同步更新退房、離店與抵達機場時間。）
   </div></div>
 </div>
 
@@ -810,11 +903,11 @@
 <a href="https://www.google.com/maps/dir/?api=1&origin=%E5%8D%9A%E5%A4%9A%E9%A7%85&destination=%E7%A6%8F%E5%B2%A1%E7%A9%BA%E6%B8%AF%E5%9B%BD%E9%9A%9B%E7%B7%9A%E3%82%BF%E3%83%BC%E3%83%9F%E3%83%8A%E3%83%AB&travelmode=transit&hl=zh-TW" target="_blank" rel="noopener">🧭 博多駅 → 福岡空港国際線ターミナル<span class="leg-mode">大眾運輸</span></a>
   </div>
 </details>
-<div class="pager"><button type="button" onclick="showPage('d6')">⬅ 11/02 能古島</button><button type="button" onclick="showPage('home')">回總覽 ➡</button></div>
+<div class="pager"><button type="button" onclick="showPage('d6')">⬅ 11/02 三選一</button><button type="button" onclick="showPage('home')">回總覽 ➡</button></div>
 </section>
 
 <footer>
-  行程為 2026 年 7 月依公開資訊整理（7/22 v4.4.1：頁籤切換納入瀏覽器歷史（可用返回鍵回上一個分頁）；資料修正、每日摘要、閱讀工具、收合地圖、列印與無障礙優化），價格與時刻可能變動，出發前請以各官方網站為準。<br>
+  行程為 2026 年 7 月依公開資訊整理（7/22 v4.5：行前總控、時程修正、三選一比較、手機／列印與無障礙優化）。價格、班次與活動內容可能變動，出發前請以各官方網站為準。<br>
   祝旅途愉快 🎈🏮🛶
 </footer>
 
@@ -824,7 +917,25 @@
 <script>
 (function(){
   var pages=['home','d1','d2','d3','d4','d5','d6','d7'];
-  function show(id, updateHash){
+  function focusPageHeading(id){
+    var sec=document.getElementById('pg-'+id);
+    if(!sec) return;
+    var heading=sec.querySelector('h1,.day-title');
+    if(!heading) return;
+    try{heading.focus({preventScroll:true});}catch(e){heading.focus();}
+  }
+  function cleanHash(value){
+    var hash=(value||'').replace('#','');
+    return hash.indexOf('pg-')===0 ? hash.slice(3) : hash;
+  }
+  function revealAnchor(id){
+    var anchor=document.getElementById(id);
+    if(!anchor) return;
+    anchor.setAttribute('tabindex','-1');
+    anchor.scrollIntoView();
+    try{anchor.focus({preventScroll:true});}catch(e){anchor.focus();}
+  }
+  function show(id, updateHash, moveFocus){
     pages.forEach(function(p){
       var sec=document.getElementById('pg-'+p);
       var tab=document.getElementById('tab-'+p);
@@ -837,26 +948,24 @@
     window.scrollTo(0,0);
     if(window.__initDayMap){ setTimeout(function(){window.__initDayMap(id);},80); }
     if(updateHash!==false && location.hash!=='#'+id){ try{history.pushState(null,'','#'+id);}catch(e){ location.hash=id; } }
+    if(moveFocus){setTimeout(function(){focusPageHeading(id);},0);}
   }
-  window.showPage=show;
+  window.showPage=function(id){show(id,true,true);};
   document.querySelectorAll('.tab').forEach(function(el){
-    el.addEventListener('click',function(){ show(el.getAttribute('data-p')); });
+    el.addEventListener('click',function(){ show(el.getAttribute('data-p'),true,false); });
     el.addEventListener('keydown',function(e){
-      if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+      if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight'&&e.key!=='Home'&&e.key!=='End') return;
       e.preventDefault();
       var i=pages.indexOf(el.getAttribute('data-p'));
-      var next=e.key==='ArrowRight'?(i+1)%pages.length:(i-1+pages.length)%pages.length;
-      show(pages[next]);document.getElementById('tab-'+pages[next]).focus();
+      var next=e.key==='Home'?0:e.key==='End'?pages.length-1:e.key==='ArrowRight'?(i+1)%pages.length:(i-1+pages.length)%pages.length;
+      show(pages[next],true,false);document.getElementById('tab-'+pages[next]).focus();
     });
   });
-  var rows=document.querySelectorAll('table.overview tr');
-  rows.forEach(function(tr,i){
-    if(i>=1 && i<=7){
-      tr.classList.add('clickable');
-      tr.tabIndex=0;tr.setAttribute('role','link');tr.setAttribute('aria-label','開啟 Day '+i+' 詳細行程');
-      tr.addEventListener('click',function(){ show('d'+i); });
-      tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();show('d'+i);}});
-    }
+  document.querySelectorAll('.day-link').forEach(function(link){
+    link.addEventListener('click',function(e){
+      if(e.button!==0||e.ctrlKey||e.metaKey||e.shiftKey||e.altKey) return;
+      e.preventDefault();show(link.getAttribute('data-page'),true,true);
+    });
   });
   document.querySelectorAll('details.route-card').forEach(function(box){
     box.addEventListener('toggle',function(){
@@ -867,21 +976,32 @@
   });
   var fontSize=17;
   try{fontSize=parseInt(localStorage.getItem('itinerary-font-size'),10)||17;}catch(e){}
+  var fontDown=document.getElementById('font-down');
+  var fontUp=document.getElementById('font-up');
+  var fontStatus=document.getElementById('font-status');
   function setFontSize(n){
     fontSize=Math.max(15,Math.min(21,n));document.documentElement.style.fontSize=fontSize+'px';
+    fontDown.disabled=fontSize<=15;fontUp.disabled=fontSize>=21;
+    fontStatus.textContent='目前字級 '+fontSize;
     try{localStorage.setItem('itinerary-font-size',String(fontSize));}catch(e){}
   }
   setFontSize(fontSize);
-  document.getElementById('font-down').addEventListener('click',function(){setFontSize(fontSize-1);});
-  document.getElementById('font-up').addEventListener('click',function(){setFontSize(fontSize+1);});
-  var h=(location.hash||'').replace('#','');
+  fontDown.addEventListener('click',function(){setFontSize(fontSize-1);});
+  fontUp.addEventListener('click',function(){setFontSize(fontSize+1);});
+  var closedForPrint=[];
+  window.addEventListener('beforeprint',function(){
+    closedForPrint=[];
+    document.querySelectorAll('details').forEach(function(d){if(!d.open){closedForPrint.push(d);d.open=true;}});
+  });
+  window.addEventListener('afterprint',function(){closedForPrint.forEach(function(d){d.open=false;});closedForPrint=[];});
+  var h=cleanHash(location.hash);
   show(pages.indexOf(h)>=0 ? h : 'home', false);
-  if(h.indexOf('sec-')===0){setTimeout(function(){var anchor=document.getElementById(h);if(anchor)anchor.scrollIntoView();},0);}
+  if(h.indexOf('sec-')===0){setTimeout(function(){revealAnchor(h);},0);}
   window.addEventListener('hashchange',function(){
-    var g=(location.hash||'').replace('#','');
-    if(pages.indexOf(g)>=0) show(g,false);
-    else if(!g) show('home',false);
-    else if(g.indexOf('sec-')===0){show('home',false);setTimeout(function(){var anchor=document.getElementById(g);if(anchor)anchor.scrollIntoView();},0);}
+    var g=cleanHash(location.hash);
+    if(pages.indexOf(g)>=0) show(g,false,true);
+    else if(!g) show('home',false,true);
+    else if(g.indexOf('sec-')===0){show('home',false,false);setTimeout(function(){revealAnchor(g);},0);}
   });
 })();
 </script>
@@ -893,7 +1013,11 @@
   var maps={};
   window.__initDayMap=function(id){
     if(!DATA[id]) return;
-    if(typeof L==="undefined"){var el=document.getElementById("map-"+id);if(el)el.style.display="none";return;}
+    function failMap(el){
+      if(!el) return;el.classList.add("map-failed");
+      el.setAttribute("role","status");el.setAttribute("aria-label","地圖無法載入，請使用下方導航按鈕");
+    }
+    if(typeof L==="undefined"){failMap(document.getElementById("map-"+id));return;}
     if(maps[id]){ maps[id].invalidateSize(); return; }
     var el=document.getElementById("map-"+id);
     if(!el||el.offsetParent===null) return;
@@ -909,7 +1033,7 @@
       L.polyline(pts,{color:"#c2492f",weight:3,dashArray:"6 8",opacity:.85}).addTo(m);
       m.fitBounds(pts,{padding:[28,28]});
       maps[id]=m;
-    }catch(e){ el.style.display="none"; }
+    }catch(e){ failMap(el); }
   };
   var act=document.querySelector(".page.active");
   if(act) setTimeout(function(){window.__initDayMap(act.id.replace("pg-",""));},120);
