@@ -129,6 +129,19 @@ html[data-theme="dark"] .tag.lv{color:var(--accent)}
 .corner{position:absolute;top:12px;right:14px;display:flex;gap:6px}
 .starbtn{border:0;background:transparent;font-size:22px;line-height:1;color:var(--line)}
 .starbtn.on{color:var(--star)}
+.spkbtn{
+  border:1px solid var(--ring);background:var(--surface);border-radius:10px;
+  width:34px;height:34px;display:grid;place-items:center;line-height:1;color:var(--ink-2)
+}
+.spkbtn .ico{width:18px;height:18px}
+.spksm .ico{width:16px;height:16px;display:block}
+.spkbtn:hover{background:var(--surface-2);color:var(--accent)}
+.spkbtn.speaking{background:var(--accent);color:#fff;border-color:transparent}
+html[data-theme="dark"] .spkbtn.speaking{color:#0d0d0d}
+.spkbtn[disabled]{opacity:.35;cursor:not-allowed}
+.spksm{border:0;background:transparent;line-height:1;color:var(--muted);padding:2px 4px;vertical-align:middle}
+.spksm:hover{color:var(--accent)}
+.corner{align-items:center}
 .idx{position:absolute;top:14px;left:16px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 
 .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
@@ -289,11 +302,27 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
       <input type="checkbox" id="showRead" style="accent-color:var(--accent)">
       <span class="flabel">正面顯示讀音</span>
     </label>
+    <label class="fgroup" style="gap:5px;cursor:pointer">
+      <input type="checkbox" id="ttsAuto" style="accent-color:var(--accent)">
+      <span class="flabel">自動朗讀</span>
+    </label>
+    <div class="fgroup"><span class="flabel">語速</span>
+      <select id="ttsRate">
+        <option value="0.6">很慢</option>
+        <option value="0.8">慢</option>
+        <option value="1" selected>正常</option>
+        <option value="1.2">快</option>
+      </select>
+    </div>
+    <div class="fgroup" id="voiceGroup" hidden><span class="flabel">語音</span>
+      <select id="ttsVoice"></select>
+    </div>
     <div class="spacer"></div>
     <span class="tiny" id="poolInfo"></span>
     <button class="mini" id="resetPool" hidden>回到完整單字池</button>
   </div>
   </div>
+  <p class="tiny" id="ttsWarn" style="margin:-4px 0 12px"></p>
 
   <!-- ============ STUDY ============ -->
   <section id="view-study">
@@ -306,14 +335,14 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
       <div class="card" id="card">
         <div class="face front">
           <div class="idx" id="fIdx"></div>
-          <div class="corner"><button class="starbtn" id="starF" title="收藏">☆</button></div>
+          <div class="corner"><button class="spkbtn" id="spkF" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starF" title="收藏">☆</button></div>
           <div class="word jp" id="fWord">—</div>
           <div class="reading jp" id="fRead"></div>
           <div class="hint">點一下卡片或按空白鍵翻面</div>
         </div>
         <div class="face back">
           <div class="idx" id="bIdx"></div>
-          <div class="corner"><button class="starbtn" id="starB" title="收藏">☆</button></div>
+          <div class="corner"><button class="spkbtn" id="spkB" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starB" title="收藏">☆</button></div>
           <div class="reading jp" id="bRead"></div>
           <div class="word jp" id="bWord" style="font-size:clamp(24px,6vw,36px)"></div>
           <div class="meaning" id="bMean"></div>
@@ -327,7 +356,7 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
       <button class="btn good" id="btnYes">已學會 <span class="kbd">2</span></button>
       <button class="btn primary" id="btnNext">下一張 → <span class="kbd">→</span></button>
     </div>
-    <p class="tiny" style="margin-top:10px">快捷鍵：空白＝翻面、← →＝上下張、1＝還不熟、2＝已學會、F＝收藏</p>
+    <p class="tiny" style="margin-top:10px">快捷鍵：空白＝翻面、← →＝上下張、1＝還不熟、2＝已學會、F＝收藏、S＝朗讀</p>
   </section>
 
   <!-- ============ QUIZ ============ -->
@@ -363,6 +392,7 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
         <div class="qprompt">
           <div class="qword" id="qWord"></div>
           <div class="qsub" id="qSub"></div>
+          <button class="spkbtn" id="spkQ" title="朗讀（S）" aria-label="朗讀" style="margin:12px auto 0"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button>
         </div>
         <div class="opts" id="qOpts"></div>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px">
@@ -477,7 +507,8 @@ function saveState(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); }
   catch(e){ storeOK=false; memStore=S; }
 }
-const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null};
+const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null,
+           tts:{auto:false,rate:1,voice:""}};
 let S=Object.assign({},DEF,loadState()||{});
 for(const k in DEF) if(S[k]===undefined) S[k]=JSON.parse(JSON.stringify(DEF[k]));
 
@@ -499,6 +530,64 @@ function applyTheme(t){
 }
 applyTheme(S.theme || (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
 $("#themeBtn").onclick=()=>applyTheme(document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark");
+
+/* ================= 發音（瀏覽器內建語音合成，免網路） ================= */
+const TTS={ok:typeof speechSynthesis!=="undefined"&&typeof SpeechSynthesisUtterance!=="undefined",
+           list:[],voice:null,warned:false};
+if(!S.tts) S.tts={auto:false,rate:1,voice:""};
+
+function jaVoices(){
+  if(!TTS.ok) return [];
+  let vs=[];
+  try{ vs=speechSynthesis.getVoices()||[]; }catch(e){ return []; }
+  return vs.filter(v=>(v.lang||"").toLowerCase().replace("_","-").startsWith("ja"));
+}
+function pickVoice(){
+  TTS.list=jaVoices();
+  TTS.voice = TTS.list.find(v=>v.voiceURI===S.tts.voice) || TTS.list[0] || null;
+  const g=$("#voiceGroup"), sel=$("#ttsVoice");
+  if(TTS.list.length>1){
+    g.hidden=false;
+    sel.innerHTML=TTS.list.map(v=>`<option value="${v.voiceURI}">${v.name}</option>`).join("");
+    if(TTS.voice) sel.value=TTS.voice.voiceURI;
+  }else g.hidden=true;
+  const none = !TTS.ok || (speechSynthesis.getVoices().length>0 && TTS.list.length===0);
+  $$(".spkbtn").forEach(b=>b.disabled=none);
+  $("#ttsAuto").disabled=none;
+  if(none && !TTS.warned){
+    TTS.warned=true;
+    $("#ttsWarn").textContent = TTS.ok
+      ? "⚠️ 這台裝置沒有安裝日文語音，發音功能無法使用。Windows 可在「設定 → 時間與語言 → 語言」新增日文語音套件；macOS／iOS 在「系統設定 → 輔助使用 → 語音」下載日文語音。"
+      : "⚠️ 這個瀏覽器不支援語音合成，發音功能無法使用。";
+  }else if(!none){ $("#ttsWarn").textContent=""; }
+}
+if(TTS.ok){
+  try{ speechSynthesis.onvoiceschanged=pickVoice; }catch(e){}
+  setTimeout(pickVoice,0); setTimeout(pickVoice,400); setTimeout(pickVoice,1500);
+}
+let spkTimer;
+function speak(text,btn){
+  if(!TTS.ok||!text) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang="ja-JP"; u.rate=parseFloat(S.tts.rate)||1;
+    if(TTS.voice){ try{ u.voice=TTS.voice; }catch(e){} }
+    const el=btn||$("#spkF");
+    if(el){ el.classList.add("speaking"); clearTimeout(spkTimer);
+      const off=()=>{ $$(".spkbtn").forEach(b=>b.classList.remove("speaking")); };
+      u.onend=off; u.onerror=off; spkTimer=setTimeout(off,6000);
+    }
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function speakCurrent(btn){ const v=pool[pos]; if(v) speak(v.r||v.w,btn); }
+$("#spkF").onclick=e=>{e.stopPropagation();speakCurrent(e.currentTarget);};
+$("#spkB").onclick=e=>{e.stopPropagation();speakCurrent(e.currentTarget);};
+$("#spkQ").onclick=()=>{ const q=Q.list[Q.idx]; if(q) speak(q.v.r||q.v.w,$("#spkQ")); };
+$("#ttsAuto").onchange=e=>{S.tts.auto=e.target.checked;saveState();};
+$("#ttsRate").onchange=e=>{S.tts.rate=parseFloat(e.target.value);saveState();};
+$("#ttsVoice").onchange=e=>{S.tts.voice=e.target.value;TTS.voice=TTS.list.find(v=>v.voiceURI===e.target.value)||null;saveState();speakCurrent();};
 
 /* ================= 篩選 ================= */
 const F={levels:new Set(LEVELS),pos:"all",stat:"all",order:"seq",dir:"j2c",showRead:false};
@@ -609,12 +698,16 @@ function flip(){
   const v=pool[pos]; if(!v) return;
   flipped=!flipped;
   $("#card").classList.toggle("flipped",flipped);
-  if(flipped && !S.seen[v.i] && !S.learned[v.i]){ S.seen[v.i]=1; bumpDaily(1); saveState(); renderStats(); }
+  if(flipped){
+    if(S.tts.auto) speak(v.r||v.w,$("#spkB"));
+    if(!S.seen[v.i] && !S.learned[v.i]){ S.seen[v.i]=1; bumpDaily(1); saveState(); renderStats(); }
+  }
 }
 function go(d){
   if(!pool.length) return;
   pos=(pos+d+pool.length)%pool.length;
   renderCard();
+  if(S.tts.auto && F.dir==="j2c") speak(pool[pos].r||pool[pos].w,$("#spkF"));
 }
 function toggleFav(){
   const v=pool[pos]; if(!v) return;
@@ -647,9 +740,11 @@ document.addEventListener("keydown",e=>{
     else if(e.key==="1")mark(false);
     else if(e.key==="2")mark(true);
     else if(e.key.toLowerCase()==="f")toggleFav();
+    else if(e.key.toLowerCase()==="s")speakCurrent($("#spkF"));
   }else if(currentView==="quiz" && !$("#quizPlay").hidden){
     const n=parseInt(e.key,10);
     if(n>=1&&n<=4){ const b=$$("#qOpts .opt")[n-1]; if(b&&!b.disabled) b.click(); }
+    else if(e.key.toLowerCase()==="s"){ const q=Q.list[Q.idx]; if(q) speak(q.v.r||q.v.w,$("#spkQ")); }
   }
 });
 
@@ -693,6 +788,7 @@ function renderQuestion(){
     b.onclick=()=>answer(b,o,q);
     box.appendChild(b);
   });
+  if(S.tts.auto && Q.mode!=="c2j") speak(q.v.r||q.v.w,$("#spkQ"));
 }
 function answer(btn,opt,q){
   const btns=$$("#qOpts .opt"); btns.forEach(b=>b.disabled=true);
@@ -701,6 +797,7 @@ function answer(btn,opt,q){
   if(opt.ok){ Q.ok++; S.quiz.c++; if(S.wrong[q.v.i]){S.wrong[q.v.i]--; if(S.wrong[q.v.i]<=0) delete S.wrong[q.v.i];} S.learned[q.v.i]=1; }
   else{ Q.ng++; btn.classList.add("wrong"); S.wrong[q.v.i]=(S.wrong[q.v.i]||0)+1; delete S.learned[q.v.i]; Q.wrongItems.push(q.v); }
   S.quiz.t++; saveState();
+  if(S.tts.auto && Q.mode==="c2j") speak(q.v.r||q.v.w,$("#spkQ"));
   $("#qOk").textContent="✓ "+Q.ok; $("#qNg").textContent="✗ "+Q.ng;
   setTimeout(()=>{ Q.idx++; if(Q.idx>=Q.list.length) endQuiz(); else renderQuestion(); }, opt.ok?520:1050);
 }
@@ -747,7 +844,7 @@ function renderList(){
   const rows=d.slice(page*PER,(page+1)*PER);
   $("#listBody").innerHTML = rows.length? rows.map(v=>`
     <tr data-id="${v.i}">
-      <td><button class="starbtn tstar" style="font-size:17px" data-id="${v.i}">${S.fav[v.i]?"★":"☆"}</button></td>
+      <td style="white-space:nowrap"><button class="starbtn tstar" style="font-size:17px" data-id="${v.i}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button></td>
       <td class="jpw jp">${v.w}</td>
       <td class="rd jp hidemob">${v.r}</td>
       <td>${v.m}</td>
@@ -762,6 +859,7 @@ function renderList(){
   const pp=$("#pPrev"), pn=$("#pNext");
   if(pp) pp.onclick=()=>{page--;renderList();window.scrollTo({top:0,behavior:"smooth"});};
   if(pn) pn.onclick=()=>{page++;renderList();window.scrollTo({top:0,behavior:"smooth"});};
+  $$(".tspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
   $$(".tstar").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id; if(S.fav[id]) delete S.fav[id]; else S.fav[id]=1;
     saveState(); renderList(); renderCard(); renderSaved(); renderStats();
@@ -778,7 +876,8 @@ function renderList(){
 function miniTable(items,onRemove,removeLabel){
   if(!items.length) return `<div class="emptybox">目前還沒有單字</div>`;
   const html=`<div class="tablewrap"><table><tbody>${items.map(v=>`
-    <tr><td class="jpw jp">${v.w}</td><td class="rd jp">${v.r}</td><td>${v.m}</td>
+    <tr><td style="width:1%"><button class="spksm sspk" data-id="${v.i}" title="朗讀" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button></td>
+    <td class="jpw jp">${v.w}</td><td class="rd jp">${v.r}</td><td>${v.m}</td>
     <td style="width:1%"><span class="tag lv">${v.l}</span></td>
     <td class="act"><button class="mini rm" data-id="${v.i}">${removeLabel}</button></td></tr>`).join("")}</tbody></table></div>`;
   return html;
@@ -790,6 +889,7 @@ function renderSaved(){
   $("#wrongCount").textContent=`（${wrongs.length}）`;
   $("#favList").innerHTML=miniTable(favs,null,"移除");
   $("#wrongList").innerHTML=miniTable(wrongs,null,"已學會");
+  $$(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
   $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();renderSaved();renderList();renderCard();renderStats();});
   $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];S.learned[id]=1;saveState();renderSaved();renderList();renderStats();});
 }
@@ -880,6 +980,9 @@ $$("nav.tabs button").forEach(b=>b.onclick=()=>{
 $("#poolInfo").onclick=()=>{ if(forcedPool){ forcedPool=null; rebuildPool(); toast("已回到完整單字池"); } };
 
 /* ================= 啟動 ================= */
+$("#ttsAuto").checked = !!S.tts.auto;
+$("#ttsRate").value = String(S.tts.rate || 1);
+pickVoice();
 buildFilterUI();
 rebuildPool();
 renderSaved();
