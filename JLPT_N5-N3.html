@@ -65,10 +65,21 @@ nav.tabs button{
 nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--page)}
 
 /* ---------- filter bar ---------- */
+.filterwrap{margin:14px 0}
+.filtertoggle{
+  display:none;width:100%;align-items:center;gap:8px;text-align:left;
+  padding:10px 14px;background:var(--surface);border:1px solid var(--ring);
+  border-radius:var(--r);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--ink-2)
+}
+.filtertoggle .fsum{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.filtertoggle .fico{font-size:15px}
+.filtertoggle .chev{transition:transform .2s;color:var(--muted)}
+.filterwrap.open .filtertoggle .chev{transform:rotate(180deg)}
+.filterwrap.open .filtertoggle{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
 .filters{
   display:flex;flex-wrap:wrap;gap:8px;align-items:center;
   padding:12px;background:var(--surface);border:1px solid var(--ring);
-  border-radius:var(--r);margin:14px 0;box-shadow:var(--shadow)
+  border-radius:var(--r);box-shadow:var(--shadow)
 }
 .chips{display:flex;gap:6px;flex-wrap:wrap}
 .chip{
@@ -207,7 +218,15 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
   .controls{grid-template-columns:repeat(2,1fr)}
   .kbd{display:none}
   th.hidemob,td.hidemob{display:none}
-  .filters{padding:10px}
+  .filtertoggle{display:flex}
+  .filters{display:none;padding:10px;border-radius:0 0 var(--r) var(--r);border-top:0}
+  .filterwrap.open .filters{display:flex}
+  .filters .fgroup,.filters label.fgroup{width:100%;justify-content:space-between}
+  .filters label.fgroup{flex-direction:row-reverse}
+  .filters label.fgroup input{margin-right:2px}
+  .filters select{flex:1;max-width:62%}
+  .filters .chips{flex:1;justify-content:flex-end}
+  #poolInfo{display:none}
 }
 @media print{ header,nav.tabs,.controls,.filters{display:none} }
 </style>
@@ -231,6 +250,12 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
 <div class="wrap">
 
   <!-- filter bar -->
+  <div class="filterwrap" id="filterWrap">
+  <button class="filtertoggle" id="filterToggle" aria-expanded="false" aria-controls="filterBar">
+    <span class="fico">⚙️</span>
+    <span class="fsum" id="filterSummary">篩選條件</span>
+    <span class="chev">▾</span>
+  </button>
   <div class="filters" id="filterBar">
     <div class="fgroup"><span class="flabel">等級</span>
       <div class="chips" id="lvChips"></div>
@@ -267,6 +292,7 @@ html[data-theme="dark"] .mini.on{color:#0d0d0d}
     <div class="spacer"></div>
     <span class="tiny" id="poolInfo"></span>
     <button class="mini" id="resetPool" hidden>回到完整單字池</button>
+  </div>
   </div>
 
   <!-- ============ STUDY ============ -->
@@ -499,6 +525,11 @@ function buildFilterUI(){
   $("#dirSel").onchange=e=>{F.dir=e.target.value;renderCard();};
   $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();};
   $("#resetPool").onclick=()=>{forcedPool=null;rebuildPool();toast("已回到完整單字池");};
+  $("#filterToggle").onclick=()=>{
+    const w=$("#filterWrap"), open=!w.classList.contains("open");
+    w.classList.toggle("open",open);
+    $("#filterToggle").setAttribute("aria-expanded",open);
+  };
   $("#hdcount").textContent=`${VOCAB.length} 字 · N5〜N2`;
 }
 
@@ -523,6 +554,13 @@ function rebuildPool(keep){
   if(keep && cur){ const k=pool.findIndex(v=>v.i===cur.i); if(k>=0) pos=k; }
   $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
   $("#resetPool").hidden = !forcedPool;
+  const STAT_TXT={all:"",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
+  const bits=[ forcedPool ? "自訂清單" : LEVELS.filter(l=>F.levels.has(l)).join("・") ];
+  if(F.pos!=="all") bits.push(F.pos);
+  if(F.stat!=="all") bits.push(STAT_TXT[F.stat]);
+  if(F.order==="rand") bits.push("隨機");
+  bits.push(`${pool.length} 字`);
+  $("#filterSummary").textContent = bits.join(" · ");
   renderCard(); renderList(); renderStats();
 }
 
@@ -758,6 +796,7 @@ function renderSaved(){
 function useCustom(items,view){
   if(!items.length){toast("清單是空的");return;}
   forcedPool=items; rebuildPool(); switchView(view);
+  $("#filterWrap").classList.add("open"); $("#filterToggle").setAttribute("aria-expanded","true");
   toast(`已載入 ${items.length} 個單字`);
 }
 $("#favStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.fav[v.i]),"study");
@@ -828,7 +867,7 @@ function switchView(v){
   currentView=v;
   $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
   ["study","quiz","list","saved","stats"].forEach(k=>$("#view-"+k).hidden = k!==v);
-  $("#filterBar").hidden = (v==="saved"||v==="stats");
+  $("#filterWrap").hidden = (v==="saved"||v==="stats");
   if(v==="saved") renderSaved();
   if(v==="stats") renderStats();
   if(v==="list") renderList();
