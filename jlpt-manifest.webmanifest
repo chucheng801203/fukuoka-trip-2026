@@ -4,7 +4,6 @@
   "description": "4000 個 JLPT N5〜N2 日文單字，繁體中文釋義，含翻卡學習、四選一測驗、發音朗讀、我的最愛、錯題本與學習統計。",
   "lang": "zh-Hant",
   "dir": "ltr",
-  "id": "./JLPT_N5-N3.html",
   "start_url": "./JLPT_N5-N3.html",
   "scope": "./",
   "display": "standalone",

@@ -40,7 +40,32 @@ git push
 換上新的 `JLPT_N5-N3.html` 與 `jlpt-sw.js`（build 編號會自動改變）後 push，
 使用者下次開啟時會在頁面上方看到「已下載新版本 → 立即更新」。
 
-目前 build：`1666a6e16d`
+目前 build：`98186866bf`
+
+## 疑難排解
+
+### Android 出現「此應用程式針對的是較舊版本的 Android 系統…」
+
+**這個錯誤和本專案無關。** 它是 Android 的 Play Protect 在攔截「安裝 APK 檔」時的警告，
+原因是那個 APK 的 `targetSdkVersion` 太舊（比手機的 API level 低 2 版以上）。
+
+PWA 安裝**不會產生 APK 下載**。會看到這個對話框，代表用的不是 Chrome 的原生安裝，而是：
+
+1. 把網址丟進「網頁轉 APK」的服務（PWABuilder、AppsGeyser、WebIntoApp…）產生 APK 後手動安裝；或
+2. 用了會「自己合成 APK 來假裝安裝」的瀏覽器（部分第三方瀏覽器的「加到桌面」是這樣做的）。
+
+**正確做法**：用 **Chrome**（或 Edge、Samsung Internet）開啟網址 →
+右上角 ⋮ 選單 → 「安裝應用程式 / 加到主畫面」。
+Chrome 會向 Google 的 WebAPK 服務要一個由 Play Services 簽章的安裝包，
+不會經過側載流程，也就不會被 Play Protect 擋。
+
+需要條件：**https 網址**（GitHub Pages 符合）、手機有 Google Play 服務、
+不要在 LINE／Facebook／IG 的內建瀏覽器裡開。
+
+### 真的需要一個能上架 Google Play 的 APK
+
+用 [PWABuilder](https://www.pwabuilder.com/) 輸入網址產生 Android 套件，
+並把 `targetSdkVersion` 設成目前 Google Play 要求的版本，再自行簽章。
 
 ## 注意
 

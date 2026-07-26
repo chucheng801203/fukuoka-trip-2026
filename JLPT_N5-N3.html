@@ -467,6 +467,7 @@ td.c-tool{white-space:nowrap}
   <section id="view-study" role="tabpanel" aria-label="學習" tabindex="-1">
     <div class="deckbar">
       <span id="deckPos">0 / 0</span>
+      <button class="mini" id="deckReset" hidden title="從第一張重新開始">↺ 回第一張</button>
       <div class="progress"><i id="deckBar" style="width:0%"></i></div>
       <span id="deckLearned"></span>
     </div>
@@ -670,7 +671,10 @@ function saveState(){
   catch(e){ storeOK=false; memStore=S; }
 }
 const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null,
-           tts:{auto:false,rate:1,voice:""}};
+           tts:{auto:false,rate:1,voice:""},
+           filter:null,                                   // 上次的篩選條件
+           last:{i:null,w:"",view:"",page:0},             // 上次讀到的單字／分頁
+           qcfg:{count:"20",mode:"j2c"}};                 // 上次的測驗設定
 let S=Object.assign({},DEF,loadState()||{});
 for(const k in DEF) if(S[k]===undefined) S[k]=JSON.parse(JSON.stringify(DEF[k]));
 
@@ -775,6 +779,47 @@ $("#ttsVoice").onchange=e=>{S.tts.voice=e.target.value;TTS.voice=TTS.list.find(v
 const F={levels:new Set(LEVELS),pos:"all",stat:"all",order:"seq",dir:"j2c",showRead:false};
 let pool=[], pos=0;
 
+/* ---- 進度記錄：篩選條件、讀到第幾張、所在分頁 ---- */
+if(!S.last) S.last={i:null,w:"",view:"",page:0};
+if(!S.qcfg) S.qcfg={count:"20",mode:"j2c"};
+let restorePending=true, restoredAt=-1;
+let page=(S.last && S.last.page) || 0, currentView="study";
+
+function saveFilter(){
+  S.filter={levels:[...F.levels],pos:F.pos,stat:F.stat,order:F.order,dir:F.dir,showRead:F.showRead};
+  saveState();
+}
+function applySavedFilter(){
+  const f=S.filter; if(!f) return;
+  if(Array.isArray(f.levels)){
+    const ls=f.levels.filter(l=>LEVELS.includes(l));
+    if(ls.length) F.levels=new Set(ls);
+  }
+  if(f.pos==="all"||POS_LIST.includes(f.pos)) F.pos=f.pos;
+  if(["all","new","learning","learned","fav","wrong"].includes(f.stat)) F.stat=f.stat;
+  if(["seq","rand"].includes(f.order)) F.order=f.order;
+  if(["j2c","c2j"].includes(f.dir)) F.dir=f.dir;
+  F.showRead=!!f.showRead;
+  $$("#lvChips button").forEach(b=>b.setAttribute("aria-pressed",F.levels.has(b.textContent)));
+  $("#posSel").value=F.pos; $("#statSel").value=F.stat;
+  $("#orderSel").value=F.order; $("#dirSel").value=F.dir;
+  $("#showRead").checked=F.showRead;
+}
+function findSaved(){
+  const l=S.last||{};
+  if(l.w){ const k=pool.findIndex(v=>v.w===l.w); if(k>=0) return k; }
+  if(typeof l.i==="number"){ const k=pool.findIndex(v=>v.i===l.i); if(k>=0) return k; }
+  return -1;
+}
+function savePos(){
+  const v=pool[pos];
+  S.last.i = v? v.i : null;
+  S.last.w = v? v.w : "";
+  S.last.view = currentView;
+  S.last.page = page;
+  saveState();
+}
+
 function buildFilterUI(){
   const c=$("#lvChips");
   LEVELS.forEach(l=>{
@@ -793,8 +838,8 @@ function buildFilterUI(){
   ps.onchange=()=>{F.pos=ps.value;rebuildPool();};
   $("#statSel").onchange=e=>{F.stat=e.target.value;rebuildPool();};
   $("#orderSel").onchange=e=>{F.order=e.target.value;rebuildPool();};
-  $("#dirSel").onchange=e=>{F.dir=e.target.value;renderCard();};
-  $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();};
+  $("#dirSel").onchange=e=>{F.dir=e.target.value;renderCard();saveFilter();};
+  $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();saveFilter();};
   $("#resetPool").onclick=()=>{forcedPool=null;rebuildPool();toast("已回到完整單字池");};
   $("#filterToggle").onclick=()=>{
     const w=$("#filterWrap"), open=!w.classList.contains("open");
@@ -802,6 +847,10 @@ function buildFilterUI(){
     $("#filterToggle").setAttribute("aria-expanded",open);
   };
   $("#hdcount").textContent=`${VOCAB.length} 字 · N5〜N2`;
+  $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
+  $("#qCount").onchange=e=>{S.qcfg.count=e.target.value;saveState();};
+  $("#qMode").onchange=e=>{S.qcfg.mode=e.target.value;saveState();};
+  applySavedFilter();
 }
 
 function matchFilter(v){
@@ -823,6 +872,12 @@ function rebuildPool(keep){
   if(F.order==="rand") shuffle(pool);
   pos = 0;
   if(keep && cur){ const k=pool.findIndex(v=>v.i===cur.i); if(k>=0) pos=k; }
+  else if(restorePending){
+    restorePending=false;
+    const k=findSaved();
+    if(k>0){ pos=k; restoredAt=k; }
+  }
+  if(!forcedPool) saveFilter();
   $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
   $("#resetPool").hidden = !forcedPool;
   const STAT_TXT={all:"",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
@@ -843,6 +898,7 @@ function renderCard(){
   $("#deckBar").style.width = pool.length? ((pos+1)/pool.length*100)+"%" : "0%";
   const learnedInPool = pool.filter(x=>S.learned[x.i]).length;
   $("#deckLearned").textContent = pool.length? `已學會 ${learnedInPool}` : "";
+  $("#deckReset").hidden = pos===0 || !pool.length;
   flipped=false; $("#card").classList.remove("flipped");
   const empty=!v;
   ["btnPrev","btnNext","btnYes","btnNo"].forEach(id=>$("#"+id).disabled=empty);
@@ -897,7 +953,7 @@ function flip(){
 function go(d){
   if(!pool.length) return;
   pos=(pos+d+pool.length)%pool.length;
-  renderCard();
+  renderCard(); savePos();
   if(S.tts.auto && F.dir==="j2c") speak(pool[pos].r||pool[pos].w,$("#spkF"));
 }
 function toggleFav(){
@@ -919,6 +975,9 @@ $("#card").onclick=e=>{ if(e.target.closest(".starbtn")) return; flip(); };
 $("#starF").onclick=toggleFav; $("#starB").onclick=toggleFav;
 $("#btnPrev").onclick=()=>go(-1);
 $("#btnNext").onclick=()=>go(1);
+$("#deckReset").onclick=()=>{ pos=0; renderCard(); savePos(); toast("已回到第一張"); };
+addEventListener("pagehide",savePos);
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") savePos(); });
 $("#btnYes").onclick=()=>mark(true);
 $("#btnNo").onclick=()=>mark(false);
 
@@ -1026,7 +1085,7 @@ $("#qStart").onclick=()=>startQuiz();
 $("#qQuit").onclick=()=>{ if(Q.idx>0) endQuiz(); else {$("#quizPlay").hidden=true;$("#quizSetup").hidden=false;} };
 
 /* ================= 單字表 ================= */
-let page=0; const PER=50; let search="";
+const PER=50; let search="";
 $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
 function listData(){
   let d=VOCAB.filter(matchFilter);
@@ -1056,8 +1115,8 @@ function renderList(){
     <span>第 ${page+1} / ${pages} 頁 · 共 ${d.length} 字</span>
     <button class="mini" id="pNext" ${page>=pages-1?"disabled":""}>下一頁</button>` : "";
   const pp=$("#pPrev"), pn=$("#pNext");
-  if(pp) pp.onclick=()=>{page--;renderList();window.scrollTo({top:0,behavior:"smooth"});};
-  if(pn) pn.onclick=()=>{page++;renderList();window.scrollTo({top:0,behavior:"smooth"});};
+  if(pp) pp.onclick=()=>{page--;renderList();savePos();window.scrollTo({top:0,behavior:"smooth"});};
+  if(pn) pn.onclick=()=>{page++;renderList();savePos();window.scrollTo({top:0,behavior:"smooth"});};
   $$(".tspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
   $$(".tstar").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id; if(S.fav[id]) delete S.fav[id]; else S.fav[id]=1;
@@ -1162,7 +1221,6 @@ $("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？
 
 /* ================= 視圖切換 ================= */
 const VIEWS=["study","quiz","list","saved","stats"];
-let currentView="study";
 function switchView(v,fromHistory){
   if(!VIEWS.includes(v)) v="study";
   currentView=v;
@@ -1178,6 +1236,7 @@ function switchView(v,fromHistory){
   if(v==="saved") renderSaved();
   if(v==="stats") renderStats();
   if(v==="list") renderList();
+  savePos();
   window.scrollTo({top:0});
 }
 $$("nav.tabs button").forEach(b=>b.onclick=()=>switchView(b.dataset.view));
@@ -1283,7 +1342,12 @@ pickVoice();
 buildFilterUI();
 rebuildPool();
 renderSaved();
-switchView((location.hash||"#study").slice(1),true);
+(function restoreView(){
+  const h=(location.hash||"").slice(1);
+  if(VIEWS.includes(h)) switchView(h,true);
+  else switchView(VIEWS.includes(S.last.view)? S.last.view : "study");
+})();
+if(restoredAt>0) toast(`已回到上次讀到的第 ${restoredAt+1} 張`);
 syncNavFade();
 initPWA();
 </script>
