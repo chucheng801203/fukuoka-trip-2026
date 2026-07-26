@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>日本語 単語帳 ・ 420語 綜合複習</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700;800&family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EEE3;        /* washi 紙 */
+    --paper-2:#FBF8F1;      /* 卡片表面 */
+    --ink:#22303F;          /* 藍墨 主文字 */
+    --ink-soft:#68717E;     /* 次要文字 */
+    --indigo:#213A52;       /* 藍 accent */
+    --shu:#D23B2C;          /* 朱色 批改紅 */
+    --shu-deep:#B22E22;
+    --shu-soft:#F6E1DC;     /* 正解底 */
+    --gold:#C0872B;         /* 山吹金 */
+    --gold-deep:#9C6A17;
+    --gold-soft:#FBF3E0;
+    --line:#DAD1C0;         /* 紙上細線 */
+    --wrong-bg:#EFE3E1;
+    --shadow:0 1px 2px rgba(34,48,63,.06),0 8px 24px rgba(34,48,63,.07);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Noto Sans TC",sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    background-image:repeating-linear-gradient(to bottom,transparent 0 37px,rgba(33,58,82,.035) 37px 38px);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+    padding:clamp(14px,3vw,34px);
+    display:flex;justify-content:center;
+  }
+  .jp{font-family:"Shippori Mincho",serif;font-weight:600}
+  ruby rt{font-family:"Shippori Mincho",serif;font-weight:400}
+  .wrap{width:100%;max-width:660px}
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:16px;padding-bottom:14px;margin-bottom:22px;
+    border-bottom:2px solid var(--indigo);
+    position:relative;
+  }
+  header::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--indigo);opacity:.4}
+  .title-block h1{
+    font-family:"Shippori Mincho",serif;font-weight:800;
+    font-size:clamp(1.55rem,5.5vw,2.15rem);letter-spacing:.06em;color:var(--indigo);
+    line-height:1.15;
+  }
+  .title-block .sub{
+    font-family:"Noto Serif TC",serif;font-size:.82rem;color:var(--ink-soft);
+    letter-spacing:.14em;margin-top:5px;
+  }
+  .seal{
+    flex:none;width:46px;height:46px;background:var(--shu);color:#fff;
+    border-radius:8px;display:grid;place-items:center;transform:rotate(-4deg);
+    font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.5rem;
+    box-shadow:0 3px 8px rgba(178,46,34,.3);border:1.5px solid var(--shu-deep);
+    margin-top:3px;
+  }
+
+  /* ---------- panels ---------- */
+  .panel{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:14px;
+    box-shadow:var(--shadow);padding:clamp(20px,4vw,32px);
+  }
+  .eyebrow{
+    font-family:"Noto Serif TC",serif;font-size:.72rem;font-weight:700;
+    letter-spacing:.28em;color:var(--shu);text-transform:uppercase;margin-bottom:6px;
+  }
+  h2.step{font-family:"Noto Serif TC",serif;font-weight:900;font-size:1.28rem;color:var(--indigo);margin-bottom:4px}
+  .hint{color:var(--ink-soft);font-size:.86rem;margin-bottom:18px}
+  .field{margin-bottom:24px}
+  .field-label{font-weight:700;font-size:.95rem;margin-bottom:11px;display:flex;align-items:center;gap:8px}
+  .field-label .n{
+    font-family:"Shippori Mincho",serif;color:var(--shu);font-weight:700;
+    border:1.5px solid var(--shu);border-radius:50%;width:22px;height:22px;
+    display:grid;place-items:center;font-size:.8rem;flex:none;
+  }
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    font-family:"Noto Sans TC",sans-serif;font-size:.82rem;font-weight:500;
+    padding:7px 13px;border-radius:999px;border:1.5px solid var(--line);
+    background:transparent;color:var(--ink-soft);cursor:pointer;transition:all .15s;
+    user-select:none;
+  }
+  .chip:hover{border-color:var(--indigo);color:var(--ink)}
+  .chip.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+  .chip.all{border-style:dashed}
+  .chip.all.on{background:var(--shu);border-color:var(--shu)}
+
+  .opts-row{display:flex;flex-wrap:wrap;gap:8px}
+  .seg{
+    font-size:.88rem;font-weight:500;padding:11px 16px;border-radius:10px;
+    border:1.5px solid var(--line);background:transparent;color:var(--ink-soft);
+    cursor:pointer;transition:all .15s;flex:1;min-width:calc(50% - 4px);text-align:center;
+  }
+  .seg:hover{border-color:var(--indigo);color:var(--ink)}
+  .seg.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+  .seg small{display:block;font-size:.72rem;opacity:.75;margin-top:2px;font-weight:400}
+
+  .count-row{display:flex;gap:8px}
+  .count-btn{
+    flex:1;font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.05rem;
+    padding:10px;border-radius:10px;border:1.5px solid var(--line);background:transparent;
+    color:var(--ink-soft);cursor:pointer;transition:all .15s;
+  }
+  .count-btn:hover{border-color:var(--indigo);color:var(--ink)}
+  .count-btn.on{background:var(--indigo);border-color:var(--indigo);color:#fff}
+
+  .btn-primary{
+    width:100%;font-family:"Noto Serif TC",serif;font-weight:700;font-size:1.05rem;
+    letter-spacing:.1em;padding:15px;border:none;border-radius:11px;cursor:pointer;
+    background:var(--shu);color:#fff;transition:all .15s;
+    box-shadow:0 4px 14px rgba(178,46,34,.28);
+  }
+  .btn-primary:hover{background:var(--shu-deep);transform:translateY(-1px)}
+  .btn-primary:active{transform:translateY(0)}
+  .btn-primary:disabled{background:var(--line);color:var(--ink-soft);box-shadow:none;cursor:not-allowed;transform:none}
+
+  /* ---------- quiz ---------- */
+  .quiz-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px}
+  .qcount{font-family:"Noto Serif TC",serif;font-size:.8rem;color:var(--ink-soft);letter-spacing:.1em}
+  .qcount b{font-family:"Shippori Mincho",serif;color:var(--indigo);font-size:1.05rem}
+  .score-tag{font-family:"Noto Serif TC",serif;font-size:.8rem;color:var(--ink-soft);display:flex;gap:12px}
+  .score-tag .ok{color:var(--shu);font-weight:700}
+  .score-tag .ng{color:var(--ink-soft)}
+  .pips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:22px}
+  .pip{width:100%;max-width:22px;height:5px;border-radius:3px;background:var(--line);flex:1;transition:background .3s}
+  .pip.done{background:var(--indigo)}
+  .pip.cur{background:var(--shu)}
+
+  .qcard{
+    position:relative;background:var(--paper-2);border:1px solid var(--line);
+    border-radius:14px;box-shadow:var(--shadow);padding:clamp(22px,5vw,40px) clamp(20px,5vw,36px);
+    padding-left:clamp(28px,6vw,44px);text-align:center;overflow:hidden;
+  }
+  .qcard::before{content:"";position:absolute;left:14px;top:14px;bottom:14px;width:2px;background:var(--shu);opacity:.5;border-radius:2px}
+  .qno{font-family:"Shippori Mincho",serif;font-size:.8rem;color:var(--shu);letter-spacing:.2em;margin-bottom:18px}
+  .prompt-jp{font-family:"Shippori Mincho",serif;font-weight:700;font-size:clamp(2.4rem,11vw,3.6rem);color:var(--ink);line-height:1.25;letter-spacing:.02em}
+  .prompt-jp ruby rt{font-size:.32em;color:var(--ink-soft);font-weight:400;letter-spacing:.04em}
+  .prompt-cn{font-family:"Noto Serif TC",serif;font-weight:700;font-size:clamp(1.9rem,9vw,2.9rem);color:var(--ink);line-height:1.3}
+  .prompt-tag{display:inline-block;font-size:.74rem;color:var(--ink-soft);border:1px solid var(--line);border-radius:999px;padding:3px 12px;margin-bottom:20px;letter-spacing:.14em;font-family:"Noto Serif TC",serif}
+  .ask{margin-top:20px;font-size:.9rem;color:var(--ink-soft);letter-spacing:.05em}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  @media(max-width:460px){.options{grid-template-columns:1fr}}
+  .option{
+    position:relative;background:var(--paper-2);border:1.5px solid var(--line);
+    border-radius:12px;padding:16px 18px;cursor:pointer;text-align:left;
+    display:flex;align-items:center;gap:12px;transition:border-color .15s,background .15s,transform .08s;
+    min-height:60px;font-size:1.02rem;color:var(--ink);overflow:hidden;
+  }
+  .option:hover:not(.locked){border-color:var(--indigo);transform:translateY(-1px)}
+  .option:focus-visible{outline:3px solid rgba(33,58,82,.35);outline-offset:2px}
+  .option .key{
+    flex:none;width:26px;height:26px;border-radius:7px;background:var(--paper);
+    border:1.5px solid var(--line);display:grid;place-items:center;
+    font-family:"Shippori Mincho",serif;font-weight:700;font-size:.85rem;color:var(--ink-soft);
+    transition:all .15s;
+  }
+  .option .txt{font-size:1.05rem;line-height:1.35}
+  .option .txt.jp{font-family:"Shippori Mincho",serif;font-weight:600;font-size:1.35rem}
+  .option .txt.jp ruby rt{font-size:.34em;color:var(--ink-soft);font-weight:400}
+  .option.locked{cursor:default}
+  .option.correct{background:var(--shu-soft);border-color:var(--shu)}
+  .option.correct .key{background:var(--shu);border-color:var(--shu);color:#fff}
+  .option.wrong{background:var(--wrong-bg);border-color:var(--shu);opacity:.92}
+  .option.dim{opacity:.5}
+
+  .mark-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3}
+  .mark-svg path{fill:none;stroke:var(--shu);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;
+    stroke-dasharray:100;stroke-dashoffset:100}
+  .mark-svg.draw path{transition:stroke-dashoffset .55s cubic-bezier(.4,0,.2,1);stroke-dashoffset:0}
+
+  .feedback{
+    margin-top:20px;min-height:34px;display:flex;align-items:center;justify-content:center;gap:12px;
+    font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.1rem;
+    opacity:0;transition:opacity .25s;
+  }
+  .feedback.show{opacity:1}
+  .feedback.right{color:var(--shu)}
+  .feedback.miss{color:var(--indigo)}
+  .feedback .ans{font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:.92rem;color:var(--ink-soft)}
+  .feedback .ans .jp{color:var(--ink)}
+
+  .next-row{margin-top:18px;display:flex;gap:10px}
+  .btn-next{
+    flex:1;font-family:"Noto Serif TC",serif;font-weight:700;font-size:1rem;letter-spacing:.08em;
+    padding:14px;border:none;border-radius:11px;cursor:pointer;background:var(--indigo);color:#fff;
+    transition:all .15s;box-shadow:0 4px 14px rgba(33,58,82,.22);
+  }
+  .btn-next:hover{background:#18293a;transform:translateY(-1px)}
+  .btn-ghost{
+    font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:.9rem;
+    padding:14px 18px;border:1.5px solid var(--line);border-radius:11px;cursor:pointer;
+    background:transparent;color:var(--ink-soft);transition:all .15s;
+  }
+  .btn-ghost:hover{border-color:var(--indigo);color:var(--ink)}
+
+  /* ---------- result ---------- */
+  .result{text-align:center}
+  .result .eyebrow{text-align:center}
+  .score-ring{position:relative;width:190px;height:150px;margin:8px auto 4px}
+  .score-ring svg{position:absolute;inset:0;width:100%;height:100%}
+  .score-ring svg path{fill:none;stroke:var(--shu);stroke-width:2.6;stroke-linecap:round;
+    stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1) .2s}
+  .score-ring.draw svg path{stroke-dashoffset:0}
+  .score-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .score-num .big{font-family:"Shippori Mincho",serif;font-weight:800;font-size:3.6rem;color:var(--ink);line-height:1}
+  .score-num .tot{font-family:"Shippori Mincho",serif;font-size:1rem;color:var(--ink-soft);margin-top:2px}
+  .verdict{font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.5rem;color:var(--indigo);margin:10px 0 4px}
+  .verdict.manten{color:var(--shu)}
+  .verdict-cn{color:var(--ink-soft);font-size:.9rem;margin-bottom:8px}
+  .pct{font-family:"Noto Serif TC",serif;color:var(--ink-soft);font-size:.85rem;letter-spacing:.12em;margin-bottom:22px}
+
+  .review{text-align:left;margin:8px 0 22px;border-top:1px solid var(--line);padding-top:18px}
+  .review h3{font-family:"Noto Serif TC",serif;font-size:.95rem;color:var(--indigo);margin-bottom:12px;letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+  .review h3 .cnt{background:var(--shu);color:#fff;border-radius:999px;font-size:.72rem;padding:1px 9px;font-family:"Noto Sans TC",sans-serif}
+  .rev-item{display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .rev-item:last-child{border-bottom:none}
+  .rev-w{font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.15rem;color:var(--ink);flex:none}
+  .rev-w ruby rt{font-size:.36em;color:var(--ink-soft);font-weight:400}
+  .rev-m{color:var(--ink-soft);font-size:.9rem}
+  .rev-theme{margin-left:auto;font-size:.72rem;color:var(--gold);font-family:"Noto Serif TC",serif;flex:none;padding-left:8px}
+
+  .result-btns{display:flex;flex-direction:column;gap:10px}
+  .allclear{color:var(--shu);font-family:"Shippori Mincho",serif;font-weight:700;font-size:1.05rem;text-align:center;padding:14px 0 4px}
+
+  footer{text-align:center;color:var(--ink-soft);font-size:.72rem;margin-top:22px;letter-spacing:.08em;font-family:"Noto Serif TC",serif}
+  .hidden{display:none!important}
+
+  /* ---------- 星號 star ---------- */
+  .star-ic{fill:none;stroke:var(--ink-soft);stroke-width:1.8;stroke-linejoin:round;transition:fill .15s,stroke .15s}
+  @keyframes starpop{0%{transform:scale(1)}45%{transform:scale(1.25)}100%{transform:scale(1)}}
+
+  /* 設定頁：星號複習橫幅 */
+  .star-banner{display:flex;align-items:center;justify-content:space-between;gap:12px 16px;flex-wrap:wrap;
+    background:var(--gold-soft);border:1.5px solid #E6D2A4;border-radius:12px;padding:15px 17px;margin-bottom:24px}
+  .star-banner.empty{background:var(--paper);border-color:var(--line);border-style:dashed}
+  .sb-left{min-width:190px;flex:1}
+  .sb-title{display:flex;align-items:center;gap:8px;font-family:"Noto Serif TC",serif;font-weight:700;font-size:1rem;color:var(--indigo)}
+  .sb-title .star-ic{width:20px;height:20px;fill:var(--gold);stroke:var(--gold);stroke-width:1.3}
+  .star-banner.empty .sb-title .star-ic{fill:none;stroke:var(--ink-soft)}
+  .sb-count{background:var(--gold);color:#fff;border-radius:999px;font-family:"Noto Sans TC",sans-serif;font-size:.75rem;font-weight:700;padding:1px 10px;min-width:26px;text-align:center}
+  .star-banner.empty .sb-count{background:var(--ink-soft)}
+  .sb-hint{font-size:.8rem;color:var(--ink-soft);margin-top:5px;line-height:1.5}
+  .sb-btns{display:flex;gap:8px}
+  .sb-go{font-family:"Noto Serif TC",serif;font-weight:700;font-size:.88rem;padding:9px 16px;border:none;border-radius:9px;background:var(--gold);color:#fff;cursor:pointer;transition:all .15s;box-shadow:0 3px 10px rgba(192,135,43,.28)}
+  .sb-go:hover:not(:disabled){background:var(--gold-deep);transform:translateY(-1px)}
+  .sb-go:disabled{background:var(--line);color:var(--ink-soft);box-shadow:none;cursor:not-allowed}
+  .sb-view{font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:.85rem;padding:9px 14px;border:1.5px solid var(--line);border-radius:9px;background:transparent;color:var(--ink-soft);cursor:pointer;transition:all .15s}
+  .sb-view:hover:not(:disabled){border-color:var(--gold);color:var(--ink)}
+  .sb-view:disabled{opacity:.45;cursor:not-allowed}
+
+  /* 測驗卡：標記藥丸 */
+  .star-pill{position:absolute;top:12px;right:12px;z-index:4;display:inline-flex;align-items:center;gap:6px;
+    padding:7px 12px 7px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--paper);
+    color:var(--ink-soft);font-family:"Noto Sans TC",sans-serif;font-size:.76rem;font-weight:500;cursor:pointer;transition:all .15s}
+  .star-pill:hover{border-color:var(--gold);color:var(--ink)}
+  .star-pill .star-ic{width:16px;height:16px}
+  .star-pill.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold-deep);animation:starpop .3s}
+  .star-pill.on .star-ic{fill:var(--gold);stroke:var(--gold)}
+
+  /* 清單／複習列的星號按鈕 */
+  .star-btn{flex:none;width:34px;height:34px;border-radius:9px;border:1.5px solid var(--line);background:var(--paper);
+    cursor:pointer;display:grid;place-items:center;transition:all .15s;padding:0;margin-left:8px;align-self:center}
+  .star-btn:hover{border-color:var(--gold)}
+  .star-btn .star-ic{width:19px;height:19px}
+  .star-btn.on{background:var(--gold-soft);border-color:var(--gold);animation:starpop .3s}
+  .star-btn.on .star-ic{fill:var(--gold);stroke:var(--gold)}
+
+  /* 星號清單畫面 */
+  .star-list{margin-top:8px}
+  .star-row{display:flex;align-items:baseline;gap:12px;padding:11px 2px;border-bottom:1px dashed var(--line)}
+  .star-row:last-child{border-bottom:none}
+  .star-empty{text-align:center;color:var(--ink-soft);font-size:.9rem;padding:30px 0;font-family:"Noto Serif TC",serif}
+  .star-remove{margin-left:8px;flex:none;width:30px;height:30px;border-radius:8px;border:1.5px solid var(--line);
+    background:var(--paper);color:var(--ink-soft);cursor:pointer;font-size:.82rem;transition:all .15s;align-self:center}
+  .star-remove:hover{border-color:var(--shu);color:var(--shu);background:var(--wrong-bg)}
+
+  @media(prefers-reduced-motion:reduce){.star-btn.on,.star-pill.on{animation:none!important}}
+
+  @media(prefers-reduced-motion:reduce){
+    *{transition:none!important}
+    .mark-svg path,.score-ring svg path{stroke-dashoffset:0!important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="title-block">
+      <h1>日本語 単語帳</h1>
+      <div class="sub">420 語 綜合複習測驗 ・ 14 主題</div>
+    </div>
+    <div class="seal jp">習</div>
+  </header>
+
+  <!-- START -->
+  <section id="startScreen" class="panel">
+    <div class="eyebrow">Settings ・ 設定</div>
+    <h2 class="step">開始練習</h2>
+    <p class="hint">選擇主題、出題方式與題數，按下開始即可。</p>
+
+    <div class="star-banner empty" id="starBanner">
+      <div class="sb-left">
+        <div class="sb-title">
+          <svg viewBox="0 0 24 24" class="star-ic" aria-hidden="true"><path d="M12 2.6 L14.85 8.4 L21.2 9.3 L16.6 13.75 L17.7 20.1 L12 17.1 L6.3 20.1 L7.4 13.75 L2.8 9.3 L9.15 8.4 Z"/></svg>
+          星號複習 <span class="sb-count" id="sbCount">0</span>
+        </div>
+        <div class="sb-hint" id="sbHint">在測驗中點「標記複習」，不熟的單字會收藏到這裡。</div>
+      </div>
+      <div class="sb-btns">
+        <button class="sb-go" id="starReviewBtn" disabled>開始複習</button>
+        <button class="sb-view" id="starViewBtn" disabled>查看清單</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span class="n">1</span>出題方式</div>
+      <div class="opts-row" id="modeRow">
+        <button class="seg on" data-mode="j2c">看日文選中文<small>日 → 中意思</small></button>
+        <button class="seg" data-mode="c2j">看中文選日文<small>中 → 日單字</small></button>
+        <button class="seg" data-mode="read">看漢字選讀音<small>漢字 → 假名</small></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span class="n">2</span>主題範圍</div>
+      <div class="chips" id="themeChips"></div>
+    </div>
+
+    <div class="field">
+      <div class="field-label"><span class="n">3</span>題數</div>
+      <div class="count-row" id="countRow">
+        <button class="count-btn on" data-count="10">10</button>
+        <button class="count-btn" data-count="20">20</button>
+        <button class="count-btn" data-count="30">30</button>
+        <button class="count-btn" data-count="0">全部</button>
+      </div>
+    </div>
+
+    <button class="btn-primary" id="startBtn">開始測驗</button>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="quizScreen" class="hidden">
+    <div class="quiz-top">
+      <div class="qcount">第 <b id="qNow">1</b> / <span id="qTot">10</span> 題</div>
+      <div class="score-tag"><span class="ok">◯ <span id="okCount">0</span></span><span class="ng">✕ <span id="ngCount">0</span></span></div>
+    </div>
+    <div class="pips" id="pips"></div>
+
+    <div class="qcard" id="qcard">
+      <button class="star-pill" id="starPill" aria-pressed="false">
+        <svg viewBox="0 0 24 24" class="star-ic" aria-hidden="true"><path d="M12 2.6 L14.85 8.4 L21.2 9.3 L16.6 13.75 L17.7 20.1 L12 17.1 L6.3 20.1 L7.4 13.75 L2.8 9.3 L9.15 8.4 Z"/></svg>
+        <span class="lbl">標記複習</span>
+      </button>
+      <div class="qno jp" id="qNo">第一問</div>
+      <div id="promptTag" class="prompt-tag hidden"></div>
+      <div id="promptArea"></div>
+      <div class="ask" id="askText"></div>
+    </div>
+
+    <div class="options" id="options"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="next-row hidden" id="nextRow">
+      <button class="btn-ghost" id="quitBtn">結束</button>
+      <button class="btn-next" id="nextBtn">下一題 →</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="resultScreen" class="panel result hidden">
+    <div class="eyebrow">Result ・ 採点</div>
+    <div class="score-ring" id="scoreRing">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M66 14 C86 16 90 40 86 56 C82 78 58 90 42 86 C20 80 12 56 16 40 C20 18 44 8 66 14 C78 17 84 22 86 30"/></svg>
+      <div class="score-num"><span class="big" id="finalScore">0</span><span class="tot" id="finalTot">/ 0</span></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <div class="verdict-cn" id="verdictCn"></div>
+    <div class="pct" id="pctText"></div>
+
+    <div id="reviewBlock" class="review hidden">
+      <h3>複習清單 <span class="cnt" id="reviewCnt">0</span></h3>
+      <div id="reviewList"></div>
+    </div>
+    <div id="allClear" class="allclear hidden">満点！全部答對，太厲害了 🎌</div>
+
+    <div class="result-btns">
+      <button class="btn-primary" id="retryBtn">再挑戰一次</button>
+      <button class="btn-next hidden" id="reviewWrongBtn">只複習答錯的單字</button>
+      <button class="btn-ghost" id="restartBtn" style="text-align:center">重新設定</button>
+    </div>
+  </section>
+
+  <!-- STARRED LIST -->
+  <section id="starScreen" class="panel hidden">
+    <div class="eyebrow">★ Starred ・ 星號單字</div>
+    <h2 class="step">星號單字清單</h2>
+    <p class="hint">這些是你標記為「不熟」的單字，可以隨時針對它們複習。</p>
+    <div id="starList" class="star-list"></div>
+    <div class="result-btns" style="margin-top:22px">
+      <button class="btn-primary" id="starListReviewBtn">開始複習這些單字</button>
+      <button class="btn-ghost" id="starClearBtn" style="text-align:center">全部清除</button>
+      <button class="btn-ghost" id="starBackBtn" style="text-align:center">返回設定</button>
+    </div>
+  </section>
+
+  <footer>日本語単語ドリル ・ 手作りの複習帳</footer>
+</div>
+
+<script>
+/* ============ 資料：14 主題 × 30 = 420 語 ============ */
+const THEMES={
+  1:"日常・飲食",2:"情緒・工作・購物",3:"天氣・自然・時間",4:"身體・健康・服裝",
+  5:"交通・場所・方位",6:"興趣・娛樂・人際",7:"學校・文具・數量",8:"動物・顏色・形容詞",
+  9:"料理・味覺・廚房",10:"科技・通訊・辦公",11:"季節・節慶・活動",12:"抽象概念・思考",
+  13:"職業・城市・服務",14:"金融・數字・商業"
+};
+const V=[
+["家族","かぞく","家人、家族",1],["両親","りょうしん","父母、雙親",1],["兄弟","きょうだい","兄弟姊妹",1],["部屋","へや","房間",1],["台所","だいどころ","廚房",1],["玄関","げんかん","玄關",1],["風呂","ふろ","浴室、洗澡",1],["布団","ふとん","棉被",1],["窓","まど","窗戶",1],["鍵","かぎ","鑰匙",1],["朝ご飯","あさごはん","早餐",1],["昼ご飯","ひるごはん","午餐",1],["晩ご飯","ばんごはん","晚餐",1],["飲み物","のみもの","飲料",1],["食べ物","たべもの","食物",1],["お茶","おちゃ","茶",1],["牛乳","ぎゅうにゅう","牛奶",1],["野菜","やさい","蔬菜",1],["果物","くだもの","水果",1],["美味しい","おいしい","好吃的",1],["出かける","でかける","外出",1],["帰る","かえる","回家、回去",1],["待つ","まつ","等待",1],["急ぐ","いそぐ","趕緊、急忙",1],["歩く","あるく","走路",1],["走る","はしる","跑步",1],["乗る","のる","搭乘",1],["降りる","おりる","下車",1],["切符","きっぷ","車票",1],["地図","ちず","地圖",1],
+["嬉しい","うれしい","高興的",2],["悲しい","かなしい","悲傷的",2],["楽しい","たのしい","快樂的",2],["寂しい","さびしい","寂寞的",2],["怖い","こわい","可怕的",2],["恥ずかしい","はずかしい","害羞的",2],["疲れる","つかれる","疲累",2],["驚く","おどろく","驚訝",2],["笑う","わらう","笑",2],["泣く","なく","哭",2],["会社","かいしゃ","公司",2],["会議","かいぎ","會議",2],["仕事","しごと","工作",2],["資料","しりょう","資料",2],["締め切り","しめきり","截止期限",2],["給料","きゅうりょう","薪水",2],["残業","ざんぎょう","加班",2],["宿題","しゅくだい","作業",2],["試験","しけん","考試",2],["質問","しつもん","提問",2],["値段","ねだん","價格",2],["財布","さいふ","錢包",2],["現金","げんきん","現金",2],["割引","わりびき","折扣",2],["領収書","りょうしゅうしょ","收據",2],["品物","しなもの","物品、商品",2],["選ぶ","えらぶ","挑選",2],["払う","はらう","支付",2],["貯金","ちょきん","存款",2],["高い","たかい","貴的、高的",2],
+["天気","てんき","天氣",3],["晴れ","はれ","晴天",3],["曇り","くもり","陰天",3],["雨","あめ","雨",3],["雪","ゆき","雪",3],["風","かぜ","風",3],["雲","くも","雲",3],["空","そら","天空",3],["星","ほし","星星",3],["月","つき","月亮",3],["海","うみ","海",3],["山","やま","山",3],["川","かわ","河川",3],["森","もり","森林",3],["花","はな","花",3],["木","き","樹木",3],["島","しま","島嶼",3],["池","いけ","池塘",3],["石","いし","石頭",3],["虹","にじ","彩虹",3],["時間","じかん","時間",3],["今日","きょう","今天",3],["明日","あした","明天",3],["昨日","きのう","昨天",3],["週末","しゅうまつ","週末",3],["来月","らいげつ","下個月",3],["去年","きょねん","去年",3],["毎日","まいにち","每天",3],["午前","ごぜん","上午",3],["午後","ごご","下午",3],
+["頭","あたま","頭",4],["顔","かお","臉",4],["目","め","眼睛",4],["耳","みみ","耳朵",4],["口","くち","嘴巴",4],["鼻","はな","鼻子",4],["手","て","手",4],["足","あし","腳",4],["首","くび","脖子",4],["歯","は","牙齒",4],["病気","びょうき","生病、疾病",4],["風邪","かぜ","感冒",4],["熱","ねつ","發燒",4],["薬","くすり","藥",4],["病院","びょういん","醫院",4],["医者","いしゃ","醫生",4],["痛い","いたい","痛的",4],["元気","げんき","健康、有精神",4],["怪我","けが","受傷",4],["休む","やすむ","休息、請假",4],["服","ふく","衣服",4],["帽子","ぼうし","帽子",4],["靴","くつ","鞋子",4],["靴下","くつした","襪子",4],["眼鏡","めがね","眼鏡",4],["時計","とけい","時鐘、手錶",4],["手袋","てぶくろ","手套",4],["傘","かさ","雨傘",4],["着る","きる","穿（上半身）",4],["履く","はく","穿（下半身、鞋襪）",4],
+["車","くるま","車子、汽車",5],["自転車","じてんしゃ","腳踏車",5],["飛行機","ひこうき","飛機",5],["船","ふね","船",5],["新幹線","しんかんせん","新幹線",5],["空港","くうこう","機場",5],["信号","しんごう","紅綠燈",5],["道","みち","道路",5],["橋","はし","橋",5],["運転","うんてん","駕駛",5],["銀行","ぎんこう","銀行",5],["郵便局","ゆうびんきょく","郵局",5],["図書館","としょかん","圖書館",5],["公園","こうえん","公園",5],["神社","じんじゃ","神社",5],["寺","てら","寺廟",5],["建物","たてもの","建築物",5],["交番","こうばん","派出所",5],["市場","いちば","市場",5],["温泉","おんせん","溫泉",5],["右","みぎ","右邊",5],["左","ひだり","左邊",5],["上","うえ","上面",5],["下","した","下面",5],["前","まえ","前面",5],["後ろ","うしろ","後面",5],["隣","となり","隔壁、旁邊",5],["近く","ちかく","附近",5],["曲がる","まがる","轉彎",5],["渡る","わたる","過（馬路、橋）",5],
+["趣味","しゅみ","興趣、嗜好",6],["音楽","おんがく","音樂",6],["映画","えいが","電影",6],["写真","しゃしん","照片",6],["旅行","りょこう","旅行",6],["漫画","まんが","漫畫",6],["小説","しょうせつ","小說",6],["歌","うた","歌曲",6],["踊る","おどる","跳舞",6],["遊ぶ","あそぶ","玩、遊玩",6],["友達","ともだち","朋友",6],["恋人","こいびと","情人",6],["先輩","せんぱい","學長姊、前輩",6],["後輩","こうはい","學弟妹、後輩",6],["同僚","どうりょう","同事",6],["隣人","りんじん","鄰居",6],["約束","やくそく","約定、約會",6],["紹介","しょうかい","介紹",6],["相談","そうだん","商量、諮詢",6],["喧嘩","けんか","吵架",6],["話す","はなす","說話、談話",6],["聞く","きく","聽、詢問",6],["会う","あう","見面",6],["誘う","さそう","邀約",6],["断る","ことわる","拒絕",6],["謝る","あやまる","道歉",6],["手伝う","てつだう","幫忙",6],["教える","おしえる","教導、告知",6],["覚える","おぼえる","記住、學會",6],["忘れる","わすれる","忘記",6],
+["学校","がっこう","學校",7],["教室","きょうしつ","教室",7],["先生","せんせい","老師",7],["生徒","せいと","學生",7],["授業","じゅぎょう","課程、上課",7],["黒板","こくばん","黑板",7],["校長","こうちょう","校長",7],["制服","せいふく","制服",7],["卒業","そつぎょう","畢業",7],["入学","にゅうがく","入學",7],["鉛筆","えんぴつ","鉛筆",7],["消しゴム","けしゴム","橡皮擦",7],["定規","じょうぎ","尺",7],["教科書","きょうかしょ","教科書",7],["辞書","じしょ","字典",7],["紙","かみ","紙",7],["筆箱","ふでばこ","鉛筆盒",7],["鞄","かばん","書包、包包",7],["書く","かく","寫",7],["読む","よむ","讀、閱讀",7],["数","かず","數量",7],["半分","はんぶん","一半",7],["全部","ぜんぶ","全部",7],["一つ","ひとつ","一個",7],["二つ","ふたつ","兩個",7],["多い","おおい","多的",7],["少ない","すくない","少的",7],["足す","たす","加、相加",7],["引く","ひく","減、拉",7],["計算","けいさん","計算",7],
+["犬","いぬ","狗",8],["猫","ねこ","貓",8],["鳥","とり","鳥",8],["魚","さかな","魚",8],["馬","うま","馬",8],["牛","うし","牛",8],["豚","ぶた","豬",8],["虫","むし","昆蟲",8],["象","ぞう","大象",8],["熊","くま","熊",8],["色","いろ","顏色",8],["赤","あか","紅色",8],["青","あお","藍色",8],["黄色","きいろ","黃色",8],["白","しろ","白色",8],["黒","くろ","黑色",8],["緑","みどり","綠色",8],["茶色","ちゃいろ","咖啡色",8],["紫","むらさき","紫色",8],["灰色","はいいろ","灰色",8],["大きい","おおきい","大的",8],["小さい","ちいさい","小的",8],["長い","ながい","長的",8],["短い","みじかい","短的",8],["新しい","あたらしい","新的",8],["古い","ふるい","舊的",8],["重い","おもい","重的",8],["軽い","かるい","輕的",8],["速い","はやい","快的",8],["遅い","おそい","慢的、晚的",8],
+["料理","りょうり","料理、烹飪",9],["焼く","やく","烤、煎",9],["煮る","にる","煮、燉",9],["炒める","いためる","炒",9],["揚げる","あげる","炸",9],["蒸す","むす","蒸",9],["切る","きる","切",9],["混ぜる","まぜる","攪拌、混合",9],["味見","あじみ","試味道",9],["冷やす","ひやす","冷卻、冰鎮",9],["味","あじ","味道",9],["甘い","あまい","甜的",9],["辛い","からい","辣的",9],["酸っぱい","すっぱい","酸的",9],["苦い","にがい","苦的",9],["塩","しお","鹽",9],["砂糖","さとう","砂糖",9],["醤油","しょうゆ","醬油",9],["酢","す","醋",9],["油","あぶら","油",9],["包丁","ほうちょう","菜刀",9],["鍋","なべ","鍋子",9],["皿","さら","盤子",9],["茶碗","ちゃわん","飯碗",9],["箸","はし","筷子",9],["匙","さじ","湯匙",9],["冷蔵庫","れいぞうこ","冰箱",9],["電子レンジ","でんしレンジ","微波爐",9],["材料","ざいりょう","材料、食材",9],["洗う","あらう","洗",9],
+["携帯","けいたい","手機",10],["電話","でんわ","電話",10],["電池","でんち","電池",10],["画面","がめん","螢幕、畫面",10],["充電","じゅうでん","充電",10],["番号","ばんごう","號碼",10],["電源","でんげん","電源",10],["送る","おくる","傳送、寄送",10],["繋がる","つながる","連接、接通",10],["切れる","きれる","斷掉、耗盡",10],["電子メール","でんしメール","電子郵件",10],["検索","けんさく","搜尋",10],["登録","とうろく","註冊、登錄",10],["保存","ほぞん","儲存",10],["削除","さくじょ","刪除",10],["設定","せってい","設定",10],["情報","じょうほう","資訊",10],["画像","がぞう","圖片、影像",10],["印刷","いんさつ","列印",10],["故障","こしょう","故障",10],["机","つくえ","桌子",10],["椅子","いす","椅子",10],["封筒","ふうとう","信封",10],["名刺","めいし","名片",10],["判子","はんこ","印章",10],["書類","しょるい","文件",10],["提出","ていしゅつ","提交、繳交",10],["確認","かくにん","確認",10],["連絡","れんらく","聯絡",10],["報告","ほうこく","報告",10],
+["季節","きせつ","季節",11],["春","はる","春天",11],["夏","なつ","夏天",11],["秋","あき","秋天",11],["冬","ふゆ","冬天",11],["桜","さくら","櫻花",11],["台風","たいふう","颱風",11],["梅雨","つゆ","梅雨",11],["暑い","あつい","熱的",11],["寒い","さむい","冷的",11],["正月","しょうがつ","新年、正月",11],["祭り","まつり","祭典、廟會",11],["花火","はなび","煙火",11],["誕生日","たんじょうび","生日",11],["休日","きゅうじつ","假日",11],["連休","れんきゅう","連假",11],["記念","きねん","紀念",11],["祝う","いわう","慶祝",11],["招待","しょうたい","邀請、招待",11],["準備","じゅんび","準備",11],["参加","さんか","參加",11],["集まる","あつまる","聚集",11],["予約","よやく","預約",11],["出席","しゅっせき","出席",11],["欠席","けっせき","缺席",11],["開く","ひらく","舉辦、打開",11],["始まる","はじまる","開始",11],["終わる","おわる","結束",11],["楽しむ","たのしむ","享受",11],["贈る","おくる","贈送",11],
+["考える","かんがえる","思考",12],["思う","おもう","認為、覺得",12],["知る","しる","知道",12],["分かる","わかる","理解、明白",12],["決める","きめる","決定",12],["選択","せんたく","選擇",12],["意見","いけん","意見",12],["理由","りゆう","理由",12],["目的","もくてき","目的",12],["記憶","きおく","記憶",12],["自由","じゆう","自由",12],["平和","へいわ","和平",12],["幸せ","しあわせ","幸福",12],["未来","みらい","未來",12],["過去","かこ","過去",12],["現在","げんざい","現在",12],["変化","へんか","變化",12],["関係","かんけい","關係",12],["意味","いみ","意思、意義",12],["夢","ゆめ","夢、夢想",12],["大切","たいせつ","重要、珍惜",12],["簡単","かんたん","簡單",12],["複雑","ふくざつ","複雜",12],["便利","べんり","方便",12],["不便","ふべん","不便",12],["静か","しずか","安靜",12],["賑やか","にぎやか","熱鬧",12],["危険","きけん","危險",12],["安全","あんぜん","安全",12],["感じる","かんじる","感覺、感受",12],
+["職業","しょくぎょう","職業",13],["警察","けいさつ","警察",13],["看護師","かんごし","護理師",13],["教師","きょうし","教師",13],["店員","てんいん","店員",13],["運転手","うんてんしゅ","司機",13],["料理人","りょうりにん","廚師",13],["農家","のうか","農夫",13],["記者","きしゃ","記者",13],["社長","しゃちょう","社長、董事長",13],["駅","えき","車站",13],["交差点","こうさてん","十字路口",13],["病室","びょうしつ","病房",13],["工場","こうじょう","工廠",13],["役所","やくしょ","政府機關",13],["消防署","しょうぼうしょ","消防局",13],["駐車場","ちゅうしゃじょう","停車場",13],["歩道","ほどう","人行道",13],["階段","かいだん","樓梯",13],["出口","でぐち","出口",13],["掃除","そうじ","打掃",13],["洗濯","せんたく","洗衣服",13],["修理","しゅうり","修理",13],["配達","はいたつ","配送",13],["注文","ちゅうもん","訂購、點餐",13],["案内","あんない","導覽、帶路",13],["予定","よてい","預定、計畫",13],["貸す","かす","借出",13],["借りる","かりる","借入",13],["探す","さがす","尋找",13],
+["経済","けいざい","經濟",14],["税金","ぜいきん","稅金",14],["口座","こうざ","帳戶",14],["通帳","つうちょう","存摺",14],["為替","かわせ","匯兌、匯率",14],["利益","りえき","利潤",14],["損","そん","損失",14],["予算","よさん","預算",14],["費用","ひよう","費用",14],["収入","しゅうにゅう","收入",14],["番目","ばんめ","第～個（順序）",14],["倍","ばい","倍",14],["割合","わりあい","比例",14],["平均","へいきん","平均",14],["合計","ごうけい","合計",14],["増える","ふえる","增加",14],["減る","へる","減少",14],["上がる","あがる","上升",14],["下がる","さがる","下降",14],["比べる","くらべる","比較",14],["商売","しょうばい","生意、買賣",14],["契約","けいやく","契約",14],["交渉","こうしょう","談判、協商",14],["販売","はんばい","販賣",14],["客","きゃく","客人",14],["在庫","ざいこ","庫存",14],["商品","しょうひん","商品",14],["値引き","ねびき","減價、殺價",14],["売れる","うれる","暢銷、賣得出去",14],["儲かる","もうかる","賺錢、獲利",14]
+];
+const VOCAB=V.map(a=>({k:a[0],r:a[1],m:a[2],t:a[3]}));
+const VOCAB_BY_K={};VOCAB.forEach(v=>VOCAB_BY_K[v.k]=v);
+
+/* ============ 星號 star ============ */
+let starred=new Set();
+let starScreenOpen=false;
+const STAR_KEY="jp_vocab_stars_v1";
+function loadStars(){try{const s=localStorage.getItem(STAR_KEY);if(s)starred=new Set(JSON.parse(s));}catch(e){}}
+function saveStars(){try{localStorage.setItem(STAR_KEY,JSON.stringify([...starred]));}catch(e){}}
+function isStarred(k){return starred.has(k);}
+function toggleStar(k){if(starred.has(k))starred.delete(k);else starred.add(k);saveStars();updateStarUI();}
+const STAR_SVG='<svg viewBox="0 0 24 24" class="star-ic" aria-hidden="true"><path d="M12 2.6 L14.85 8.4 L21.2 9.3 L16.6 13.75 L17.7 20.1 L12 17.1 L6.3 20.1 L7.4 13.75 L2.8 9.3 L9.15 8.4 Z"/></svg>';
+function makeStarBtn(k){
+  const b=document.createElement("button");
+  b.className="star-btn"+(isStarred(k)?" on":"");
+  b.innerHTML=STAR_SVG;b.title="標記／取消不熟";
+  b.setAttribute("aria-pressed",isStarred(k)?"true":"false");
+  b.onclick=()=>{toggleStar(k);b.classList.toggle("on",isStarred(k));b.setAttribute("aria-pressed",isStarred(k)?"true":"false");};
+  return b;
+}
+function setPill(k){
+  const pill=document.getElementById("starPill");if(!pill)return;
+  pill.dataset.k=k;const on=isStarred(k);
+  pill.classList.toggle("on",on);
+  pill.setAttribute("aria-pressed",on?"true":"false");
+  pill.querySelector(".lbl").textContent=on?"已標記":"標記複習";
+}
+function updateStarUI(){
+  const n=starred.size;
+  const c=document.getElementById("sbCount");if(c)c.textContent=n;
+  const banner=document.getElementById("starBanner");
+  const go=document.getElementById("starReviewBtn"),view=document.getElementById("starViewBtn"),hint=document.getElementById("sbHint");
+  if(banner)banner.classList.toggle("empty",n===0);
+  if(go)go.disabled=n===0;
+  if(view)view.disabled=n===0;
+  if(hint)hint.textContent=n===0?"在測驗中點「標記複習」，不熟的單字會收藏到這裡。":"隨時回來複習這 "+n+" 個不熟的單字。";
+  const pill=document.getElementById("starPill");
+  if(pill&&pill.dataset.k)setPill(pill.dataset.k);
+  if(starScreenOpen)renderStarList();
+}
+function renderStarList(){
+  const list=document.getElementById("starList");if(!list)return;
+  const items=[...starred].map(k=>VOCAB_BY_K[k]).filter(Boolean);
+  const rev=document.getElementById("starListReviewBtn"),clr=document.getElementById("starClearBtn");
+  if(!items.length){
+    list.innerHTML='<div class="star-empty">目前沒有星號單字。<br>在測驗中點右上角的「標記複習」即可加入。</div>';
+    if(rev)rev.disabled=true;if(clr)clr.disabled=true;return;
+  }
+  if(rev)rev.disabled=false;if(clr)clr.disabled=false;
+  list.innerHTML="";
+  items.forEach(e=>{
+    const row=document.createElement("div");row.className="star-row";
+    row.innerHTML=`<span class="rev-w jp">${ruby(e.k,e.r)}</span><span class="rev-m">${e.m}</span><span class="rev-theme">${THEMES[e.t]}</span>`;
+    const rm=document.createElement("button");rm.className="star-remove";rm.innerHTML="✕";rm.title="從星號移除";
+    rm.onclick=()=>{starred.delete(e.k);saveStars();updateStarUI();};
+    row.appendChild(rm);list.appendChild(row);
+  });
+}
+function startStarredQuiz(){
+  const entries=[...starred].map(k=>VOCAB_BY_K[k]).filter(Boolean);
+  if(!entries.length)return;
+  const prev=state.count;state.count=0;
+  startQuiz(entries);
+  state.count=prev;starScreenOpen=false;
+}
+
+/* ============ 工具 ============ */
+const $=s=>document.querySelector(s);
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a;};
+const ruby=(k,r)=>`<ruby>${k}<rt>${r}</rt></ruby>`;
+const KANJI_NUM=["零","一","二","三","四","五","六","七","八","九","十"];
+function kanjiNum(n){if(n<=10)return KANJI_NUM[n];if(n<20)return "十"+(n%10?KANJI_NUM[n%10]:"");if(n<100){const t=n/10|0,o=n%10;return KANJI_NUM[t]+"十"+(o?KANJI_NUM[o]:"");}return String(n);}
+
+/* ============ 狀態 ============ */
+const state={mode:"j2c",themes:new Set(Array.from({length:14},(_,i)=>i+1)),count:10,quiz:[],idx:0,ok:0,ng:0,wrong:[],answered:false};
+
+/* ============ 建立設定畫面 ============ */
+function buildThemeChips(){
+  const box=$("#themeChips");
+  const all=document.createElement("button");
+  all.className="chip all on";all.textContent="全部主題";all.dataset.all="1";
+  all.onclick=()=>{
+    const on=!all.classList.contains("on");
+    all.classList.toggle("on",on);
+    box.querySelectorAll(".chip:not(.all)").forEach(c=>{c.classList.toggle("on",on);c.dataset.on=on?"1":"";});
+    state.themes=new Set(on?Array.from({length:14},(_,i)=>i+1):[]);
+    validate();
+  };
+  box.appendChild(all);
+  for(let i=1;i<=14;i++){
+    const c=document.createElement("button");
+    c.className="chip on";c.textContent=i+". "+THEMES[i];c.dataset.t=i;
+    c.onclick=()=>{
+      const on=!c.classList.contains("on");
+      c.classList.toggle("on",on);
+      on?state.themes.add(i):state.themes.delete(i);
+      $("#themeChips .all").classList.toggle("on",state.themes.size===14);
+      validate();
+    };
+    box.appendChild(c);
+  }
+}
+function validate(){$("#startBtn").disabled=state.themes.size===0;}
+
+$("#modeRow").addEventListener("click",e=>{
+  const b=e.target.closest(".seg");if(!b)return;
+  $("#modeRow").querySelectorAll(".seg").forEach(s=>s.classList.remove("on"));
+  b.classList.add("on");state.mode=b.dataset.mode;
+});
+$("#countRow").addEventListener("click",e=>{
+  const b=e.target.closest(".count-btn");if(!b)return;
+  $("#countRow").querySelectorAll(".count-btn").forEach(s=>s.classList.remove("on"));
+  b.classList.add("on");state.count=+b.dataset.count;
+});
+
+/* ============ 出題 ============ */
+function optionKey(entry,mode){
+  if(mode==="j2c")return entry.m;
+  if(mode==="read")return entry.r;
+  return entry.k+"|"+entry.r;
+}
+function makeQuestion(correct,mode,pool){
+  const key=optionKey(correct,mode);
+  const same=shuffle(pool.filter(e=>e!==correct&&e.t===correct.t));
+  const rest=shuffle(pool.filter(e=>e!==correct&&e.t!==correct.t));
+  const picked=[],usedKeys=new Set([key]);
+  for(const e of same.concat(rest)){
+    const k=optionKey(e,mode);
+    if(usedKeys.has(k))continue;
+    usedKeys.add(k);picked.push(e);
+    if(picked.length===3)break;
+  }
+  const opts=shuffle([correct,...picked]);
+  return{correct,opts,mode};
+}
+function buildQuiz(entries){
+  const pool=VOCAB;
+  let list=shuffle(entries);
+  if(state.count>0)list=list.slice(0,state.count);
+  state.quiz=list.map(e=>makeQuestion(e,state.mode,pool));
+  state.idx=0;state.ok=0;state.ng=0;state.wrong=[];
+}
+function startQuiz(entries){
+  buildQuiz(entries);
+  $("#startScreen").classList.add("hidden");
+  $("#resultScreen").classList.add("hidden");
+  $("#quizScreen").classList.remove("hidden");
+  $("#qTot").textContent=state.quiz.length;
+  buildPips();
+  renderQuestion();
+  window.scrollTo(0,0);
+}
+function buildPips(){
+  const box=$("#pips");box.innerHTML="";
+  state.quiz.forEach(()=>{const p=document.createElement("div");p.className="pip";box.appendChild(p);});
+}
+function updatePips(){
+  $("#pips").querySelectorAll(".pip").forEach((p,i)=>{
+    p.className="pip"+(i<state.idx?" done":i===state.idx?" cur":"");
+  });
+}
+
+/* ============ 顯示單題 ============ */
+function renderQuestion(){
+  state.answered=false;
+  const q=state.quiz[state.idx];
+  $("#qNow").textContent=state.idx+1;
+  $("#okCount").textContent=state.ok;
+  $("#ngCount").textContent=state.ng;
+  $("#qNo").textContent="第"+kanjiNum(state.idx+1)+"問";
+  updatePips();
+
+  setPill(q.correct.k);
+  $("#starPill").onclick=()=>{toggleStar(q.correct.k);setPill(q.correct.k);};
+
+  const pArea=$("#promptArea"),pTag=$("#promptTag"),ask=$("#askText");
+  if(q.mode==="j2c"){
+    pTag.classList.add("hidden");
+    pArea.innerHTML=`<div class="prompt-jp jp">${ruby(q.correct.k,q.correct.r)}</div>`;
+    ask.textContent="這個單字的意思是？";
+  }else if(q.mode==="c2j"){
+    pTag.classList.remove("hidden");pTag.textContent="中文意思";
+    pArea.innerHTML=`<div class="prompt-cn">${q.correct.m}</div>`;
+    ask.textContent="對應的日文單字是？";
+  }else{
+    pTag.classList.remove("hidden");pTag.textContent="請讀出漢字";
+    pArea.innerHTML=`<div class="prompt-jp jp">${q.correct.k}</div>`;
+    ask.textContent="正確的讀音是？";
+  }
+
+  const box=$("#options");box.innerHTML="";
+  const keyLabels=["A","B","C","D"];
+  q.opts.forEach((e,i)=>{
+    const b=document.createElement("button");
+    b.className="option";b.dataset.i=i;
+    let inner;
+    if(q.mode==="j2c")inner=`<span class="txt">${e.m}</span>`;
+    else if(q.mode==="c2j")inner=`<span class="txt jp">${ruby(e.k,e.r)}</span>`;
+    else inner=`<span class="txt jp">${e.r}</span>`;
+    b.innerHTML=`<span class="key jp">${keyLabels[i]}</span>${inner}`;
+    b.onclick=()=>answer(i);
+    box.appendChild(b);
+  });
+
+  const fb=$("#feedback");fb.className="feedback";fb.innerHTML="";
+  $("#nextRow").classList.add("hidden");
+}
+
+/* ============ 批改動畫 ============ */
+function drawMaru(optEl){
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("preserveAspectRatio","none");
+  svg.setAttribute("class","mark-svg");
+  const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d","M66 16 C86 18 90 40 85 55 C80 76 56 88 42 84 C22 78 14 55 18 40 C22 20 44 12 64 16 C76 18 82 24 85 31");
+  p.setAttribute("pathLength","100");p.setAttribute("vector-effect","non-scaling-stroke");
+  svg.appendChild(p);optEl.appendChild(svg);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>svg.classList.add("draw")));
+}
+function drawSlash(optEl){
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("viewBox","0 0 100 100");svg.setAttribute("preserveAspectRatio","none");
+  svg.setAttribute("class","mark-svg");
+  const p=document.createElementNS("http://www.w3.org/2000/svg","path");
+  p.setAttribute("d","M22 24 C42 40 60 58 80 78");
+  p.setAttribute("pathLength","100");p.setAttribute("vector-effect","non-scaling-stroke");
+  svg.appendChild(p);optEl.appendChild(svg);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>svg.classList.add("draw")));
+}
+
+/* ============ 作答 ============ */
+function answer(i){
+  if(state.answered)return;
+  state.answered=true;
+  const q=state.quiz[state.idx];
+  const correctIdx=q.opts.indexOf(q.correct);
+  const box=$("#options");
+  const btns=[...box.children];
+  btns.forEach(b=>b.classList.add("locked"));
+
+  const isRight=i===correctIdx;
+  const fb=$("#feedback");
+  const ansHtml=`${ruby(q.correct.k,q.correct.r)}　${q.correct.m}`;
+
+  if(isRight){
+    state.ok++;
+    btns[i].classList.add("correct");
+    drawMaru(btns[i]);
+    fb.className="feedback right show";
+    fb.innerHTML=`正解！`;
+  }else{
+    state.ng++;
+    state.wrong.push(q.correct);
+    btns[i].classList.add("wrong");
+    drawSlash(btns[i]);
+    btns[correctIdx].classList.add("correct");
+    drawMaru(btns[correctIdx]);
+    btns.forEach((b,bi)=>{if(bi!==i&&bi!==correctIdx)b.classList.add("dim");});
+    fb.className="feedback miss show";
+    fb.innerHTML=`残念…　<span class="ans"><span class="jp">${ansHtml}</span></span>`;
+  }
+  $("#okCount").textContent=state.ok;
+  $("#ngCount").textContent=state.ng;
+  $("#nextBtn").textContent=(state.idx===state.quiz.length-1)?"看結果 →":"下一題 →";
+  $("#nextRow").classList.remove("hidden");
+}
+function next(){
+  if(state.idx<state.quiz.length-1){state.idx++;renderQuestion();window.scrollTo(0,0);}
+  else showResult();
+}
+$("#nextBtn").onclick=next;
+$("#quitBtn").onclick=showResult;
+
+/* ============ 結果 ============ */
+function showResult(){
+  $("#quizScreen").classList.add("hidden");
+  $("#resultScreen").classList.remove("hidden");
+  const total=state.ok+state.ng;
+  const pct=total?Math.round(state.ok/total*100):0;
+  $("#finalScore").textContent=state.ok;
+  $("#finalTot").textContent="/ "+total;
+  $("#pctText").textContent="正解率 "+pct+"%　・　共 "+total+" 題";
+
+  const v=$("#verdict"),vc=$("#verdictCn");
+  let jp,cn,manten=false;
+  if(pct===100){jp="満点！";cn="全部答對，完美！";manten=true;}
+  else if(pct>=80){jp="お見事！";cn="非常好，繼續保持！";}
+  else if(pct>=60){jp="いい調子！";cn="不錯，再複習錯的就更穩了。";}
+  else if(pct>=40){jp="もう一歩！";cn="還差一點，多練幾次會進步。";}
+  else{jp="頑張ろう！";cn="別氣餒，複習後再挑戰一次吧。";}
+  v.textContent=jp;v.className="verdict"+(manten?" manten":"");
+  vc.textContent=cn;
+
+  const ring=$("#scoreRing");ring.classList.remove("draw");
+  requestAnimationFrame(()=>requestAnimationFrame(()=>ring.classList.add("draw")));
+
+  const rb=$("#reviewBlock"),ac=$("#allClear"),rw=$("#reviewWrongBtn");
+  const wrong=dedupeWrong(state.wrong);
+  if(wrong.length){
+    rb.classList.remove("hidden");ac.classList.add("hidden");rw.classList.remove("hidden");
+    $("#reviewCnt").textContent=wrong.length;
+    const list=$("#reviewList");list.innerHTML="";
+    wrong.forEach(e=>{
+      const row=document.createElement("div");row.className="rev-item";
+      row.innerHTML=`<span class="rev-w jp">${ruby(e.k,e.r)}</span><span class="rev-m">${e.m}</span><span class="rev-theme">${THEMES[e.t]}</span>`;
+      row.appendChild(makeStarBtn(e.k));
+      list.appendChild(row);
+    });
+  }else{
+    rb.classList.add("hidden");ac.classList.remove("hidden");rw.classList.add("hidden");
+  }
+  window.scrollTo(0,0);
+}
+function dedupeWrong(arr){const seen=new Set(),out=[];for(const e of arr){if(seen.has(e.k))continue;seen.add(e.k);out.push(e);}return out;}
+
+/* ============ 結果按鈕 ============ */
+$("#retryBtn").onclick=()=>{
+  const entries=VOCAB.filter(e=>state.themes.has(e.t));
+  startQuiz(entries);
+};
+$("#reviewWrongBtn").onclick=()=>{
+  const wrong=dedupeWrong(state.wrong);
+  const prev=state.count;state.count=0;   // 全部錯題
+  startQuiz(wrong);
+  state.count=prev;
+};
+$("#restartBtn").onclick=()=>{
+  $("#resultScreen").classList.add("hidden");
+  $("#startScreen").classList.remove("hidden");
+  window.scrollTo(0,0);
+};
+
+/* ============ 開始 ============ */
+$("#startBtn").onclick=()=>{
+  const entries=VOCAB.filter(e=>state.themes.has(e.t));
+  if(entries.length<4){alert("單字太少，請多選幾個主題。");return;}
+  startQuiz(entries);
+};
+
+/* ============ 星號畫面串接 ============ */
+function openStarScreen(){
+  starScreenOpen=true;
+  $("#startScreen").classList.add("hidden");
+  $("#resultScreen").classList.add("hidden");
+  $("#starScreen").classList.remove("hidden");
+  renderStarList();window.scrollTo(0,0);
+}
+function closeStarScreen(){
+  starScreenOpen=false;
+  $("#starScreen").classList.add("hidden");
+  $("#startScreen").classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+$("#starViewBtn").onclick=openStarScreen;
+$("#starBackBtn").onclick=closeStarScreen;
+$("#starReviewBtn").onclick=startStarredQuiz;
+$("#starListReviewBtn").onclick=startStarredQuiz;
+$("#starClearBtn").onclick=()=>{
+  if(starred.size&&confirm("確定要清除全部 "+starred.size+" 個星號單字嗎？")){
+    starred.clear();saveStars();updateStarUI();
+  }
+};
+
+/* ============ 鍵盤 ============ */
+document.addEventListener("keydown",e=>{
+  if(!$("#quizScreen").classList.contains("hidden")){
+    if(!state.answered){
+      const map={"1":0,"2":1,"3":2,"4":3,"a":0,"b":1,"c":2,"d":3};
+      const k=e.key.toLowerCase();
+      if(k in map){const btns=$("#options").children;if(map[k]<btns.length){answer(map[k]);e.preventDefault();}}
+    }else if(e.key==="Enter"||e.key===" "){next();e.preventDefault();}
+  }else if(!$("#startScreen").classList.contains("hidden")&&e.key==="Enter"){
+    if(!$("#startBtn").disabled)$("#startBtn").click();
+  }
+});
+
+/* ============ 初始化 ============ */
+buildThemeChips();
+loadStars();
+updateStarUI();
+validate();
+</script>
+</body>
+</html>
