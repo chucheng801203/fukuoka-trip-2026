@@ -179,7 +179,8 @@ select:focus,input:focus{border-color:var(--accent-2)}
 .tag.lv{background:var(--accent-soft);color:var(--accent);border-color:transparent}
 .tag.srs{background:transparent;color:var(--muted);border-style:dashed}
 html[data-theme="dark"] .tag.lv{color:var(--accent)}
-.hint{position:absolute;bottom:12px;left:0;right:0;font-size:12px;color:var(--muted)}
+.hint{position:absolute;bottom:12px;left:0;right:0;font-size:12px;color:var(--muted);background:none;border:0;cursor:pointer;font-family:inherit;padding:4px 0}
+.hint:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
 
 /* ---------- 例句 ---------- */
 ruby{ruby-position:over}
@@ -536,7 +537,7 @@ td.c-tool{white-space:nowrap}
           <div class="corner"><button class="spkbtn" id="spkF" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starF" title="收藏">☆</button></div>
           <div class="reading jp" id="fRead" lang="ja"></div>
           <div class="word jp" id="fWord" lang="ja">—</div>
-          <div class="hint">點一下卡片翻面<span class="kbdhint">，或按空白鍵</span></div>
+          <button type="button" class="hint">點一下卡片翻面<span class="kbdhint">，或按空白鍵</span></button>
         </div>
         <div class="face back">
           <div class="idx" id="bIdx"></div>
@@ -801,6 +802,35 @@ function exHTML(v, {head=true} = {}){
 VOCAB.forEach((v,i)=>v.i=i);
 const LEVELS = ["N5","N4","N3","N2","N1"];
 const POS_LIST = [...new Set(VOCAB.map(v=>v.p))].sort();
+/* 穩定 ID：「單字｜讀音」（資料中無重複組合）。儲存與備份一律用穩定 ID，
+   未來字庫插入、刪除或重排時，進度仍會對應到相同的單字 */
+const SEP="｜";
+const KEY2I=Object.create(null);
+VOCAB.forEach(v=>{ KEY2I[v.w+SEP+v.r]=v.i; });
+let DATA_SIG=0;
+{ const sg=VOCAB.map(v=>v.w+v.r).join("\u0001");
+  for(let i=0;i<sg.length;i++) DATA_SIG=(DATA_SIG*31+sg.charCodeAt(i))>>>0; }
+const stableKey=i=>{ const v=VOCAB[i]; return v ? v.w+SEP+v.r : null; };
+function packMap(m){ const o={}; for(const k in m){ const sk=stableKey(+k); if(sk) o[sk]=m[k]; } return o; }
+/* 寫入儲存／匯出備份時：索引 → 穩定 ID */
+function packState(st){
+  const p=Object.assign({},st);
+  for(const k of ["learned","seen","fav","wrong","srs"]) p[k]=packMap(st[k]||{});
+  p.app="jvocab"; p.ver=2; p.sig=DATA_SIG;
+  return p;
+}
+/* 讀取時：穩定 ID → 目前索引；數字 key 直接沿用（相容既有儲存與舊備份） */
+function unpackKeys(m){
+  const o={}; if(!m||typeof m!=="object") return o;
+  for(const k in m){
+    if(k.includes(SEP)){ const i=KEY2I[k]; if(i!==undefined) o[i]=m[k]; }
+    else o[k]=m[k];
+  }
+  return o;
+}
+/* 同形異讀（同一個寫法有兩種讀音，如 紅葉）——出題時需要特別處理 */
+const HOMO=(()=>{ const c={}; for(const v of VOCAB) c[v.w]=(c[v.w]||0)+1;
+  return new Set(Object.keys(c).filter(w=>c[w]>1)); })();
 
 /* ================= 儲存（無法使用時自動退回記憶體） ================= */
 const KEY="jvocab.v1";
@@ -824,7 +854,7 @@ function loadState(){
   }catch(e){ storeOK=false; return null; }
 }
 function saveState(){
-  try{ localStorage.setItem(KEY, JSON.stringify(S)); }
+  try{ localStorage.setItem(KEY, JSON.stringify(packState(S))); }
   catch(e){ storeOK=false; memStore=S; }
 }
 const SRS_IV = [2, 5, 14, 40, 120];        // 第 1~5 盒答對後，隔幾天再複習
@@ -844,6 +874,9 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
    回傳 null 代表整份資料不是進度檔。 */
 function sanitizeState(o){
   if(!isObj(o)) return null;
+  o=Object.assign({},o);
+  for(const k of ["learned","seen","fav","wrong","srs"])   // 穩定 ID → 索引；找不到的字直接略過
+    if(isObj(o[k])) o[k]=unpackKeys(o[k]);
   const S2 = clone(DEF);
   const validId = k => /^\d+$/.test(k) && +k < VOCAB.length;   // 單字 ID 必須落在 0～上限內
   const numMap = (v, min, ids) => {                // {id: 數字}；ids=true 時連 key 也要檢查
@@ -1205,28 +1238,46 @@ function buildSmartQueue(){
 }
 /* 目前這一份智慧牌組（隨機模式下不可以每次重畫都重抽） */
 function smartDeck(){ return smartQueue || (smartQueue = buildSmartQueue()); }
+/* 這個字還在不在自訂清單的「來源」裡（只看收藏／錯題本身，與暫時的篩選無關） */
+function srcBelongs(v){
+  return forcedSrc==="wrong" ? !!S.wrong[v.i]
+       : forcedSrc==="fav" ? !!S.fav[v.i] : true;
+}
 /* 某個字還屬不屬於目前的牌組 */
 function deckBelongs(v){
   if(forcedPool){
     if(!F.levels.has(v.l)) return false;                       // 自訂牌組也遵守等級／詞性篩選
     if(F.pos!=="all" && v.p!==F.pos) return false;
-    return forcedSrc==="wrong" ? !!S.wrong[v.i]
-         : forcedSrc==="fav" ? !!S.fav[v.i] : true;
+    return srcBelongs(v);
   }
   if(F.stat === "smart") return !S.srs[v.i] || isDue(v.i);
   return matchFilter(v);
 }
+/* 智慧牌組：今日配額變小時（例如在單字表標記了牌組外的新字），把多出來的新字修掉 */
+function trimFreshToQuota(){
+  if(forcedPool || F.stat!=="smart") return;
+  const allow = newQuota();
+  if(allow === Infinity) return;
+  const cut = arr=>{ let used=0; return arr.filter(v=> S.srs[v.i] ? true : (used++ < allow)); };
+  if(smartQueue) smartQueue = cut(smartQueue);
+  pool = cut(pool);
+}
 /* 狀態改變後把不再符合的字剔除，但保留現有順序（不重抽、不洗牌） */
 function pruneDeck(){
   const cur = pool[pos];
-  if(smartQueue) smartQueue = smartQueue.filter(deckBelongs);
-  if(forcedPool) forcedPool = forcedPool.filter(deckBelongs);
-  const before = pool.length;
-  pool = pool.filter(deckBelongs);
-  if(pool.length !== before){
-    const k = cur ? pool.findIndex(v=>v.i===cur.i) : -1;
-    pos = k>=0 ? k : Math.min(pos, Math.max(0, pool.length-1));
+  if(forcedPool){
+    forcedPool = forcedPool.filter(srcBelongs);   // 只看來源；暫時的等級／詞性篩選不會永久刪掉單字
+    if(!forcedPool.length){                       // 清單空了 → 自動回到完整單字池
+      forcedPool=null; forcedSrc=null;
+      rebuildPool(); toast("自訂清單已空，回到完整單字池");
+      return;
+    }
   }
+  if(smartQueue) smartQueue = smartQueue.filter(deckBelongs);
+  pool = pool.filter(deckBelongs);
+  trimFreshToQuota();
+  const k = cur ? pool.findIndex(v=>v.i===cur.i) : -1;
+  pos = k>=0 ? k : Math.min(pos, Math.max(0, pool.length-1));
   updatePoolInfo();
 }
 function updatePoolInfo(){
@@ -1355,8 +1406,12 @@ function renderCard(){
   bx.hidden = !bx.innerHTML;
   bindEx(bx);
   const on = !!S.fav[v.i];
-  $("#starF").className="starbtn"+(on?" on":""); $("#starF").textContent=on?"★":"☆";
-  $("#starB").className="starbtn"+(on?" on":""); $("#starB").textContent=on?"★":"☆";
+  for(const id of ["starF","starB"]){
+    const el=$("#"+id);
+    el.className="starbtn"+(on?" on":""); el.textContent=on?"★":"☆";
+    el.setAttribute("aria-label", on?"取消收藏":"加入收藏");   // 讀屏唸得出用途，不是只有星號
+    el.setAttribute("aria-pressed", on?"true":"false");
+  }
 }
 /* 沒顯示的那一面退出無障礙樹與焦點順序，讀屏不會提前讀到答案 */
 function syncFaces(){
@@ -1488,8 +1543,8 @@ function startQuiz(customPool){
   clearTimeout(qTimer); qTimer=null;        // 舊測驗排定中的換題不可以帶進新測驗
   const src0=(customPool&&customPool.length)?customPool:pool;
   const mode=$("#qMode").value;
-  // 全假名的單字（單字＝讀音）沒有「看漢字選讀音」可考，直接排除以免洩題
-  const src = mode==="j2r" ? src0.filter(v=>v.w!==v.r) : src0;
+  // 全假名（單字＝讀音）與同形異讀（兩種讀音都對，如 紅葉）不適合「看漢字選讀音」
+  const src = mode==="j2r" ? src0.filter(v=>v.w!==v.r && !HOMO.has(v.w)) : src0;
   if(src.length<4){
     toast(mode==="j2r" && src0.length>=4
       ? "這個範圍內有漢字的單字太少，無法出「看漢字選讀音」的題目"
@@ -1511,7 +1566,8 @@ function renderQuestion(){
   const w=$("#qWord");
   if(Q.mode==="c2j"){ w.textContent=q.v.m; w.className="qword"; $("#qSub").textContent=`${q.v.l}　${q.v.p}　選出對應的日文單字`; }
   else if(Q.mode==="j2r"){ w.textContent=q.v.w; w.className="qword jp"; $("#qSub").textContent=`${q.v.l}　選出正確的讀音`; }
-  else { w.textContent=q.v.w; w.className="qword jp"; $("#qSub").textContent=`${q.v.l}　${q.v.p}　選出正確的中文意思`; }
+  else { w.textContent = HOMO.has(q.v.w) ? `${q.v.w}（${q.v.r}）` : q.v.w;   // 同形異讀補讀音，題意才明確
+         w.className="qword jp"; $("#qSub").textContent=`${q.v.l}　${q.v.p}　選出正確的中文意思`; }
   w.lang = (Q.mode==="c2j") ? "zh-Hant" : "ja";
   const jpOpt = (Q.mode==="c2j"||Q.mode==="j2r");
   $("#qEx").hidden=true; $("#qEx").innerHTML="";
@@ -1596,9 +1652,9 @@ $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
    一旦開始搜尋則放寬到所有符合條件的字，不然會搜不到東西。 */
 function listWidened(){ return F.stat==="smart" && !forcedPool && !!search; }
 function listData(){
-  let d = forcedPool ? forcedPool.slice()
-        : !search ? pool.slice()                    // 與學習牌組同一份、同順序（隨機也一致）
-        : VOCAB.filter(matchFilter);                // 搜尋時放寬到所有符合條件的字
+  let d = !search ? pool.slice()                    // 與學習牌組同一份、同順序（自訂牌組也一致）
+        : forcedPool ? forcedPool.slice()           // 自訂牌組搜尋：在整份清單內找
+        : VOCAB.filter(matchFilter);                // 一般搜尋：放寬到所有符合條件的字
   if(search){
     const s=search.toLowerCase();
     d=d.filter(v=>v.w.includes(search)||v.r.includes(search)||v.m.includes(search)||v.p.includes(search)||v.l.toLowerCase()===s);
@@ -1611,7 +1667,7 @@ function renderList(){
   if(page>=pages) page=pages-1;
   const rows=d.slice(page*PER,(page+1)*PER);
   $("#listBody").innerHTML = rows.length? rows.map(v=>`
-    <tr data-id="${v.i}">
+    <tr data-id="${v.i}" tabindex="0" aria-expanded="false">
       <td class="c-tool"><button class="starbtn tstar${S.fav[v.i]?" on":""}" style="font-size:17px" data-id="${v.i}" aria-label="${S.fav[v.i]?"取消收藏":"加入收藏"}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀">${SPK}</button></td>
       <td class="jpw jp" lang="ja">${furigana(v.w, v.r)}</td>
       <td class="mean">${v.m}</td>
@@ -1627,18 +1683,23 @@ function renderList(){
   if(pp) pp.onclick=()=>{page--;renderList();savePos();window.scrollTo({top:0,behavior:"smooth"});};
   if(pn) pn.onclick=()=>{page++;renderList();savePos();window.scrollTo({top:0,behavior:"smooth"});};
   $$(".tspk").forEach(b=>b.onclick=e=>{e.stopPropagation();const v=VOCAB[+b.dataset.id];speak(v.r||v.w,b);});
-  $$("#listBody tr[data-id]").forEach(tr=>tr.onclick=e=>{
-    if(e.target.closest("button")) return;
-    const id=+tr.dataset.id, v=VOCAB[id];
-    const nx=tr.nextElementSibling;
-    if(nx&&nx.classList.contains("exrow")){ nx.remove(); tr.classList.remove("open"); return; }
-    $$("#listBody tr.exrow").forEach(r=>r.remove());
-    $$("#listBody tr.open").forEach(r=>r.classList.remove("open"));
-    if(!hasEx(v)){ toast("這個單字還沒有例句"); return; }
-    const r=document.createElement("tr");
-    r.className="exrow";
-    r.innerHTML=`<td colspan="6"><div class="exwrap">${exHTML(v,{head:false})}</div></td>`;
-    tr.after(r); tr.classList.add("open"); bindEx(r);
+  $$("#listBody tr[data-id]").forEach(tr=>{
+    tr.onclick=e=>{
+      if(e.target.closest("button")) return;
+      const id=+tr.dataset.id, v=VOCAB[id];
+      const nx=tr.nextElementSibling;
+      if(nx&&nx.classList.contains("exrow")){ nx.remove(); tr.classList.remove("open"); tr.setAttribute("aria-expanded","false"); return; }
+      $$("#listBody tr.exrow").forEach(r=>r.remove());
+      $$("#listBody tr.open").forEach(r=>{r.classList.remove("open");r.setAttribute("aria-expanded","false");});
+      if(!hasEx(v)){ toast("這個單字還沒有例句"); return; }
+      const r=document.createElement("tr");
+      r.className="exrow";
+      r.innerHTML=`<td colspan="6"><div class="exwrap">${exHTML(v,{head:false})}</div></td>`;
+      tr.after(r); tr.classList.add("open"); tr.setAttribute("aria-expanded","true"); bindEx(r);
+    };
+    tr.onkeydown=e=>{                      // 鍵盤也能展開例句
+      if(e.key==="Enter"||e.code==="Space"){ e.preventDefault(); tr.click(); }
+    };
   });
   $$(".tstar").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id; if(S.fav[id]) delete S.fav[id]; else S.fav[id]=1;
@@ -1764,7 +1825,7 @@ function renderStats(){
   $("#storeWarn").textContent = storeOK? "" : "⚠️ 這個環境無法寫入瀏覽器儲存空間，進度只會保留在目前分頁。請把檔案下載到電腦後用瀏覽器開啟。";
 }
 $("#expBtn").onclick=()=>{
-  const blob=new Blob([JSON.stringify(Object.assign({app:"jvocab",ver:1},S))],{type:"application/json"});
+  const blob=new Blob([JSON.stringify(packState(S))],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download="jvocab-progress-"+today()+".json"; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast("已匯出進度");
@@ -1800,7 +1861,7 @@ function syncUIFromState(resetQuiz){
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
   $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
-  if(resetQuiz) resetQuizUI();
+  if(resetQuiz){ resetQuizUI(); forcedPool=null; forcedSrc=null; }   // 對方清除／匯入 → 舊自訂牌組一併退出
   pruneDeck(); rebuildPool(true); renderSaved();
 }
 function resetQuizUI(){

@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "0c4804b9b3";
+const VERSION = "b998de570a";
 // 快取名稱包含部署路徑＋路徑雜湊：/a-b/ 與 /a_b/ 這種替換後同名的路徑也不會互刪快取
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 let SCOPE_HASH = 0;
@@ -69,17 +69,13 @@ self.addEventListener("fetch", e => {
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(key);
-    const net = (async () => {
-      let r = null;
-      try { r = await fetch(req); } catch (err) { return null; }
-      if (r && r.ok && r.type === "basic") {
-        try { await cache.put(key, r.clone()); }           // 等寫入完成
-        catch (err) {}                                     // 寫不進快取就算了，不能吃掉成功的回應
-      }
-      return r;
-    })();
-    if (hit) { e.waitUntil(net); return hit; }     // 快取優先；背景更新交給 waitUntil，不會被提早終止
-    const r = await net;
+    if (hit) return hit;   // 版本鎖定：內容更新一律由「新版 SW 安裝」原子切換，不做背景覆寫，避免新舊混版
+    let r = null;
+    try { r = await fetch(req); } catch (err) {}
+    if (r && r.ok && r.type === "basic") {
+      try { await cache.put(key, r.clone()); }             // 補快取（例如安裝時漏掉的圖示）
+      catch (err) {}                                       // 寫不進快取就算了，不能吃掉成功的回應
+    }
     if (r) return r;
     return new Response("離線中，而且這個檔案還沒被快取。請在有網路時開啟一次本頁。",
       { status: 503, headers: { "Content-Type": "text/plain; charset=utf-8" } });
