@@ -1125,7 +1125,7 @@ function buildFilterUI(){
     S.showFuri=e.target.checked; saveState(); applyFuri();
   };
   $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();saveFilter();};
-  $("#resetPool").onclick=()=>{forcedPool=null;rebuildPool();toast("已回到完整單字池");};
+  $("#resetPool").onclick=()=>{forcedPool=null;forcedSrc=null;rebuildPool();toast("已回到完整單字池");};
   $("#filterToggle").onclick=()=>{
     const w=$("#filterWrap"), open=!w.classList.contains("open");
     w.classList.toggle("open",open);
@@ -1152,7 +1152,7 @@ function matchFilter(v){
   }
   return true;
 }
-let forcedPool=null;
+let forcedPool=null, forcedSrc=null, smartQueue=null;
 /* 智慧複習：到期的複習字排前面，後面補當日配額內的新字 */
 function buildSmartQueue(){
   const t = today(), due = [], fresh = [];
@@ -1168,10 +1168,44 @@ function buildSmartQueue(){
   const q = newQuota();
   return due.concat(q === Infinity ? fresh : fresh.slice(0, q));
 }
+/* 目前這一份智慧牌組（隨機模式下不可以每次重畫都重抽） */
+function smartDeck(){ return smartQueue || (smartQueue = buildSmartQueue()); }
+/* 某個字還屬不屬於目前的牌組 */
+function deckBelongs(v){
+  if(forcedPool) return forcedSrc==="wrong" ? !!S.wrong[v.i]
+                       : forcedSrc==="fav" ? !!S.fav[v.i] : true;
+  if(F.stat === "smart") return !S.srs[v.i] || isDue(v.i);
+  return matchFilter(v);
+}
+/* 狀態改變後把不再符合的字剔除，但保留現有順序（不重抽、不洗牌） */
+function pruneDeck(){
+  const cur = pool[pos];
+  if(smartQueue) smartQueue = smartQueue.filter(deckBelongs);
+  if(forcedPool) forcedPool = forcedPool.filter(deckBelongs);
+  const before = pool.length;
+  pool = pool.filter(deckBelongs);
+  if(pool.length !== before){
+    const k = cur ? pool.findIndex(v=>v.i===cur.i) : -1;
+    pos = k>=0 ? k : Math.min(pos, Math.max(0, pool.length-1));
+  }
+  updatePoolInfo();
+}
+function updatePoolInfo(){
+  $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
+  $("#resetPool").hidden = !forcedPool;
+  const STAT_TXT={all:"",smart:"智慧複習",due:"今日待複習",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
+  const bits=[ forcedPool ? "自訂清單" : LEVELS.filter(l=>F.levels.has(l)).join(" ") ];
+  if(F.pos!=="all") bits.push(F.pos);
+  if(F.stat!=="all" && STAT_TXT[F.stat]) bits.push(STAT_TXT[F.stat]);
+  if(F.order==="rand") bits.push("隨機");
+  bits.push(`${pool.length} 字`);
+  $("#filterSummary").textContent = bits.join(" · ");
+}
 function rebuildPool(keep){
   const cur = pool[pos];
+  smartQueue = null;
   if(forcedPool) pool = forcedPool.slice();
-  else if(F.stat === "smart") pool = buildSmartQueue();
+  else if(F.stat === "smart") pool = smartDeck().slice();
   else pool = VOCAB.filter(matchFilter);
   if(F.order==="rand" && F.stat!=="smart") shuffle(pool);
   pos = 0;
@@ -1182,15 +1216,7 @@ function rebuildPool(keep){
     if(k>0){ pos=k; restoredAt=k; }
   }
   if(!forcedPool) saveFilter();
-  $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
-  $("#resetPool").hidden = !forcedPool;
-  const STAT_TXT={all:"",smart:"智慧複習",due:"今日待複習",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
-  const bits=[ forcedPool ? "自訂清單" : LEVELS.filter(l=>F.levels.has(l)).join(" ") ];
-  if(F.pos!=="all") bits.push(F.pos);
-  if(F.stat!=="all" && STAT_TXT[F.stat]) bits.push(STAT_TXT[F.stat]);
-  if(F.order==="rand") bits.push("隨機");
-  bits.push(`${pool.length} 字`);
-  $("#filterSummary").textContent = bits.join(" · ");
+  updatePoolInfo();
   renderCard(); renderList(); renderStats();
 }
 
@@ -1316,10 +1342,8 @@ function mark(known){
   bumpDaily(1); saveState();
   const n=daysUntil(sc.d);
   toast(known ? `👍 已學會 · ${n} 天後再複習` : "明天會再出現一次");
-  if(F.stat==="smart" || F.stat==="due"){   // 已排到未來 → 從今天的牌組移除
-    pool.splice(pos,1);
-    if(pos>=pool.length) pos=Math.max(0,pool.length-1);
-    renderCard(); savePos();
+  if(!deckBelongs(v)){          // 已排到未來（或已離開錯題／最愛清單）→ 退出目前牌組
+    pruneDeck(); renderCard(); savePos();
   }else go(1);
   renderStats(); renderSaved();
 }
@@ -1364,7 +1388,7 @@ document.addEventListener("keydown",e=>{
 });
 
 /* ================= 測驗 ================= */
-let Q={list:[],idx:0,ok:0,ng:0,mode:"j2c",wrongItems:[]};
+let Q={list:[],idx:0,ok:0,ng:0,mode:"j2c",wrongItems:[]}, qTimer=null;
 function makeQuestion(v,mode,poolAll){
   const key = mode==="j2c" ? "m" : mode==="c2j" ? "w" : "r";
   const same = poolAll.filter(x=>x.i!==v.i && x.p===v.p && x.l===v.l && x[key]!==v[key]);
@@ -1383,14 +1407,14 @@ function startQuiz(customPool){
   const mode=$("#qMode").value;
   const picked=shuffle(src.slice()).slice(0,n);
   Q={list:picked.map(v=>makeQuestion(v,mode,src.length>=20?src:VOCAB)),idx:0,ok:0,ng:0,mode,wrongItems:[],
-     answered:false, src:(customPool&&customPool.length)?customPool.slice():null};
+     answered:false, src:src.slice()};      // 記住這一輪的出題範圍，「再測一次」才不會跑掉
   $("#quizSetup").hidden=true; $("#quizResult").hidden=true; $("#quizPlay").hidden=false;
   renderQuestion();
 }
 function renderQuestion(){
   const q=Q.list[Q.idx];
   $("#qPos").textContent=`${Q.idx+1} / ${Q.list.length}`;
-  $("#qBar").style.width=(Q.idx/Q.list.length*100)+"%";
+  $("#qBar").style.width=((Q.idx+1)/Q.list.length*100)+"%";
   $("#qOk").textContent="✓ "+Q.ok; $("#qNg").textContent="✗ "+Q.ng;
   const w=$("#qWord");
   if(Q.mode==="c2j"){ w.textContent=q.v.m; w.className="qword"; $("#qSub").textContent=`${q.v.l}　${q.v.p}　選出對應的日文單字`; }
@@ -1436,9 +1460,11 @@ function answer(btn,opt,q){
   if(S.tts.auto && Q.mode!=="j2c") speak(q.v.r||q.v.w,$("#spkQ"));   // 公布答案後才唸
   announce(opt.ok?`答對，${q.v.w}的意思是${q.v.m}`:`答錯，正確答案是${q.opts.find(o=>o.ok).txt}`);
   $("#qOk").textContent="✓ "+Q.ok; $("#qNg").textContent="✗ "+Q.ng;
-  setTimeout(()=>{ Q.idx++; if(Q.idx>=Q.list.length) endQuiz(); else renderQuestion(); }, opt.ok?520:(hasEx(q.v)?2600:1050));
+  clearTimeout(qTimer);
+  qTimer=setTimeout(()=>{ qTimer=null; Q.idx++; if(Q.idx>=Q.list.length) endQuiz(); else renderQuestion(); }, opt.ok?520:(hasEx(q.v)?2600:1050));
 }
 function endQuiz(){
+  clearTimeout(qTimer); qTimer=null;      // 別讓排定中的換題在成績頁背後繼續跑
   $("#quizPlay").hidden=true;
   const answered=Q.ok+Q.ng;
   const pct=answered?Math.round(Q.ok/answered*100):0;
@@ -1457,7 +1483,7 @@ function endQuiz(){
     </div>
     <div class="panel"><h3>本次答錯的單字（已加入錯題本）</h3>${wrongHtml}</div>`;
   $("#quizResult").hidden=false;
-  const again=Q.src;                       // 錯題測驗再測一次時仍限定在錯題範圍
+  const again=Q.src;                       // 「再測一次」沿用同一份出題範圍
   $("#qAgain").onclick=()=>startQuiz(again);
   $("#qBack").onclick=()=>{$("#quizResult").hidden=true;$("#quizSetup").hidden=false;};
   $("#quizResult").querySelectorAll(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w,b);});
@@ -1466,7 +1492,9 @@ function endQuiz(){
   renderStats(); renderSaved(); renderList();
 }
 $("#qStart").onclick=()=>startQuiz();
-$("#qQuit").onclick=()=>{ if(Q.idx>0) endQuiz(); else {$("#quizPlay").hidden=true;$("#quizSetup").hidden=false;} };
+$("#qQuit").onclick=()=>{ clearTimeout(qTimer); qTimer=null;
+  if(Q.ok+Q.ng>0) endQuiz();            // 已經作答過就要看得到成績
+  else {$("#quizPlay").hidden=true;$("#quizSetup").hidden=false;} };
 
 /* ================= 單字表 ================= */
 const PER=50; let search="";
@@ -1475,7 +1503,7 @@ $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
    一旦開始搜尋則放寬到所有符合條件的字，不然會搜不到東西。 */
 function listWidened(){ return F.stat==="smart" && !forcedPool && !!search; }
 function listData(){
-  let d = (F.stat==="smart" && !forcedPool && !search) ? buildSmartQueue() : VOCAB.filter(matchFilter);
+  let d = (F.stat==="smart" && !forcedPool && !search) ? smartDeck() : VOCAB.filter(matchFilter);
   if(search){
     const s=search.toLowerCase();
     d=d.filter(v=>v.w.includes(search)||v.r.includes(search)||v.m.includes(search)||v.p.includes(search)||v.l.toLowerCase()===s);
@@ -1525,7 +1553,8 @@ function renderList(){
     const id=+b.dataset.id;
     if(S.learned[id]) delete S.learned[id];
     else { markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1); }
-    saveState(); renderList(); renderCard(); renderStats(); renderSaved();
+    saveState(); pruneDeck();          // 學習牌組要跟著同步
+    renderList(); renderCard(); renderStats(); renderSaved();
   });
 }
 
@@ -1547,17 +1576,17 @@ function renderSaved(){
   $("#favList").innerHTML=miniTable(favs,null,"移除");
   $("#wrongList").innerHTML=miniTable(wrongs,null,"已學會");
   $$(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
-  $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();renderSaved();renderList();renderCard();renderStats();});
-  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];markLearned(id);saveState();renderSaved();renderList();renderStats();});
+  $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();});
+  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];markLearned(id);saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();});
 }
-function useCustom(items,view){
+function useCustom(items,view,srcKind){
   if(!items.length){toast("清單是空的");return;}
-  forcedPool=items; rebuildPool(); switchView(view);
+  forcedPool=items; forcedSrc=srcKind||null; rebuildPool(); switchView(view);
   $("#filterWrap").classList.add("open"); $("#filterToggle").setAttribute("aria-expanded","true");
   toast(`已載入 ${items.length} 個單字`);
 }
-$("#favStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.fav[v.i]),"study");
-$("#wrongStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.wrong[v.i]),"study");
+$("#favStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.fav[v.i]),"study","fav");
+$("#wrongStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.wrong[v.i]),"study","wrong");
 $("#wrongQuiz").onclick=()=>{const w=VOCAB.filter(v=>S.wrong[v.i]);if(w.length<4){toast("錯題至少要 4 個字才能測驗");return;}switchView("quiz");startQuiz(w);};
 $("#favClear").onclick=()=>{if(confirm("確定要清空我的最愛嗎？")){S.fav={};saveState();renderSaved();renderList();renderCard();renderStats();}};
 $("#wrongClear").onclick=()=>{if(confirm("確定要清空錯題本嗎？")){S.wrong={};saveState();renderSaved();renderList();renderStats();}};
@@ -1798,7 +1827,7 @@ async function initPWA(){
 }
 addEventListener("online",()=>toast("已恢復連線"));
 addEventListener("offline",()=>toast("目前離線，仍可正常使用"));
-$("#poolInfo").onclick=()=>{ if(forcedPool){ forcedPool=null; rebuildPool(); toast("已回到完整單字池"); } };
+$("#poolInfo").onclick=()=>{ if(forcedPool){ forcedPool=null; forcedSrc=null; rebuildPool(); toast("已回到完整單字池"); } };
 
 /* ================= 啟動 ================= */
 $("#ttsAuto").checked = !!S.tts.auto;
