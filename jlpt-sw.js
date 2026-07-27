@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "d68538fcd3";
+const VERSION = "2da9b21fe0";
 const CACHE = "jvocab-" + VERSION;
 const ASSETS = [
   "./JLPT_N5-N3.html",
