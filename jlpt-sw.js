@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "0c314aa651";
+const VERSION = "3ed8b08787";
 const CACHE = "jvocab-" + VERSION;
 const ASSETS = [
   "./JLPT_N5-N3.html",
@@ -18,8 +18,10 @@ const OWNED = new Set(ASSETS.map(abs));
 self.addEventListener("install", e => {
   e.waitUntil((async () => {
     const c = await caches.open(CACHE);
-    // 逐一加入，單一檔案失敗不會讓整包安裝失敗
-    await Promise.all(ASSETS.map(async a => {
+    // 主程式一定要快取成功，否則整次安裝視為失敗（瀏覽器之後會自動重試）
+    await c.add(new Request(ASSETS[0], { cache: "reload" }));
+    // 圖示等附屬資源盡力而為，單一檔案失敗不擋安裝
+    await Promise.all(ASSETS.slice(1).map(async a => {
       try { await c.add(new Request(a, { cache: "reload" })); } catch (err) {}
     }));
   })());

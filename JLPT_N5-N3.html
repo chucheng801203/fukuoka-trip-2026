@@ -809,7 +809,7 @@ const SRS_MAX = SRS_IV.length;
 const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null,
            tts:{auto:false,rate:1,voice:""},
            filter:null,                                   // 上次的篩選條件
-           last:{i:null,w:"",view:"",page:0},             // 上次讀到的單字／分頁
+           last:{i:null,w:"",r:"",view:"",page:0},        // 上次讀到的單字／分頁
            qcfg:{count:"20",mode:"j2c"},                  // 上次的測驗設定
            showEx:true, showFuri:true,                    // 例句顯示與注音
            srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, srsMig:0};  // 間隔重複排程
@@ -852,6 +852,8 @@ function sanitizeState(o){
     const b = int(s.b, 0);
     if(b < 1 || b > SRS_MAX) continue;
     if(typeof s.d !== "string" || !DATE_RE.test(s.d)) continue;
+    const dt = new Date(s.d + "T00:00:00");             // 2026-99-99 / 2026-02-31 這種假日期要擋
+    if(!Number.isFinite(dt.getTime()) || dstr(dt) !== s.d) continue;
     S2.srs[k] = {b, d: s.d, n: Math.max(0, int(s.n, 0)), l: Math.max(0, int(s.l, 0))};
   }
   if(o.theme === "dark" || o.theme === "light") S2.theme = o.theme;
@@ -864,6 +866,7 @@ function sanitizeState(o){
   S2.srsCfg.npd = oneOf(S2.srsCfg.npd, [0,10,20,30,50], 20);
   if(isObj(o.last)) S2.last = {i: validId(String(o.last.i)) ? int(o.last.i, 0) : null,
                                w: typeof o.last.w === "string" ? o.last.w : "",
+                               r: typeof o.last.r === "string" ? o.last.r : "",
                                view: typeof o.last.view === "string" ? o.last.view : "",
                                page: Math.max(0, int(o.last.page, 0))};
   if(isObj(o.filter)) S2.filter = {
@@ -1086,14 +1089,16 @@ function applySavedFilter(){
 }
 function findSaved(){
   const l=S.last||{};
-  if(l.w){ const k=pool.findIndex(v=>v.w===l.w); if(k>=0) return k; }
+  if(l.w && l.r){ const k=pool.findIndex(v=>v.w===l.w && v.r===l.r); if(k>=0) return k; }  // 同名異讀（紅葉）也能對準
   if(typeof l.i==="number"){ const k=pool.findIndex(v=>v.i===l.i); if(k>=0) return k; }
+  if(l.w){ const k=pool.findIndex(v=>v.w===l.w); if(k>=0) return k; }
   return -1;
 }
 function savePos(){
   const v=pool[pos];
   S.last.i = v? v.i : null;
   S.last.w = v? v.w : "";
+  S.last.r = v? v.r : "";
   S.last.view = currentView;
   S.last.page = page;
   saveState();
@@ -1321,8 +1326,10 @@ function go(d){
 function toggleFav(){
   const v=pool[pos]; if(!v) return;
   if(S.fav[v.i]) delete S.fav[v.i]; else S.fav[v.i]=1;
-  saveState(); renderCard(); renderSaved(); renderStats(); renderList();
-  toast(S.fav[v.i]?"已加入我的最愛":"已從最愛移除");
+  const msg=S.fav[v.i]?"已加入我的最愛":"已從最愛移除";
+  saveState(); pruneDeck();                  // 在最愛牌組中取消收藏 → 這張卡要退出牌組
+  renderCard(); renderSaved(); renderStats(); renderList();
+  toast(msg);
 }
 /* 統一入口：任何「已學會」都要進 SRS 排程。
    review=true（測驗答對，等於做了一次複習）→ 一定升一盒；
@@ -1401,13 +1408,21 @@ function makeQuestion(v,mode,poolAll){
   return {v,opts,mode};
 }
 function startQuiz(customPool){
-  const src=(customPool&&customPool.length)?customPool:pool;
-  if(src.length<4){ toast("單字數太少，至少需要 4 個字"); return; }
-  const n=Math.min(parseInt($("#qCount").value,10), src.length);
+  clearTimeout(qTimer); qTimer=null;        // 舊測驗排定中的換題不可以帶進新測驗
+  const src0=(customPool&&customPool.length)?customPool:pool;
   const mode=$("#qMode").value;
+  // 全假名的單字（單字＝讀音）沒有「看漢字選讀音」可考，直接排除以免洩題
+  const src = mode==="j2r" ? src0.filter(v=>v.w!==v.r) : src0;
+  if(src.length<4){
+    toast(mode==="j2r" && src0.length>=4
+      ? "這個範圍內有漢字的單字太少，無法出「看漢字選讀音」的題目"
+      : "單字數太少，至少需要 4 個字");
+    return;
+  }
+  const n=Math.min(parseInt($("#qCount").value,10), src.length);
   const picked=shuffle(src.slice()).slice(0,n);
   Q={list:picked.map(v=>makeQuestion(v,mode,src.length>=20?src:VOCAB)),idx:0,ok:0,ng:0,mode,wrongItems:[],
-     answered:false, src:src.slice()};      // 記住這一輪的出題範圍，「再測一次」才不會跑掉
+     answered:false, src:src0.slice()};     // 記住這一輪的出題範圍，「再測一次」才不會跑掉
   $("#quizSetup").hidden=true; $("#quizResult").hidden=true; $("#quizPlay").hidden=false;
   renderQuestion();
 }
@@ -1503,7 +1518,8 @@ $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
    一旦開始搜尋則放寬到所有符合條件的字，不然會搜不到東西。 */
 function listWidened(){ return F.stat==="smart" && !forcedPool && !!search; }
 function listData(){
-  let d = (F.stat==="smart" && !forcedPool && !search) ? smartDeck() : VOCAB.filter(matchFilter);
+  let d = forcedPool ? forcedPool.slice()
+        : (F.stat==="smart" && !search) ? smartDeck() : VOCAB.filter(matchFilter);
   if(search){
     const s=search.toLowerCase();
     d=d.filter(v=>v.w.includes(search)||v.r.includes(search)||v.m.includes(search)||v.p.includes(search)||v.l.toLowerCase()===s);
@@ -1547,7 +1563,7 @@ function renderList(){
   });
   $$(".tstar").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id; if(S.fav[id]) delete S.fav[id]; else S.fav[id]=1;
-    saveState(); renderList(); renderCard(); renderSaved(); renderStats();
+    saveState(); pruneDeck(); renderList(); renderCard(); renderSaved(); renderStats();
   });
   $$(".tlearn").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
@@ -1588,8 +1604,8 @@ function useCustom(items,view,srcKind){
 $("#favStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.fav[v.i]),"study","fav");
 $("#wrongStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.wrong[v.i]),"study","wrong");
 $("#wrongQuiz").onclick=()=>{const w=VOCAB.filter(v=>S.wrong[v.i]);if(w.length<4){toast("錯題至少要 4 個字才能測驗");return;}switchView("quiz");startQuiz(w);};
-$("#favClear").onclick=()=>{if(confirm("確定要清空我的最愛嗎？")){S.fav={};saveState();renderSaved();renderList();renderCard();renderStats();}};
-$("#wrongClear").onclick=()=>{if(confirm("確定要清空錯題本嗎？")){S.wrong={};saveState();renderSaved();renderList();renderStats();}};
+$("#favClear").onclick=()=>{if(confirm("確定要清空我的最愛嗎？")){S.fav={};saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();}};
+$("#wrongClear").onclick=()=>{if(confirm("確定要清空錯題本嗎？")){S.wrong={};saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();}};
 
 /* ================= 統計 ================= */
 function renderStats(){
@@ -1680,7 +1696,8 @@ $("#impFile").onchange=e=>{
     let data=null;
     try{ data=JSON.parse(r.result); }catch(err){ toast("檔案格式不正確"); e.target.value=""; return; }
     const ns=sanitizeState(data);                       // 驗證通過才會覆蓋現有進度
-    if(!ns || !("learned" in data) && !("srs" in data) && !("seen" in data)){
+    const marker = isObj(data)&&(isObj(data.learned)||isObj(data.srs)||isObj(data.seen));
+    if(!ns || !marker){
       toast("這不是進度備份檔"); e.target.value=""; return;
     }
     S=ns; applyState(); toast("進度已匯入");
@@ -1690,9 +1707,12 @@ $("#impFile").onchange=e=>{
 };
 /* 換掉整份 S 之後，把畫面與各項設定同步回來 */
 function applyState(){
+  forcedPool=null; forcedSrc=null;           // 匯入／清除後不該留著舊的自訂牌組
+  migrateSRS();                              // 舊版備份只有 learned → 立刻補建排程，不必等重新整理
   saveState();
   applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
   applySavedFilter(); applyFuri();
+  if(TTS.ok) pickVoice();                    // 匯入的語音選擇立即生效
   $("#npdSel").value=String(S.srsCfg.npd);
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
@@ -1760,10 +1780,13 @@ addEventListener("appinstalled",()=>{
 });
 async function doInstall(){
   if(!PWA.deferred){ toast("這個瀏覽器沒有提供安裝按鈕"); return; }
-  PWA.deferred.prompt();
-  const {outcome}=await PWA.deferred.userChoice;
-  if(outcome!=="accepted") toast("已取消安裝");
-  PWA.deferred=null;
+  const ev=PWA.deferred; PWA.deferred=null;   // 這個提示一次性有效，用掉就收
+  ev.prompt();
+  const {outcome}=await ev.userChoice;
+  if(outcome!=="accepted"){
+    toast("已取消安裝");
+    $("#installBtn").hidden=true; $("#installBtn2").hidden=true;   // 失效的按鈕先收起；瀏覽器再次提供時會自動重現
+  }
 }
 $("#installBtn").onclick=doInstall;
 $("#installBtn2").onclick=doInstall;
