@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "66018d203c";
+const VERSION = "3bf338f7fe";
 // 快取名稱包含部署路徑：同網域放兩份 App 也不會互刪對方的快取
 const SCOPE_TAG = new URL(self.registration.scope).pathname.replace(/[^A-Za-z0-9]/g, "_");
 const CACHE = "jvocab" + SCOPE_TAG + "-" + VERSION;

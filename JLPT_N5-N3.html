@@ -398,6 +398,8 @@ td.c-tool{white-space:nowrap}
   .tablewrap td.act{grid-area:act;text-align:right}
   .tablewrap td.rd,.tablewrap td.lv,.tablewrap td.pos{display:none}
   .tablewrap td.emptycell{display:block;grid-area:unset}
+  .tablewrap tr.exrow{display:block;padding:2px 14px 12px}   /* 例句列跨滿整列 */
+  .tablewrap tr.exrow>td{display:block;width:100%;padding:0}
   .tablewrap tr.emptyrow{display:block;padding:0}
   .mini{margin-left:0}
   .controls{position:sticky;bottom:0;z-index:5;background:var(--page);
@@ -794,14 +796,16 @@ const POS_LIST = [...new Set(VOCAB.map(v=>v.p))].sort();
 /* ================= 儲存（無法使用時自動退回記憶體） ================= */
 const KEY="jvocab.v1";
 let memStore=null, storeOK=true;
-/* 另一個分頁寫入進度時，把最新狀態同步進來，本分頁之後的寫入才不會蓋掉它 */
+/* 另一個分頁寫入進度時，把最新狀態完整同步進來（主題、篩選、設定、牌組都跟著換），
+   本分頁之後的寫入才不會蓋掉它 */
 addEventListener("storage", ev=>{
   if(ev.key!==KEY || ev.newValue==null) return;
   let ns=null;
   try{ ns=sanitizeState(JSON.parse(ev.newValue)); }catch(err){}
   if(!ns) return;
+  const shrank = stateWeight(ns) < stateWeight(S);   // 進度變少 = 對方清除或匯入 → 本分頁的測驗也要跟著結束
   S=ns;
-  if(typeof pruneDeck==="function"){ pruneDeck(); renderCard(); renderList(); renderSaved(); renderStats(); }
+  syncUIFromState(shrank);
 });
 function loadState(){
   try{
@@ -1242,13 +1246,20 @@ let flipped=false;
 function updateDeckInfo(){
   const el=$("#deckInfo"); if(!el) return;
   if(forcedPool || (F.stat!=="smart" && F.stat!=="due")){ el.innerHTML=""; return; }
-  const d=dueCount(), q=newQuota();
-  const left=VOCAB.reduce((a,v)=>a+(S.srs[v.i]?0:1),0);   // 還沒排程過的字
-  const qt = left===0 ? "0 個（全部單字都已排入複習）" : (q===Infinity ? "不限" : q+" 個");
+  const td=today(), q=newQuota();
+  let d=0, left=0;                                        // 只數目前等級＋詞性範圍內的字
+  for(const v of VOCAB){
+    if(!F.levels.has(v.l)) continue;
+    if(F.pos!=="all" && v.p!==F.pos) continue;
+    const sc=S.srs[v.i];
+    if(sc){ if(sc.d<=td) d++; } else left++;
+  }
+  const canNew = q===Infinity ? left : Math.min(q,left);
+  const qt = left===0 ? "0 個（這個篩選範圍內沒有新字）" : (q===Infinity ? left+" 個" : canNew+" 個");
   // 「今日待複習」只收到期的字，加配額也不會出現新字 → 改成引導切換到智慧複習
   const btn = left===0 ? ""
     : F.stat==="due" ? ` <button class="mini" id="toSmart" style="margin-left:6px">改用智慧複習學新字</button>`
-    : q!==Infinity ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
+    : (q!==Infinity && left>canNew) ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
   el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` + btn;
   const b=$("#moreNew");
   if(b) b.onclick=()=>{ grantNew(20); rebuildPool(); toast("今天的新字配額 +20"); };
@@ -1266,7 +1277,7 @@ function renderCard(){
   const learnedInPool = pool.filter(x=>S.learned[x.i]).length;
   $("#deckLearned").textContent = pool.length? `已學會 ${learnedInPool}` : "";
   $("#deckReset").hidden = pos===0 || !pool.length;
-  flipped=false; $("#card").classList.remove("flipped");
+  flipped=false; $("#card").classList.remove("flipped"); syncFaces();
   const empty=!v;
   ["btnPrev","btnNext","btnYes","btnNo"].forEach(id=>$("#"+id).disabled=empty);
   $("#starF").disabled=empty; $("#starB").disabled=empty;
@@ -1277,8 +1288,10 @@ function renderCard(){
     $("#fWord").textContent = smart ? "今天的複習都做完了 🎉" : "沒有符合的單字";
     $("#fWord").lang="zh-Hant"; $("#fWord").className="word";
     $("#fWord").style.fontSize="clamp(20px,5vw,32px)";
+    const scopedFresh = VOCAB.some(x=>F.levels.has(x.l)&&(F.pos==="all"||x.p===F.pos)&&!S.srs[x.i]);
     $("#fRead").textContent = smart
-      ? (newQuota() > 0 ? "還有新字可以學，按下面的按鈕繼續" : "明天再來，或按上面的按鈕多學一些新字")
+      ? (!scopedFresh ? "這個篩選範圍內沒有可學的新字，請調整上方的篩選條件"
+         : newQuota() > 0 ? "還有新字可以學，按下面的按鈕繼續" : "明天再來，或按上面的按鈕多學一些新字")
       : "請調整上方的篩選條件";
     $("#fRead").lang="zh-Hant";
     $("#fIdx").textContent=""; $("#starF").className="starbtn";
@@ -1320,10 +1333,18 @@ function renderCard(){
   $("#starF").className="starbtn"+(on?" on":""); $("#starF").textContent=on?"★":"☆";
   $("#starB").className="starbtn"+(on?" on":""); $("#starB").textContent=on?"★":"☆";
 }
+/* 沒顯示的那一面退出無障礙樹與焦點順序，讀屏不會提前讀到答案 */
+function syncFaces(){
+  const fr=document.querySelector(".face.front"), bk=document.querySelector(".face.back");
+  if(!fr||!bk) return;
+  const set=(el,hide)=>{ el.setAttribute("aria-hidden",hide?"true":"false"); try{ el.inert=hide; }catch(e){} };
+  set(fr,flipped); set(bk,!flipped);
+}
 function flip(){
   const v=pool[pos]; if(!v) return;
   flipped=!flipped;
   $("#card").classList.toggle("flipped",flipped);
+  syncFaces();
   if(flipped){
     if(S.tts.auto) speak(v.r||v.w,$("#spkB"));
     if(!S.seen[v.i] && !S.learned[v.i]){ S.seen[v.i]=1; bumpDaily(1); saveState(); renderStats(); }
@@ -1733,9 +1754,8 @@ $("#impFile").onchange=e=>{
     if(!ns || !marker){
       toast("這不是進度備份檔"); e.target.value=""; return;
     }
-    const weight = st => ["learned","seen","srs","fav","wrong"].reduce((a,k)=>a+Object.keys(st[k]||{}).length,0);
-    if(weight(ns) < weight(S) &&
-       !confirm(`這份備份的學習紀錄（${weight(ns)} 筆）比目前的進度（${weight(S)} 筆）少，匯入會以備份內容覆蓋現有進度。確定要繼續嗎？`)){
+    if(stateWeight(ns) < stateWeight(S) &&
+       !confirm(`這份備份的學習紀錄（${stateWeight(ns)} 筆）比目前的進度（${stateWeight(S)} 筆）少，匯入會以備份內容覆蓋現有進度。確定要繼續嗎？`)){
       e.target.value=""; return;
     }
     S=ns; applyState(); toast("進度已匯入");
@@ -1744,6 +1764,18 @@ $("#impFile").onchange=e=>{
   r.readAsText(f);
 };
 /* 換掉整份 S 之後，把畫面與各項設定同步回來 */
+function stateWeight(st){ return ["learned","seen","srs","fav","wrong"].reduce((a,k)=>a+Object.keys(st&&st[k]||{}).length,0); }
+/* 跨分頁同步：套用另一分頁存下來的完整狀態 */
+function syncUIFromState(resetQuiz){
+  applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
+  applySavedFilter(); applyFuri();
+  $("#npdSel").value=String(S.srsCfg.npd);
+  $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
+  $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
+  $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
+  if(resetQuiz) resetQuizUI();
+  pruneDeck(); rebuildPool(true); renderSaved();
+}
 function resetQuizUI(){
   clearTimeout(qTimer); qTimer=null;
   Q={list:[],idx:0,ok:0,ng:0,mode:"j2c",wrongItems:[]};
@@ -1767,18 +1799,24 @@ $("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？
 
 /* ================= 視圖切換 ================= */
 const VIEWS=["study","quiz","list","saved","stats"];
+let navBooted=false;
 function switchView(v,fromHistory){
   if(!VIEWS.includes(v)) v="study";
   currentView=v;
   if(!fromHistory){
     try{
       const h="#"+v;
-      if(location.hash!==h) history.pushState({v},"",h);
+      if(location.hash!==h){
+        if(navBooted) history.pushState({v},"",h);
+        else history.replaceState({v},"",h);   // 首次補上預設 hash 不新增歷史，上一頁一次就能離開
+      }
     }catch(e){ /* file:// 下可能不允許，忽略 */ }
   }
+  navBooted=true;
   $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
   VIEWS.forEach(k=>$("#view-"+k).hidden = k!==v);
   $("#filterWrap").hidden = (v==="saved"||v==="stats");
+  if(v==="study"){ pruneDeck(); renderCard(); }   // 測驗中改過的排程要立刻反映在牌組
   if(v==="saved") renderSaved();
   if(v==="stats") renderStats();
   if(v==="list") renderList();
@@ -1863,8 +1901,9 @@ async function initPWA(){
         if(nw.state==="installed" && navigator.serviceWorker.controller) showUpdateBar(nw);
       });
     });
-    let reloading=false;
+    let reloading=false, hadController=!!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener("controllerchange",()=>{
+      if(!hadController){ hadController=true; return; }   // 首次接管（clients.claim）不重載，測驗不會被打斷
       if(reloading) return; reloading=true; location.reload();
     });
     const ready=()=>{
