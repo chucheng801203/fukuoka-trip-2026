@@ -4,7 +4,7 @@
 
 | 檔案 | 用途 |
 |---|---|
-| `JLPT_N5-N3.html` | 主程式（含 7503 個單字，單獨開也能用） |
+| `JLPT_N5-N3.html` | 主程式（含 7501 個單字，單獨開也能用） |
 | `jlpt-sw.js` | Service Worker，負責離線快取 |
 | `jlpt-manifest.webmanifest` | App 資訊（名稱、圖示、啟動網址） |
 | `jlpt-icon-192.png` / `jlpt-icon-512.png` | App 圖示 |
@@ -40,11 +40,11 @@ git push
 換上新的 `JLPT_N5-N3.html` 與 `jlpt-sw.js`（build 編號會自動改變）後 push，
 使用者下次開啟時會在頁面上方看到「已下載新版本 → 立即更新」。
 
-目前 build：`c44253f5a0`
+目前 build：`d68538fcd3`
 
 > **檔名為什麼還是 `JLPT_N5-N3.html`？**
 > 因為網址與已安裝 App 的 `start_url` 都指向這個檔名，改名會讓已安裝的使用者打不開。
-> 內容已經是完整的 N5〜N1（7503 字）。若真要改名，請同時修改
+> 內容已經是完整的 N5〜N1（7501 字）。若真要改名，請同時修改
 > `jlpt-manifest.webmanifest` 的 `start_url`／`shortcuts` 與 `jlpt-sw.js` 的 `ASSETS`。
 
 ## 疑難排解
