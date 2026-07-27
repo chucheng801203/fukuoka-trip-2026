@@ -23,7 +23,7 @@ html{scrollbar-gutter:stable}
   --ink:#0b0b0b; --ink-2:#52514e; --muted:#6b6a65;
   --line:#e1e0d9; --ring:rgba(11,11,11,.10);
   --accent:#1c5cab; --accent-soft:#e8f0fc; --accent-2:#5598e7;
-  --good:#0ca30c; --bad:#d03b3b; --warn:#fab219; --star:#a9700a; --star-off:#b6b5ae;
+  --good:#0ca30c; --bad:#d03b3b; --warn:#fab219; --star:#f5a300; --star-off:#b6b5ae;
   --track:#e1e0d9;
   --shadow:0 1px 2px rgba(11,11,11,.05), 0 8px 24px rgba(11,11,11,.06);
   --font: system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
@@ -152,7 +152,7 @@ select:focus,input:focus{border-color:var(--accent-2)}
 
 .cardstage{perspective:1400px;margin-bottom:14px}
 .card{
-  position:relative;width:100%;min-height:clamp(190px,42vh,300px);display:grid;
+  position:relative;width:100%;height:clamp(330px,52vh,520px);display:grid;
   transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1);
   cursor:pointer;
 }
@@ -162,8 +162,11 @@ select:focus,input:focus{border-color:var(--accent-2)}
   grid-area:1/1;position:relative;backface-visibility:hidden;-webkit-backface-visibility:hidden;
   background:var(--surface);border:1px solid var(--ring);border-radius:20px;
   box-shadow:var(--shadow);padding:26px 22px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:10px;
+  display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;
+  overflow-y:auto;overscroll-behavior:contain;
 }
+/* 垂直置中改用彈性空隙：內容超出高度時仍可捲到最上面，不會被切掉 */
+.face::before,.face::after{content:"";display:block;flex:none;margin:auto}
 .face.back{transform:rotateY(180deg)}
 .word{font-size:clamp(34px,9vw,58px);font-weight:700;line-height:1.25;letter-spacing:.02em}
 .reading{font-size:clamp(16px,4.2vw,22px);color:var(--accent);font-weight:600}
@@ -203,7 +206,7 @@ tr.exrow .exwrap{border-top:0;margin-top:0;padding-top:0}
 .corner{position:absolute;top:12px;right:14px;display:flex;gap:6px}
 .starbtn{border:0;background:transparent;font-size:22px;line-height:1;color:var(--star-off);
   width:34px;height:34px;display:inline-grid;place-items:center;vertical-align:middle}
-.starbtn.on{color:var(--star)}
+.starbtn.on{color:var(--star);text-shadow:0 0 8px color-mix(in srgb, var(--star) 45%, transparent)}
 .spkbtn{
   border:1px solid var(--ring);background:var(--surface);border-radius:10px;
   width:34px;height:34px;display:grid;place-items:center;line-height:1;color:var(--ink-2)
@@ -398,12 +401,14 @@ td.c-tool{white-space:nowrap}
   .tablewrap td.act{grid-area:act;text-align:right}
   .tablewrap td.rd,.tablewrap td.lv,.tablewrap td.pos{display:none}
   .tablewrap td.emptycell{display:block;grid-area:unset}
+  /* 收藏／錯題的小表格：桌面版的固定欄寬會把單字欄壓到一字一行，手機版一律還原成自動寬度 */
+  .minitab td.c-tool,.minitab td.jpw,.minitab td.lv,.minitab td.act{width:auto}
   .tablewrap tr.exrow{display:block;padding:2px 14px 12px}   /* 例句列跨滿整列 */
   .tablewrap tr.exrow>td{display:block;width:100%;padding:0}
 }
 /* 低高度（手機橫向）：背面例句很長時不可把卡片撐到超出畫面 */
 @media (max-height:560px){
-  .card .face{max-height:calc(100vh - 190px);overflow-y:auto}
+  .card{height:calc(100vh - 190px);min-height:220px}
   .tablewrap tr.emptyrow{display:block;padding:0}
   .mini{margin-left:0}
   .controls{position:sticky;bottom:0;z-index:5;background:var(--page);
@@ -519,7 +524,7 @@ td.c-tool{white-space:nowrap}
   <section id="view-study" role="tabpanel" aria-label="學習" tabindex="-1">
     <div class="deckbar">
       <span id="deckPos">0 / 0</span>
-      <button class="mini" id="deckReset" hidden title="從第一張重新開始">↺ 回第一張</button>
+      <button class="mini" id="deckReset" style="visibility:hidden" title="從第一張重新開始">↺ 回第一張</button>
       <div class="progress"><i id="deckBar" style="width:0%"></i></div>
       <span id="deckLearned"></span>
     </div>
@@ -1291,7 +1296,7 @@ function renderCard(){
   $("#deckBar").style.width = pool.length? ((pos+1)/pool.length*100)+"%" : "0%";
   const learnedInPool = pool.filter(x=>S.learned[x.i]).length;
   $("#deckLearned").textContent = pool.length? `已學會 ${learnedInPool}` : "";
-  $("#deckReset").hidden = pos===0 || !pool.length;
+  $("#deckReset").style.visibility = (pos===0 || !pool.length) ? "hidden" : "visible";   // 保留空間，版面不跳動
   flipped=false; $("#card").classList.remove("flipped"); syncFaces();
   const empty=!v;
   ["btnPrev","btnNext","btnYes","btnNo"].forEach(id=>$("#"+id).disabled=empty);
@@ -1602,7 +1607,7 @@ function renderList(){
   const rows=d.slice(page*PER,(page+1)*PER);
   $("#listBody").innerHTML = rows.length? rows.map(v=>`
     <tr data-id="${v.i}">
-      <td class="c-tool"><button class="starbtn tstar" style="font-size:17px" data-id="${v.i}" aria-label="${S.fav[v.i]?"取消收藏":"加入收藏"}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀">${SPK}</button></td>
+      <td class="c-tool"><button class="starbtn tstar${S.fav[v.i]?" on":""}" style="font-size:17px" data-id="${v.i}" aria-label="${S.fav[v.i]?"取消收藏":"加入收藏"}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀">${SPK}</button></td>
       <td class="jpw jp" lang="ja">${furigana(v.w, v.r)}</td>
       <td class="mean">${v.m}</td>
       <td class="pos hidemob"><span class="tag">${v.p}</span></td>
