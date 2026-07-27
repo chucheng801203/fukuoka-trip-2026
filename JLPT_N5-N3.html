@@ -400,6 +400,10 @@ td.c-tool{white-space:nowrap}
   .tablewrap td.emptycell{display:block;grid-area:unset}
   .tablewrap tr.exrow{display:block;padding:2px 14px 12px}   /* 例句列跨滿整列 */
   .tablewrap tr.exrow>td{display:block;width:100%;padding:0}
+}
+/* 低高度（手機橫向）：背面例句很長時不可把卡片撐到超出畫面 */
+@media (max-height:560px){
+  .card .face{max-height:calc(100vh - 190px);overflow-y:auto}
   .tablewrap tr.emptyrow{display:block;padding:0}
   .mini{margin-left:0}
   .controls{position:sticky;bottom:0;z-index:5;background:var(--page);
@@ -803,9 +807,10 @@ addEventListener("storage", ev=>{
   let ns=null;
   try{ ns=sanitizeState(JSON.parse(ev.newValue)); }catch(err){}
   if(!ns) return;
-  const shrank = stateWeight(ns) < stateWeight(S);   // 進度變少 = 對方清除或匯入 → 本分頁的測驗也要跟著結束
+  // 對方做了清除或匯入（resetSeq 改變）→ 本分頁進行中的測驗必須跟著結束，舊題目不可寫回新狀態
+  const wholesale = (ns.resetSeq||0) !== (S.resetSeq||0);
   S=ns;
-  syncUIFromState(shrank);
+  syncUIFromState(wholesale);
 });
 function loadState(){
   try{
@@ -825,7 +830,8 @@ const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null
            last:{i:null,w:"",r:"",view:"",page:0},        // 上次讀到的單字／分頁
            qcfg:{count:"20",mode:"j2c"},                  // 上次的測驗設定
            showEx:true, showFuri:true,                    // 例句顯示與注音
-           srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, srsMig:0};  // 間隔重複排程
+           srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, srsMig:0,
+           resetSeq:0};   // 間隔重複排程＋清除／匯入識別碼（跨分頁同步用）
 const clone = o => JSON.parse(JSON.stringify(o));
 const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -892,6 +898,7 @@ function sanitizeState(o){
   S2.showEx   = bool(o.showEx, true);
   S2.showFuri = bool(o.showFuri, true);
   S2.srsMig   = o.srsMig ? 1 : 0;
+  S2.resetSeq = Math.max(0, int(o.resetSeq, 0));
   return S2;
 }
 let S = sanitizeState(loadState()) || clone(DEF);
@@ -1086,16 +1093,20 @@ function saveFilter(){
   saveState();
 }
 function applySavedFilter(){
-  const f=S.filter; if(!f) return;
-  if(Array.isArray(f.levels)){
-    const ls=f.levels.filter(l=>LEVELS.includes(l));
-    if(ls.length) F.levels=new Set(ls);
+  const f=S.filter;
+  // 先回到預設值：清除進度（filter=null）時，畫面上的舊篩選才不會殘留
+  F.levels=new Set(LEVELS); F.pos="all"; F.stat="smart"; F.order="seq"; F.dir="j2c"; F.showRead=false;
+  if(f){
+    if(Array.isArray(f.levels)){
+      const ls=f.levels.filter(l=>LEVELS.includes(l));
+      if(ls.length) F.levels=new Set(ls);
+    }
+    if(f.pos==="all"||POS_LIST.includes(f.pos)) F.pos=f.pos;
+    if(["smart","due","all","new","learning","learned","fav","wrong"].includes(f.stat)) F.stat=f.stat;
+    if(["seq","rand"].includes(f.order)) F.order=f.order;
+    if(["j2c","c2j"].includes(f.dir)) F.dir=f.dir;
+    F.showRead=!!f.showRead;
   }
-  if(f.pos==="all"||POS_LIST.includes(f.pos)) F.pos=f.pos;
-  if(["smart","due","all","new","learning","learned","fav","wrong"].includes(f.stat)) F.stat=f.stat;
-  if(["seq","rand"].includes(f.order)) F.order=f.order;
-  if(["j2c","c2j"].includes(f.dir)) F.dir=f.dir;
-  F.showRead=!!f.showRead;
   $$("#lvChips button").forEach(b=>b.setAttribute("aria-pressed",F.levels.has(b.textContent)));
   $("#posSel").value=F.pos; $("#statSel").value=F.stat;
   $("#orderSel").value=F.order; $("#dirSel").value=F.dir;
@@ -1191,8 +1202,12 @@ function buildSmartQueue(){
 function smartDeck(){ return smartQueue || (smartQueue = buildSmartQueue()); }
 /* 某個字還屬不屬於目前的牌組 */
 function deckBelongs(v){
-  if(forcedPool) return forcedSrc==="wrong" ? !!S.wrong[v.i]
-                       : forcedSrc==="fav" ? !!S.fav[v.i] : true;
+  if(forcedPool){
+    if(!F.levels.has(v.l)) return false;                       // 自訂牌組也遵守等級／詞性篩選
+    if(F.pos!=="all" && v.p!==F.pos) return false;
+    return forcedSrc==="wrong" ? !!S.wrong[v.i]
+         : forcedSrc==="fav" ? !!S.fav[v.i] : true;
+  }
   if(F.stat === "smart") return !S.srs[v.i] || isDue(v.i);
   return matchFilter(v);
 }
@@ -1224,10 +1239,10 @@ function rebuildPool(keep){
   const cur = pool[pos];
   smartQueue = null;
   deckDay = today();
-  if(forcedPool) pool = forcedPool.slice();
+  if(forcedPool) pool = forcedPool.filter(v=>F.levels.has(v.l)&&(F.pos==="all"||v.p===F.pos));
   else if(F.stat === "smart") pool = smartDeck().slice();
   else pool = VOCAB.filter(matchFilter);
-  if(F.order==="rand" && F.stat!=="smart") shuffle(pool);
+  if(F.order==="rand" && (forcedPool || F.stat!=="smart")) shuffle(pool);
   pos = 0;
   if(keep && cur){ const k=pool.findIndex(v=>v.i===cur.i); if(k>=0) pos=k; }
   else if(restorePending){
@@ -1621,7 +1636,7 @@ function renderList(){
   });
   $$(".tlearn").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
-    if(S.learned[id]) delete S.learned[id];
+    if(S.learned[id]){ delete S.learned[id]; delete S.srs[id]; }   // 取消已學會 → 排程一併清除，重新排入學習
     else { markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1); }
     saveState(); pruneDeck();          // 學習牌組要跟著同步
     renderList(); renderCard(); renderStats(); renderSaved();
@@ -1784,6 +1799,7 @@ function resetQuizUI(){
 function applyState(){
   forcedPool=null; forcedSrc=null;           // 匯入／清除後不該留著舊的自訂牌組
   resetQuizUI();                             // 進行中的測驗一併結束，舊題目不可寫進新狀態
+  S.resetSeq = Date.now() % 2147483647;      // 蓋上識別碼，其他分頁看到就會同步結束舊測驗
   migrateSRS();                              // 舊版備份只有 learned → 立刻補建排程，不必等重新整理
   saveState();
   applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
@@ -1793,7 +1809,13 @@ function applyState(){
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
   $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
-  rebuildPool(); renderSaved(); renderList(); renderStats();
+  rebuildPool();
+  const k=findSaved();                            // 恢復備份中的續讀位置
+  if(k>0){ pos=k; renderCard(); }
+  page=(S.last&&S.last.page)||0;
+  if(S.last && S.last.view && VIEWS.includes(S.last.view) && S.last.view!==currentView)
+    switchView(S.last.view);
+  renderSaved(); renderList(); renderStats(); savePos();
 }
 $("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？此動作無法復原。")){ S=clone(DEF); S.theme=document.documentElement.getAttribute("data-theme"); applyState(); toast("進度已清除"); } };
 
@@ -1894,6 +1916,14 @@ async function initPWA(){
   try{
     const reg=await navigator.serviceWorker.register("./jlpt-sw.js");
     PWA.reg=reg;
+    const watchInstallFail=sw=>{               // 首次安裝失敗（redundant）不能永遠停在「正在準備…」
+      if(!sw) return;
+      sw.addEventListener("statechange",()=>{
+        if(sw.state==="redundant" && !reg.active && !navigator.serviceWorker.controller)
+          setPwaStatus("no","離線快取安裝失敗，請確認網路後重新整理再試。");
+      });
+    };
+    watchInstallFail(reg.installing);
     if(reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
     reg.addEventListener("updatefound",()=>{
       const nw=reg.installing; if(!nw) return;
@@ -1935,6 +1965,7 @@ async function initPWA(){
               sw.removeEventListener("statechange",on); done(); } };
             sw.addEventListener("statechange",on); on();
           });
+          if(sw.state==="redundant" && !reg.waiting){ toast("更新下載失敗，請稍後再試"); return; }
         }
         if(reg.waiting){ showUpdateBar(reg.waiting); toast("有新版本可更新"); }
         else toast("已是最新版本");

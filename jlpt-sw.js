@@ -1,8 +1,12 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "3bf338f7fe";
-// 快取名稱包含部署路徑：同網域放兩份 App 也不會互刪對方的快取
-const SCOPE_TAG = new URL(self.registration.scope).pathname.replace(/[^A-Za-z0-9]/g, "_");
+const VERSION = "53faefd829";
+// 快取名稱包含部署路徑＋路徑雜湊：/a-b/ 與 /a_b/ 這種替換後同名的路徑也不會互刪快取
+const SCOPE_PATH = new URL(self.registration.scope).pathname;
+let SCOPE_HASH = 0;
+for (const ch of SCOPE_PATH) SCOPE_HASH = (SCOPE_HASH * 31 + ch.codePointAt(0)) >>> 0;
+const SCOPE_TAG = SCOPE_PATH.replace(/[^A-Za-z0-9]/g, "_") + SCOPE_HASH.toString(36);
+const LEGACY_TAG = "jvocab" + SCOPE_PATH.replace(/[^A-Za-z0-9]/g, "_") + "-";   // 前一版未加雜湊的命名
 const CACHE = "jvocab" + SCOPE_TAG + "-" + VERSION;
 const ASSETS = [
   "./JLPT_N5-N3.html",
@@ -34,7 +38,8 @@ self.addEventListener("activate", e => {
     const keys = await caches.keys();
     await Promise.all(keys.filter(k =>
         (k.startsWith("jvocab" + SCOPE_TAG + "-") ||       // 本路徑的舊版本
-         /^jvocab-[0-9a-f]{6,}$/.test(k))                  // 更早期未含路徑的命名
+         k.startsWith(LEGACY_TAG) ||                       // 前一版未加雜湊的命名
+         /^jvocab-[0-9a-f]{6,}$/.test(k))                  // 最早未含路徑的命名
         && k !== CACHE).map(k => caches.delete(k)));
     await self.clients.claim();
   })());
@@ -65,11 +70,13 @@ self.addEventListener("fetch", e => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(key);
     const net = (async () => {
-      try {
-        const r = await fetch(req);
-        if (r && r.ok && r.type === "basic") await cache.put(key, r.clone());  // 等寫入完成
-        return r;
-      } catch (err) { return null; }
+      let r = null;
+      try { r = await fetch(req); } catch (err) { return null; }
+      if (r && r.ok && r.type === "basic") {
+        try { await cache.put(key, r.clone()); }           // 等寫入完成
+        catch (err) {}                                     // 寫不進快取就算了，不能吃掉成功的回應
+      }
+      return r;
     })();
     if (hit) { e.waitUntil(net); return hit; }     // 快取優先；背景更新交給 waitUntil，不會被提早終止
     const r = await net;
