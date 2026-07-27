@@ -794,6 +794,15 @@ const POS_LIST = [...new Set(VOCAB.map(v=>v.p))].sort();
 /* ================= 儲存（無法使用時自動退回記憶體） ================= */
 const KEY="jvocab.v1";
 let memStore=null, storeOK=true;
+/* 另一個分頁寫入進度時，把最新狀態同步進來，本分頁之後的寫入才不會蓋掉它 */
+addEventListener("storage", ev=>{
+  if(ev.key!==KEY || ev.newValue==null) return;
+  let ns=null;
+  try{ ns=sanitizeState(JSON.parse(ev.newValue)); }catch(err){}
+  if(!ns) return;
+  S=ns;
+  if(typeof pruneDeck==="function"){ pruneDeck(); renderCard(); renderList(); renderSaved(); renderStats(); }
+});
 function loadState(){
   try{
     const raw=localStorage.getItem(KEY);
@@ -993,7 +1002,8 @@ function pickVoice(){
     if(TTS.voice) sel.value=TTS.voice.voiceURI;
     sel.disabled=TTS.list.length<2;
   }else g.hidden=true;
-  const none = !TTS.ok || (speechSynthesis.getVoices().length>0 && TTS.list.length===0);
+  let sysVoices=0; try{ sysVoices=speechSynthesis.getVoices().length; }catch(err){}
+  const none = !TTS.ok || (sysVoices>0 && TTS.list.length===0);
   TTS.blocked=none;
   document.body.classList.toggle("no-tts", none);   // 之後才用 innerHTML 產生的按鈕也會跟著停用
   $$(".spkbtn,.spksm").forEach(b=>b.disabled=none);
@@ -1157,7 +1167,7 @@ function matchFilter(v){
   }
   return true;
 }
-let forcedPool=null, forcedSrc=null, smartQueue=null;
+let forcedPool=null, forcedSrc=null, smartQueue=null, deckDay=null;
 /* 智慧複習：到期的複習字排前面，後面補當日配額內的新字 */
 function buildSmartQueue(){
   const t = today(), due = [], fresh = [];
@@ -1209,6 +1219,7 @@ function updatePoolInfo(){
 function rebuildPool(keep){
   const cur = pool[pos];
   smartQueue = null;
+  deckDay = today();
   if(forcedPool) pool = forcedPool.slice();
   else if(F.stat === "smart") pool = smartDeck().slice();
   else pool = VOCAB.filter(matchFilter);
@@ -1220,6 +1231,7 @@ function rebuildPool(keep){
     const k=findSaved();
     if(k>0){ pos=k; restoredAt=k; }
   }
+  else page=0;                                 // 篩選條件改變 → 單字表回到第 1 頁
   if(!forcedPool) saveFilter();
   updatePoolInfo();
   renderCard(); renderList(); renderStats();
@@ -1341,10 +1353,13 @@ function markLearned(id, review){
   return S.srs[id];
 }
 function mark(known){
+  const now=performance.now();
+  if(now-(mark._t||0)<300) return;           // 防連點：雙擊只算一次，不會動到下一張卡
+  mark._t=now;
   const v=pool[pos]; if(!v) return;
   S.seen[v.i]=1;
   const sc=schedule(v.i, known);
-  if(known){ S.learned[v.i]=1; if(S.wrong[v.i]) delete S.wrong[v.i]; }
+  if(known){ S.learned[v.i]=1; if(S.wrong[v.i]){ S.wrong[v.i]--; if(S.wrong[v.i]<=0) delete S.wrong[v.i]; } }   // 與測驗一致：答對扣一次
   else { delete S.learned[v.i]; S.wrong[v.i]=(S.wrong[v.i]||0)+1; }
   bumpDaily(1); saveState();
   const n=daysUntil(sc.d);
@@ -1360,7 +1375,15 @@ $("#btnPrev").onclick=()=>go(-1);
 $("#btnNext").onclick=()=>go(1);
 $("#deckReset").onclick=()=>{ pos=0; renderCard(); savePos(); toast("已回到第一張"); };
 addEventListener("pagehide",savePos);
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") savePos(); });
+/* 跨過午夜後回到頁面：到期字與新一天的配額要自動補進牌組 */
+function checkDayRollover(){
+  if(deckDay && deckDay!==today()){ rebuildPool(true); toast("新的一天，複習牌組已更新"); }
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden") savePos();
+  else checkDayRollover();
+});
+addEventListener("focus",checkDayRollover);
 $("#btnYes").onclick=()=>mark(true);
 $("#btnNo").onclick=()=>mark(false);
 
@@ -1373,6 +1396,8 @@ document.addEventListener("click",e=>{
 document.addEventListener("keydown",e=>{
   const t=e.target;
   if(!t || !t.closest || t.closest("input,select,textarea,[contenteditable]")) return;
+  if(e.ctrlKey||e.metaKey||e.altKey) return;   // Ctrl+F、Alt+← 等瀏覽器快捷鍵不可以動到學習資料
+  if(e.repeat && e.key!=="ArrowLeft" && e.key!=="ArrowRight") return;   // 長按不重複標記
   // 用鍵盤把焦點移到按鈕上時，空白鍵要留給按鈕自己（滑鼠點過留下的焦點則不算）
   const ctl=t.closest("button,a[href],summary");
   let kbd=false;
@@ -1398,12 +1423,18 @@ document.addEventListener("keydown",e=>{
 let Q={list:[],idx:0,ok:0,ng:0,mode:"j2c",wrongItems:[]}, qTimer=null;
 function makeQuestion(v,mode,poolAll){
   const key = mode==="j2c" ? "m" : mode==="c2j" ? "w" : "r";
-  const same = poolAll.filter(x=>x.i!==v.i && x.p===v.p && x.l===v.l && x[key]!==v[key]);
-  const any  = poolAll.filter(x=>x.i!==v.i && x[key]!==v[key]);
+  const vSenses = new Set(String(v.m).split("；"));
+  /* 會構成第二個正解的候選都不能當干擾項：
+     同字異讀（紅葉 こうよう／もみじ），或意思有重疊（そんな／あんな 都是「那樣的」） */
+  const clash = x => x.w===v.w ||
+    (mode!=="j2r" && String(x.m).split("；").some(t=>vSenses.has(t)));
+  const ok = x => x.i!==v.i && x[key]!==v[key] && !clash(x);
+  const same = poolAll.filter(x=>ok(x) && x.p===v.p && x.l===v.l);
+  const any  = poolAll.filter(ok);
   const picks=[]; const usedTxt=new Set([v[key]]);
   const take=arr=>{ shuffle(arr); for(const c of arr){ if(picks.length>=3) break; if(usedTxt.has(c[key]))continue; usedTxt.add(c[key]); picks.push(c);} };
   take(same.slice()); if(picks.length<3) take(any.slice());
-  if(picks.length<3){ const g=VOCAB.filter(x=>x.i!==v.i); take(g); }
+  if(picks.length<3){ const g=VOCAB.filter(ok); take(g); }
   const opts=shuffle([v,...picks].map(x=>({txt:x[key],ok:x.i===v.i})));
   return {v,opts,mode};
 }
@@ -1503,6 +1534,7 @@ function endQuiz(){
   $("#qBack").onclick=()=>{$("#quizResult").hidden=true;$("#quizSetup").hidden=false;};
   $("#quizResult").querySelectorAll(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w,b);});
   announce(`測驗結束，答對 ${Q.ok} 題，答錯 ${Q.ng} 題，正確率 ${pct}%`);
+  pruneDeck();                              // 測驗中移除的錯題也要退出自訂牌組
   rebuildPool(true);                        // 答對而排到未來的字要立刻退出今天的牌組
   renderStats(); renderSaved(); renderList();
 }
@@ -1519,7 +1551,8 @@ $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
 function listWidened(){ return F.stat==="smart" && !forcedPool && !!search; }
 function listData(){
   let d = forcedPool ? forcedPool.slice()
-        : (F.stat==="smart" && !search) ? smartDeck() : VOCAB.filter(matchFilter);
+        : !search ? pool.slice()                    // 與學習牌組同一份、同順序（隨機也一致）
+        : VOCAB.filter(matchFilter);                // 搜尋時放寬到所有符合條件的字
   if(search){
     const s=search.toLowerCase();
     d=d.filter(v=>v.w.includes(search)||v.r.includes(search)||v.m.includes(search)||v.p.includes(search)||v.l.toLowerCase()===s);
@@ -1683,7 +1716,7 @@ function renderStats(){
   $("#storeWarn").textContent = storeOK? "" : "⚠️ 這個環境無法寫入瀏覽器儲存空間，進度只會保留在目前分頁。請把檔案下載到電腦後用瀏覽器開啟。";
 }
 $("#expBtn").onclick=()=>{
-  const blob=new Blob([JSON.stringify(S)],{type:"application/json"});
+  const blob=new Blob([JSON.stringify(Object.assign({app:"jvocab",ver:1},S))],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob); a.download="jvocab-progress-"+today()+".json"; a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast("已匯出進度");
@@ -1696,9 +1729,14 @@ $("#impFile").onchange=e=>{
     let data=null;
     try{ data=JSON.parse(r.result); }catch(err){ toast("檔案格式不正確"); e.target.value=""; return; }
     const ns=sanitizeState(data);                       // 驗證通過才會覆蓋現有進度
-    const marker = isObj(data)&&(isObj(data.learned)||isObj(data.srs)||isObj(data.seen));
+    const marker = isObj(data)&&(data.app==="jvocab"||isObj(data.learned)||isObj(data.srs)||isObj(data.seen));
     if(!ns || !marker){
       toast("這不是進度備份檔"); e.target.value=""; return;
+    }
+    const weight = st => ["learned","seen","srs","fav","wrong"].reduce((a,k)=>a+Object.keys(st[k]||{}).length,0);
+    if(weight(ns) < weight(S) &&
+       !confirm(`這份備份的學習紀錄（${weight(ns)} 筆）比目前的進度（${weight(S)} 筆）少，匯入會以備份內容覆蓋現有進度。確定要繼續嗎？`)){
+      e.target.value=""; return;
     }
     S=ns; applyState(); toast("進度已匯入");
     e.target.value="";
@@ -1706,13 +1744,19 @@ $("#impFile").onchange=e=>{
   r.readAsText(f);
 };
 /* 換掉整份 S 之後，把畫面與各項設定同步回來 */
+function resetQuizUI(){
+  clearTimeout(qTimer); qTimer=null;
+  Q={list:[],idx:0,ok:0,ng:0,mode:"j2c",wrongItems:[]};
+  $("#quizPlay").hidden=true; $("#quizResult").hidden=true; $("#quizSetup").hidden=false;
+}
 function applyState(){
   forcedPool=null; forcedSrc=null;           // 匯入／清除後不該留著舊的自訂牌組
+  resetQuizUI();                             // 進行中的測驗一併結束，舊題目不可寫進新狀態
   migrateSRS();                              // 舊版備份只有 learned → 立刻補建排程，不必等重新整理
   saveState();
   applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
   applySavedFilter(); applyFuri();
-  if(TTS.ok) pickVoice();                    // 匯入的語音選擇立即生效
+  if(TTS.ok){ try{ pickVoice(); }catch(err){} }   // 匯入的語音選擇立即生效
   $("#npdSel").value=String(S.srsCfg.npd);
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
@@ -1823,15 +1867,27 @@ async function initPWA(){
     navigator.serviceWorker.addEventListener("controllerchange",()=>{
       if(reloading) return; reloading=true; location.reload();
     });
-    const ready=()=>setPwaStatus("ok",
-      isStandalone()? "已安裝，離線可用。" : "離線快取完成，關掉網路也能開啟本頁。",
-      {install:!!PWA.deferred && !isStandalone(), ios:isIOS()&&!isStandalone(), upd:true});
+    const ready=()=>{
+      setPwaStatus("ok",
+        isStandalone()? "已安裝，離線可用。" : "離線快取完成，關掉網路也能開啟本頁。",
+        {install:!!PWA.deferred && !isStandalone(), ios:isIOS()&&!isStandalone(), upd:true});
+      try{                                        // 問 SW 附屬檔案是否都快取成功了
+        const onMsg=ev=>{
+          if(!ev.data || ev.data.type!=="STATUS") return;
+          navigator.serviceWorker.removeEventListener("message",onMsg);
+          const miss=(ev.data.missing||[]).length;
+          if(miss) $("#pwaMsg").textContent += `（另有 ${miss} 個附屬檔案尚未快取，離線時圖示可能缺少；連上網路重新整理即可補齊）`;
+        };
+        navigator.serviceWorker.addEventListener("message",onMsg);
+        if(navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage("GET_STATUS");
+      }catch(err){}
+    };
     if(navigator.serviceWorker.controller) ready();
     else navigator.serviceWorker.ready.then(ready);
     $("#chkUpdBtn").onclick=async()=>{
       try{
         await reg.update();
-        if(reg.waiting){ toast("有新版本可更新"); return; }
+        if(reg.waiting){ showUpdateBar(reg.waiting); toast("有新版本可更新"); return; }
         const sw = reg.installing;
         if(sw){                                  // 還在安裝，等它結束再回報
           toast("正在下載新版本…");
@@ -1841,7 +1897,8 @@ async function initPWA(){
             sw.addEventListener("statechange",on); on();
           });
         }
-        toast(reg.waiting? "有新版本可更新" : "已是最新版本");
+        if(reg.waiting){ showUpdateBar(reg.waiting); toast("有新版本可更新"); }
+        else toast("已是最新版本");
       }catch(e){ toast("檢查更新失敗，請確認網路"); }
     };
   }catch(e){
