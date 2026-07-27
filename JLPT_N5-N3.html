@@ -1277,9 +1277,10 @@ function updateDeckInfo(){
   const canNew = q===Infinity ? left : Math.min(q,left);
   const qt = left===0 ? "0 個（這個篩選範圍內沒有新字）" : (q===Infinity ? left+" 個" : canNew+" 個");
   // 「今日待複習」只收到期的字，加配額也不會出現新字 → 改成引導切換到智慧複習
+  // 「再多學 20 個」只在今天的配額用完（q===0）而且範圍內還有新字時才出現
   const btn = left===0 ? ""
     : F.stat==="due" ? ` <button class="mini" id="toSmart" style="margin-left:6px">改用智慧複習學新字</button>`
-    : (q!==Infinity && left>canNew) ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
+    : q===0 ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
   el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` + btn;
   const b=$("#moreNew");
   if(b) b.onclick=()=>{ grantNew(20); rebuildPool(); toast("今天的新字配額 +20"); };
