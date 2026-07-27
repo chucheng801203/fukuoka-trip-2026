@@ -530,7 +530,7 @@ td.c-tool{white-space:nowrap}
     </div>
     <p class="tiny" id="deckInfo" style="margin:-4px 0 10px"></p>
     <div class="cardstage">
-      <div class="card" id="card" role="button" tabindex="0" aria-label="單字卡，按 Enter 或空白鍵翻面">
+      <div class="card" id="card">
         <div class="face front">
           <div class="idx" id="fIdx"></div>
           <div class="corner"><button class="spkbtn" id="spkF" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starF" title="收藏">☆</button></div>
@@ -1232,10 +1232,14 @@ function pruneDeck(){
 function updatePoolInfo(){
   $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
   $("#resetPool").hidden = !forcedPool;
+  // 自訂牌組不套用「狀態」條件 → 停用選單並在摘要中省略，避免顯示矛盾的資訊
+  const sSel=$("#statSel");
+  if(sSel){ sSel.disabled=!!forcedPool;
+            sSel.title=forcedPool?"自訂清單學習中不套用狀態篩選，回到完整單字池後恢復":""; }
   const STAT_TXT={all:"",smart:"智慧複習",due:"今日待複習",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
   const bits=[ forcedPool ? "自訂清單" : LEVELS.filter(l=>F.levels.has(l)).join(" ") ];
   if(F.pos!=="all") bits.push(F.pos);
-  if(F.stat!=="all" && STAT_TXT[F.stat]) bits.push(STAT_TXT[F.stat]);
+  if(!forcedPool && F.stat!=="all" && STAT_TXT[F.stat]) bits.push(STAT_TXT[F.stat]);
   if(F.order==="rand") bits.push("隨機");
   bits.push(`${pool.length} 字`);
   $("#filterSummary").textContent = bits.join(" · ");
@@ -1452,7 +1456,7 @@ document.addEventListener("keydown",e=>{
     else if(e.key==="2")mark(true);
     else if(e.key.toLowerCase()==="f")toggleFav();
     else if(e.key.toLowerCase()==="s"){ if(flipped||canSpeakFront()) speakCurrent(flipped?$("#spkB"):$("#spkF")); }
-    else if(e.key==="Enter"&&e.target===$("#card")){e.preventDefault();flip();}
+
   }else if(currentView==="quiz" && !$("#quizPlay").hidden){
     const n=parseInt(e.key,10);
     if(e.code==="Space" && kbd) return;
@@ -1674,7 +1678,9 @@ function useCustom(items,view,srcKind){
   if(!items.length){toast("清單是空的");return;}
   forcedPool=items; forcedSrc=srcKind||null; rebuildPool(); switchView(view);
   $("#filterWrap").classList.add("open"); $("#filterToggle").setAttribute("aria-expanded","true");
-  toast(`已載入 ${items.length} 個單字`);
+  if(!pool.length) toast("已載入自訂清單，但目前的等級／詞性篩選把單字全部濾掉了，請調整篩選");
+  else if(pool.length<items.length) toast(`已載入 ${pool.length} 個單字（清單共 ${items.length} 個，其餘不符合目前的等級／詞性篩選）`);
+  else toast(`已載入 ${pool.length} 個單字`);
 }
 $("#favStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.fav[v.i]),"study","fav");
 $("#wrongStudy").onclick=()=>useCustom(VOCAB.filter(v=>S.wrong[v.i]),"study","wrong");
