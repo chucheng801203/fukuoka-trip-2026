@@ -214,6 +214,8 @@ tr.exrow .exwrap{border-top:0;margin-top:0;padding-top:0}
 .spkbtn.speaking{background:var(--accent);color:#fff;border-color:transparent}
 html[data-theme="dark"] .spkbtn.speaking{color:#0d0d0d}
 .spkbtn[disabled]{opacity:.35;cursor:not-allowed}
+/* 沒有日文語音時，連之後才產生的朗讀鈕也一併停用 */
+body.no-tts .spkbtn,body.no-tts .spksm{opacity:.35;cursor:not-allowed;pointer-events:none}
 .spksm{border:0;background:transparent;line-height:1;color:var(--muted);padding:2px 4px;vertical-align:middle}
 .spksm:hover{color:var(--accent)}
 .corner{align-items:center}
@@ -802,6 +804,8 @@ function saveState(){
   try{ localStorage.setItem(KEY, JSON.stringify(S)); }
   catch(e){ storeOK=false; memStore=S; }
 }
+const SRS_IV = [2, 5, 14, 40, 120];        // 第 1~5 盒答對後，隔幾天再複習
+const SRS_MAX = SRS_IV.length;
 const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null,
            tts:{auto:false,rate:1,voice:""},
            filter:null,                                   // 上次的篩選條件
@@ -809,12 +813,66 @@ const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null
            qcfg:{count:"20",mode:"j2c"},                  // 上次的測驗設定
            showEx:true, showFuri:true,                    // 例句顯示與注音
            srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, srsMig:0};  // 間隔重複排程
-let S=Object.assign({},DEF,loadState()||{});
-for(const k in DEF) if(S[k]===undefined) S[k]=JSON.parse(JSON.stringify(DEF[k]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+/* 把外來資料（localStorage／匯入的檔案）整理成合法狀態；不合法的欄位一律退回預設值。
+   回傳 null 代表整份資料不是進度檔。 */
+function sanitizeState(o){
+  if(!isObj(o)) return null;
+  const S2 = clone(DEF);
+  const numMap = (v, min) => {                     // {id: 數字}
+    const r = {};
+    if(!isObj(v)) return r;
+    for(const k in v){ const n = Number(v[k]); if(Number.isFinite(n) && n >= min) r[k] = n; }
+    return r;
+  };
+  const bool = (v, d) => typeof v === "boolean" ? v : d;
+  const int  = (v, d) => { const n = Number(v); return Number.isFinite(n) ? Math.round(n) : d; };
+
+  S2.learned = numMap(o.learned, 1);
+  S2.seen    = numMap(o.seen, 1);
+  S2.fav     = numMap(o.fav, 1);
+  S2.wrong   = numMap(o.wrong, 1);
+  S2.daily   = numMap(o.daily, 0);
+  S2.newDay  = numMap(o.newDay, 0);
+  S2.bonus   = numMap(o.bonus, 0);
+  if(isObj(o.quiz)) S2.quiz = {t: Math.max(0, int(o.quiz.t, 0)), c: Math.max(0, int(o.quiz.c, 0))};
+  if(S2.quiz.c > S2.quiz.t) S2.quiz.c = S2.quiz.t;
+
+  if(isObj(o.srs)) for(const k in o.srs){
+    const s = o.srs[k];
+    if(!isObj(s)) continue;
+    const b = int(s.b, 0);
+    if(b < 1 || b > SRS_MAX) continue;
+    if(typeof s.d !== "string" || !DATE_RE.test(s.d)) continue;
+    S2.srs[k] = {b, d: s.d, n: Math.max(0, int(s.n, 0)), l: Math.max(0, int(s.l, 0))};
+  }
+  if(o.theme === "dark" || o.theme === "light") S2.theme = o.theme;
+  if(isObj(o.tts)) S2.tts = {auto: bool(o.tts.auto, false),
+                             rate: Math.min(2, Math.max(.5, Number(o.tts.rate) || 1)),
+                             voice: typeof o.tts.voice === "string" ? o.tts.voice : ""};
+  if(isObj(o.srsCfg)) S2.srsCfg = {npd: Math.max(0, int(o.srsCfg.npd, 20))};
+  if(isObj(o.qcfg)) S2.qcfg = {count: String(o.qcfg.count ?? "20"), mode: String(o.qcfg.mode ?? "j2c")};
+  if(isObj(o.last)) S2.last = {i: Number.isFinite(Number(o.last.i)) ? int(o.last.i, 0) : null,
+                               w: typeof o.last.w === "string" ? o.last.w : "",
+                               view: typeof o.last.view === "string" ? o.last.view : "",
+                               page: Math.max(0, int(o.last.page, 0))};
+  if(isObj(o.filter)) S2.filter = {
+    levels: Array.isArray(o.filter.levels) ? o.filter.levels.filter(l => LEVELS.includes(l)) : [...LEVELS],
+    pos: typeof o.filter.pos === "string" ? o.filter.pos : "all",
+    stat: typeof o.filter.stat === "string" ? o.filter.stat : "smart",
+    order: typeof o.filter.order === "string" ? o.filter.order : "seq",
+    dir: typeof o.filter.dir === "string" ? o.filter.dir : "j2c",
+    showRead: bool(o.filter.showRead, false)};
+  S2.showEx   = bool(o.showEx, true);
+  S2.showFuri = bool(o.showFuri, true);
+  S2.srsMig   = o.srsMig ? 1 : 0;
+  return S2;
+}
+let S = sanitizeState(loadState()) || clone(DEF);
 
 /* ================= 間隔重複排程（Leitner 盒子制） ================= */
-const SRS_IV = [2, 5, 14, 40, 120];        // 第 1~5 盒答對後，隔幾天再複習
-const SRS_MAX = SRS_IV.length;
 function dstr(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
 function addDays(n){const d=new Date();d.setDate(d.getDate()+n);return dstr(d);}
 function daysUntil(ds){
@@ -856,7 +914,7 @@ function newQuota(){
 /* 手動追加今天的新字配額，保證至少多出 n 個 */
 function grantNew(n){
   const t = today(), used = S.newDay[t] || 0, npd = S.srsCfg.npd || 0;
-  S.bonus[t] = Math.max(0, used - npd) + (S.bonus[t] || 0) + n;
+  S.bonus[t] = Math.max(S.bonus[t] || 0, used - npd) + n;
   saveState();
 }
 function dueCount(){
@@ -926,6 +984,7 @@ function pickVoice(){
   }else g.hidden=true;
   const none = !TTS.ok || (speechSynthesis.getVoices().length>0 && TTS.list.length===0);
   TTS.blocked=none;
+  document.body.classList.toggle("no-tts", none);   // 之後才用 innerHTML 產生的按鈕也會跟著停用
   $$(".spkbtn,.spksm").forEach(b=>b.disabled=none);
   $("#ttsAuto").disabled=none;
   syncSpeakButtons();
@@ -940,6 +999,17 @@ if(TTS.ok){
   try{ speechSynthesis.onvoiceschanged=pickVoice; }catch(e){}
   setTimeout(pickVoice,0); setTimeout(pickVoice,400); setTimeout(pickVoice,1500);
 }
+/* 列表、例句、測驗結果都是用 innerHTML 重畫的，新產生的朗讀鈕要跟著停用 */
+try{
+  new MutationObserver(ms=>{
+    if(!TTS.blocked) return;
+    for(const m of ms) for(const n of m.addedNodes){
+      if(n.nodeType!==1) continue;
+      if(n.matches(".spkbtn,.spksm")) n.disabled=true;
+      n.querySelectorAll(".spkbtn,.spksm").forEach(b=>b.disabled=true);
+    }
+  }).observe(document.body,{childList:true,subtree:true});
+}catch(e){}
 /* 中→日模式下，正面不提供朗讀，避免直接聽到答案 */
 function canSpeakFront(){ return F.dir==="j2c"; }
 function syncSpeakButtons(){
@@ -953,6 +1023,7 @@ function syncSpeakButtons(){
 let spkTimer;
 function speak(text,btn){
   if(!TTS.ok||!text) return;
+  if(TTS.blocked){ toast("這台裝置沒有日文語音，無法發音"); return; }
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
@@ -1105,10 +1176,10 @@ function rebuildPool(keep){
   if(!forcedPool) saveFilter();
   $("#poolInfo").textContent = (forcedPool?"自訂清單 ":"") + `符合 ${pool.length} 字`;
   $("#resetPool").hidden = !forcedPool;
-  const STAT_TXT={all:"",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
+  const STAT_TXT={all:"",smart:"智慧複習",due:"今日待複習",new:"未學過",learning:"學習中",learned:"已學會",fav:"我的最愛",wrong:"錯題本"};
   const bits=[ forcedPool ? "自訂清單" : LEVELS.filter(l=>F.levels.has(l)).join(" ") ];
   if(F.pos!=="all") bits.push(F.pos);
-  if(F.stat!=="all") bits.push(STAT_TXT[F.stat]);
+  if(F.stat!=="all" && STAT_TXT[F.stat]) bits.push(STAT_TXT[F.stat]);
   if(F.order==="rand") bits.push("隨機");
   bits.push(`${pool.length} 字`);
   $("#filterSummary").textContent = bits.join(" · ");
@@ -1123,10 +1194,19 @@ function updateDeckInfo(){
   const d=dueCount(), q=newQuota();
   const left=VOCAB.reduce((a,v)=>a+(S.srs[v.i]?0:1),0);   // 還沒排程過的字
   const qt = left===0 ? "0 個（全部單字都已排入複習）" : (q===Infinity ? "不限" : q+" 個");
-  el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` +
-    (left>0 && q!==Infinity ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "");
+  // 「今日待複習」只收到期的字，加配額也不會出現新字 → 改成引導切換到智慧複習
+  const btn = left===0 ? ""
+    : F.stat==="due" ? ` <button class="mini" id="toSmart" style="margin-left:6px">改用智慧複習學新字</button>`
+    : q!==Infinity ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
+  el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` + btn;
   const b=$("#moreNew");
   if(b) b.onclick=()=>{ grantNew(20); rebuildPool(); toast("今天的新字配額 +20"); };
+  const t=$("#toSmart");
+  if(t) t.onclick=()=>{
+    F.stat="smart"; const sel=$("#statSel"); if(sel) sel.value="smart";
+    if(newQuota()<=0) grantNew(20);
+    saveFilter(); rebuildPool(); toast("已切換到智慧複習");
+  };
 }
 function renderCard(){
   const v=pool[pos];
@@ -1209,6 +1289,12 @@ function toggleFav(){
   if(S.fav[v.i]) delete S.fav[v.i]; else S.fav[v.i]=1;
   saveState(); renderCard(); renderSaved(); renderStats(); renderList();
   toast(S.fav[v.i]?"已加入我的最愛":"已從最愛移除");
+}
+// 統一入口：任何「已學會」都要進 SRS 排程（已有排程就不動，避免重設間隔）
+function markLearned(id){
+  if(id==null) return null;
+  S.learned[id]=1; S.seen[id]=1;
+  return S.srs[id] || schedule(id, true);
 }
 function mark(known){
   const v=pool[pos]; if(!v) return;
@@ -1304,7 +1390,7 @@ function answer(btn,opt,q){
   const btns=$$("#qOpts .opt"); btns.forEach(b=>b.disabled=true);
   btns.forEach((b,i)=>{ if(q.opts[i].ok) b.classList.add("correct"); });
   S.seen[q.v.i]=1; bumpDaily(1);
-  if(opt.ok){ Q.ok++; S.quiz.c++; if(S.wrong[q.v.i]){S.wrong[q.v.i]--; if(S.wrong[q.v.i]<=0) delete S.wrong[q.v.i];} S.learned[q.v.i]=1; }
+  if(opt.ok){ Q.ok++; S.quiz.c++; if(S.wrong[q.v.i]){S.wrong[q.v.i]--; if(S.wrong[q.v.i]<=0) delete S.wrong[q.v.i];} markLearned(q.v.i); }
   else{
     Q.ng++; btn.classList.add("wrong"); S.wrong[q.v.i]=(S.wrong[q.v.i]||0)+1;
     delete S.learned[q.v.i]; Q.wrongItems.push(q.v);
@@ -1399,7 +1485,7 @@ function renderList(){
   $$(".tlearn").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
     if(S.learned[id]) delete S.learned[id];
-    else { S.learned[id]=1; S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1); }
+    else { markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1); }
     saveState(); renderList(); renderCard(); renderStats(); renderSaved();
   });
 }
@@ -1423,7 +1509,7 @@ function renderSaved(){
   $("#wrongList").innerHTML=miniTable(wrongs,null,"已學會");
   $$(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
   $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();renderSaved();renderList();renderCard();renderStats();});
-  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];S.learned[id]=1;saveState();renderSaved();renderList();renderStats();});
+  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];markLearned(id);saveState();renderSaved();renderList();renderStats();});
 }
 function useCustom(items,view){
   if(!items.length){toast("清單是空的");return;}
@@ -1522,10 +1608,30 @@ $("#impBtn").onclick=()=>$("#impFile").click();
 $("#impFile").onchange=e=>{
   const f=e.target.files[0]; if(!f) return;
   const r=new FileReader();
-  r.onload=()=>{ try{ S=Object.assign({},DEF,JSON.parse(r.result)); saveState(); rebuildPool(); renderSaved(); toast("進度已匯入"); }catch(err){ toast("檔案格式不正確"); } };
+  r.onload=()=>{
+    let data=null;
+    try{ data=JSON.parse(r.result); }catch(err){ toast("檔案格式不正確"); e.target.value=""; return; }
+    const ns=sanitizeState(data);                       // 驗證通過才會覆蓋現有進度
+    if(!ns || !("learned" in data) && !("srs" in data) && !("seen" in data)){
+      toast("這不是進度備份檔"); e.target.value=""; return;
+    }
+    S=ns; applyState(); toast("進度已匯入");
+    e.target.value="";
+  };
   r.readAsText(f);
 };
-$("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？此動作無法復原。")){ S=JSON.parse(JSON.stringify(DEF)); S.theme=document.documentElement.getAttribute("data-theme"); saveState(); rebuildPool(); renderSaved(); toast("進度已清除"); } };
+/* 換掉整份 S 之後，把畫面與各項設定同步回來 */
+function applyState(){
+  saveState();
+  applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
+  applySavedFilter(); applyFuri();
+  $("#npdSel").value=String(S.srsCfg.npd);
+  $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
+  $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
+  $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
+  rebuildPool(); renderSaved(); renderList(); renderStats();
+}
+$("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？此動作無法復原。")){ S=clone(DEF); S.theme=document.documentElement.getAttribute("data-theme"); applyState(); toast("進度已清除"); } };
 
 /* ================= 視圖切換 ================= */
 const VIEWS=["study","quiz","list","saved","stats"];
@@ -1632,8 +1738,20 @@ async function initPWA(){
     if(navigator.serviceWorker.controller) ready();
     else navigator.serviceWorker.ready.then(ready);
     $("#chkUpdBtn").onclick=async()=>{
-      try{ await reg.update(); toast(reg.waiting? "有新版本可更新":"已是最新版本"); }
-      catch(e){ toast("檢查更新失敗，請確認網路"); }
+      try{
+        await reg.update();
+        if(reg.waiting){ toast("有新版本可更新"); return; }
+        const sw = reg.installing;
+        if(sw){                                  // 還在安裝，等它結束再回報
+          toast("正在下載新版本…");
+          await new Promise(done=>{
+            const on=()=>{ if(sw.state==="installed"||sw.state==="activated"||sw.state==="redundant"){
+              sw.removeEventListener("statechange",on); done(); } };
+            sw.addEventListener("statechange",on); on();
+          });
+        }
+        toast(reg.waiting? "有新版本可更新" : "已是最新版本");
+      }catch(e){ toast("檢查更新失敗，請確認網路"); }
     };
   }catch(e){
     setPwaStatus("no","離線快取註冊失敗："+(e&&e.message||e),{ios:isIOS()});

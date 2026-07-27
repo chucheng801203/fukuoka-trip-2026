@@ -40,7 +40,7 @@ git push
 換上新的 `JLPT_N5-N3.html` 與 `jlpt-sw.js`（build 編號會自動改變）後 push，
 使用者下次開啟時會在頁面上方看到「已下載新版本 → 立即更新」。
 
-目前 build：`2da9b21fe0`
+目前 build：`ed9d00744a`
 
 > **檔名為什麼還是 `JLPT_N5-N3.html`？**
 > 因為網址與已安裝 App 的 `start_url` 都指向這個檔名，改名會讓已安裝的使用者打不開。
