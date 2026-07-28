@@ -219,7 +219,7 @@ tr.exrow .exwrap{border-top:0;margin-top:0;padding-top:0}
 html[data-theme="dark"] .spkbtn.speaking{color:#0d0d0d}
 .spkbtn[disabled]{opacity:.35;cursor:not-allowed}
 /* 沒有日文語音時，連之後才產生的朗讀鈕也一併停用 */
-body.no-tts .spkbtn,body.no-tts .spksm{opacity:.35;cursor:not-allowed;pointer-events:none}
+body.no-tts .spkbtn,body.no-tts .spksm{opacity:.35;cursor:not-allowed}
 .spksm{border:0;background:transparent;line-height:1;color:var(--muted);padding:2px 4px;vertical-align:middle}
 .spksm:hover{color:var(--accent)}
 .corner{align-items:center}
@@ -402,7 +402,9 @@ td.c-tool{white-space:nowrap}
   .tablewrap td.mean{grid-area:mean;color:var(--ink-2);font-size:13.5px}
   .tablewrap td.act{grid-area:act;text-align:right}
   .tablewrap td.rd,.tablewrap td.lv,.tablewrap td.pos{display:none}
-  .tablewrap td.emptycell{display:block;grid-area:unset}
+  /* 空狀態：整列脫離 Grid，「找不到符合的單字」才能橫跨整張卡片置中 */
+  .tablewrap tr.emptyrow{display:block;padding:0}
+  .tablewrap td.emptycell{display:block;grid-area:unset;width:100%}
   /* 收藏／錯題的小表格：桌面版的固定欄寬會把單字欄壓到一字一行，手機版一律還原成自動寬度 */
   .minitab td.c-tool,.minitab td.jpw,.minitab td.lv,.minitab td.act{width:auto}
   .tablewrap tr.exrow{display:block;padding:2px 14px 12px}   /* 例句列跨滿整列 */
@@ -535,14 +537,14 @@ td.c-tool{white-space:nowrap}
       <div class="card" id="card">
         <div class="face front">
           <div class="idx" id="fIdx"></div>
-          <div class="corner"><button class="spkbtn" id="spkF" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starF" title="收藏">☆</button></div>
+          <div class="corner"><button class="spkbtn" id="spkF" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starF" title="加入收藏" aria-label="加入收藏">☆</button></div>
           <div class="reading jp" id="fRead" lang="ja"></div>
           <div class="word jp" id="fWord" lang="ja">—</div>
           <button type="button" class="hint">點一下卡片翻面<span class="kbdhint">，或按空白鍵</span></button>
         </div>
         <div class="face back">
           <div class="idx" id="bIdx"></div>
-          <div class="corner"><button class="spkbtn" id="spkB" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starB" title="收藏">☆</button></div>
+          <div class="corner"><button class="spkbtn" id="spkB" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starB" title="加入收藏" aria-label="加入收藏">☆</button></div>
           <div class="reading jp" id="bRead" lang="ja"></div>
           <div class="word jp" id="bWord" lang="ja" style="font-size:clamp(24px,6vw,36px)"></div>
           <div class="meaning" id="bMean"></div>
@@ -830,7 +832,7 @@ const LEGACY_MAP = null;
 /* 讀取時：穩定 ID → 目前索引；數字 key 經遷移表對應（相容既有儲存與舊備份） */
 function unpackKeys(m){
   const o={}; if(!m||typeof m!=="object") return o;
-  for(const k in m){
+  for(const k of Object.keys(m)){
     if(k.includes(SEP)){ const i=KEY2I[k]; if(i!==undefined) o[i]=m[k]; }
     else if(LEGACY_MAP){ const ni=LEGACY_MAP[+k]; if(ni!==undefined && ni!==null && ni>=0) o[ni]=m[k]; }
     else o[k]=m[k];
@@ -842,14 +844,22 @@ const HOMO=(()=>{ const c={}; for(const v of VOCAB) c[v.w]=(c[v.w]||0)+1;
   return new Set(Object.keys(c).filter(w=>c[w]>1)); })();
 
 /* ================= 儲存（無法使用時自動退回記憶體） ================= */
-const KEY="jvocab.v1";
+/* RISK-02：進度以「部署資料夾」區隔——同網域多份 App 不互相覆寫，
+   而 /資料夾/ 與 /資料夾/檔名 兩種開法共用同一份進度；舊 key 仍可讀取（自動搬移） */
+const KEY="jvocab.v1::"+location.pathname.replace(/[^/]*$/,"");
+const KEY_PREV="jvocab.v1::"+location.pathname;   // 前一版以完整路徑為 key
+const KEY_LEGACY="jvocab.v1";
 let memStore=null, storeOK=true;
+/* BUG-10：解析外來 JSON 時剝除 __proto__ 等危險 key，杜絕原型污染 */
+function parseStateJSON(txt){
+  return JSON.parse(txt,(k,v)=>(k==="__proto__"||k==="constructor"||k==="prototype")?undefined:v);
+}
 /* 另一個分頁寫入進度時，把最新狀態完整同步進來（主題、篩選、設定、牌組都跟著換），
    本分頁之後的寫入才不會蓋掉它 */
 addEventListener("storage", ev=>{
   if(ev.key!==KEY || ev.newValue==null) return;
   let ns=null;
-  try{ ns=sanitizeState(JSON.parse(ev.newValue)); }catch(err){}
+  try{ ns=sanitizeState(parseStateJSON(ev.newValue)); }catch(err){}
   if(!ns) return;
   // 對方做了清除或匯入（resetSeq 改變）→ 本分頁進行中的測驗必須跟著結束，舊題目不可寫回新狀態
   const wholesale = (ns.resetSeq||0) !== (S.resetSeq||0);
@@ -857,10 +867,11 @@ addEventListener("storage", ev=>{
   syncUIFromState(wholesale);
 });
 function loadState(){
-  try{
-    const raw=localStorage.getItem(KEY);
-    return raw?JSON.parse(raw):null;
-  }catch(e){ storeOK=false; return null; }
+  let raw=null;
+  try{ raw=localStorage.getItem(KEY); if(raw==null) raw=localStorage.getItem(KEY_PREV); if(raw==null) raw=localStorage.getItem(KEY_LEGACY); }
+  catch(e){ storeOK=false; return null; }        // 真的無法存取儲存空間
+  if(raw==null) return null;
+  try{ return parseStateJSON(raw); }catch(e){ return null; }   // 內容壞掉 → 當成沒有資料，稍後覆寫即可
 }
 function saveState(){
   try{ localStorage.setItem(KEY, JSON.stringify(packState(S))); }
@@ -891,7 +902,7 @@ function sanitizeState(o){
   const numMap = (v, min, ids) => {                // {id: 數字}；ids=true 時連 key 也要檢查
     const r = {};
     if(!isObj(v)) return r;
-    for(const k in v){
+    for(const k of Object.keys(v)){                // 只看自有屬性，繼承屬性一律忽略
       if(ids && !validId(k)) continue;
       const n = Number(v[k]);
       if(Number.isFinite(n) && n >= min) r[k] = n;
@@ -913,7 +924,7 @@ function sanitizeState(o){
   if(isObj(o.quiz)) S2.quiz = {t: Math.max(0, int(o.quiz.t, 0)), c: Math.max(0, int(o.quiz.c, 0))};
   if(S2.quiz.c > S2.quiz.t) S2.quiz.c = S2.quiz.t;
 
-  if(isObj(o.srs)) for(const k in o.srs){
+  if(isObj(o.srs)) for(const k of Object.keys(o.srs)){
     const s = o.srs[k];
     if(!isObj(s) || !validId(k)) continue;
     const b = int(s.b, 0);
@@ -922,11 +933,19 @@ function sanitizeState(o){
     const dt = new Date(s.d + "T00:00:00");             // 2026-99-99 / 2026-02-31 這種假日期要擋
     if(!Number.isFinite(dt.getTime()) || dstr(dt) !== s.d) continue;
     S2.srs[k] = {b, d: s.d, n: Math.max(0, int(s.n, 0)), l: Math.max(0, int(s.l, 0))};
+    if(typeof s.f === "string" && DATE_RE.test(s.f)){        // 首次排程日（選填）：取消已學會時退回當日配額用
+      const ft = new Date(s.f + "T00:00:00");
+      if(Number.isFinite(ft.getTime()) && dstr(ft) === s.f) S2.srs[k].f = s.f;
+    }
   }
   if(o.theme === "dark" || o.theme === "light") S2.theme = o.theme;
-  if(isObj(o.tts)) S2.tts = {auto: bool(o.tts.auto, false),
-                             rate: Math.min(2, Math.max(.5, Number(o.tts.rate) || 1)),
-                             voice: typeof o.tts.voice === "string" ? o.tts.voice : ""};
+  if(isObj(o.tts)){
+    const rr = Math.min(2, Math.max(.5, Number(o.tts.rate) || 1));
+    let rate = 1;                                    // 語速貼齊介面提供的選項，選單才不會顯示空白
+    for(const x of [0.6, 0.8, 1, 1.2]) if(Math.abs(x - rr) < Math.abs(rate - rr)) rate = x;
+    S2.tts = {auto: bool(o.tts.auto, false), rate,
+              voice: typeof o.tts.voice === "string" ? o.tts.voice : ""};
+  }
   if(isObj(o.srsCfg)) S2.srsCfg = {npd: Math.max(0, int(o.srsCfg.npd, 20))};
   if(isObj(o.qcfg)) S2.qcfg = {count: oneOf(String(o.qcfg.count), ["10","20","30","50"], "20"),
                                mode:  oneOf(String(o.qcfg.mode), ["j2c","c2j","j2r"], "j2c")};
@@ -971,10 +990,6 @@ function boxLabel(id){
 /* ok=true → 升一盒；ok=false → 退回第 1 盒，明天再看 */
 function schedule(id, ok){
   const prev = S.srs[id];
-  if(!prev){                                   // 第一次評分 = 今天introduce的新字
-    const t = today();
-    S.newDay[t] = (S.newDay[t] || 0) + 1;
-  }
   const b = prev ? prev.b : 0;
   let nb, due;
   if(ok){ nb = Math.min(b + 1, SRS_MAX); due = addDays(SRS_IV[nb - 1]); }
@@ -982,8 +997,24 @@ function schedule(id, ok){
   S.srs[id] = {b: nb, d: due,
                n: (prev ? prev.n : 0) + 1,
                l: (prev ? prev.l : 0) + (ok ? 0 : 1)};
+  if(prev){ if(prev.f) S.srs[id].f = prev.f; }   // 保留首次排程日
+  else{                                          // 第一次評分 = 今天 introduce 的新字
+    const t = today();
+    S.newDay[t] = (S.newDay[t] || 0) + 1;
+    S.srs[id].f = t;                             // 記下首次排程日：當天取消可退回配額
+  }
   return S.srs[id];
 }
+/* 取消「已學會」時呼叫：這個字的排程若是「今天」才建立的，
+   把消耗掉的當日新字配額退回，重新標記才不會重複扣兩次 */
+function refundNewQuota(id){
+  const s = S.srs[id], t = today();
+  if(s && s.f === t && (S.newDay[t] || 0) > 0) S.newDay[t]--;
+}
+/* 超過今日新字目標仍首次排程的字 → 計入「額外學習」。
+   單字表、錯題本、學習卡評分、測驗作答共用同一條規則（呼叫時機：schedule 之前判斷） */
+function isExtraNew(id){ return !S.srs[id] && newQuota() <= 0; }
+function creditExtra(){ const t = today(); S.bonus[t]=(S.bonus[t]||0)+1; S.extraDay[t]=(S.extraDay[t]||0)+1; }
 function newQuota(){
   const n = S.srsCfg && S.srsCfg.npd;
   if(!n) return Infinity;                       // 0 = 不限制
@@ -1034,7 +1065,10 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 /* ================= 主題 ================= */
 function applyTheme(t){
   document.documentElement.setAttribute("data-theme",t);
-  $("#themeBtn").textContent = t==="dark"?"☀️":"🌙";
+  const tb=$("#themeBtn");
+  tb.textContent = t==="dark"?"☀️":"🌙";
+  const lbl = t==="dark" ? "切換淺色模式" : "切換深色模式";   // 提示要說「按下去會發生什麼」
+  tb.title=lbl; tb.setAttribute("aria-label",lbl);
   S.theme=t; saveState();
 }
 applyTheme(S.theme || (window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
@@ -1068,6 +1102,7 @@ function pickVoice(){
   $$(".spkbtn,.spksm").forEach(b=>b.disabled=none);
   $("#ttsAuto").disabled=none;
   syncSpeakButtons();
+  syncQuizSpk();                    // 測驗作答前的朗讀鎖不可被語音清單更新解除
   if(none && !TTS.warned){
     TTS.warned=true;
     $("#ttsWarn").textContent = TTS.ok
@@ -1101,26 +1136,36 @@ function syncSpeakButtons(){
   bk.disabled = TTS.blocked || noWord;
 }
 let spkTimer;
-function speak(text,btn){
-  if(!TTS.ok||!text) return;
-  if(TTS.blocked){ toast("這台裝置沒有日文語音，無法發音"); return; }
+function speak(text,btn,onDone){
+  let called=false;
+  const fin=()=>{ if(!called){ called=true; if(onDone) onDone(); } };   // 完成回呼只觸發一次
+  if(!TTS.ok||!text){ fin(); return; }
+  if(TTS.blocked){ toast("這台裝置沒有日文語音，無法發音"); fin(); return; }
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text);
     u.lang="ja-JP"; u.rate=parseFloat(S.tts.rate)||1;
     if(TTS.voice){ try{ u.voice=TTS.voice; }catch(e){} }
     const el=btn||$("#spkF");
-    if(el){ el.classList.add("speaking"); clearTimeout(spkTimer);
-      const off=()=>{ $$(".spkbtn").forEach(b=>b.classList.remove("speaking")); };
-      u.onend=off; u.onerror=off; spkTimer=setTimeout(off,6000);
-    }
+    if(el){ el.classList.add("speaking"); }
+    clearTimeout(spkTimer);
+    const off=()=>{ $$(".spkbtn").forEach(b=>b.classList.remove("speaking")); fin(); };
+    u.onend=off; u.onerror=off; spkTimer=setTimeout(off,6000);   // 語音引擎沒回報時的最長等待防呆
     speechSynthesis.speak(u);
-  }catch(e){}
+  }catch(e){ fin(); }
+}
+/* 停止播放中的語音：換卡、重建牌組時呼叫，避免畫面已換字、耳朵還在聽上一個字。
+   只取消發聲並清掉按鈕動畫；spkTimer 防呆保留，speak 的完成回呼仍會照常觸發一次 */
+function stopSpeak(){
+  if(!TTS.ok) return;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  $$(".spkbtn.speaking,.spksm.speaking").forEach(b=>b.classList.remove("speaking"));
 }
 function speakCurrent(btn){ const v=pool[pos]; if(v) speak(v.r||v.w,btn); }
 $("#spkF").onclick=e=>{e.stopPropagation();speakCurrent(e.currentTarget);};
 $("#spkB").onclick=e=>{e.stopPropagation();speakCurrent(e.currentTarget);};
-$("#spkQ").onclick=()=>{ const q=Q.list[Q.idx]; if(q && quizCanSpeak()) speak(q.v.r||q.v.w,$("#spkQ")); };
+$("#spkQ").onclick=()=>{ const q=Q.list[Q.idx]; if(!(q && quizCanSpeak())) return;
+  speak(q.v.r||q.v.w, $("#spkQ"), Q.speechHold ? Q.speechHold() : undefined); };
 $("#ttsAuto").onchange=e=>{S.tts.auto=e.target.checked;saveState();};
 $("#ttsRate").onchange=e=>{S.tts.rate=parseFloat(e.target.value);saveState();};
 $("#ttsVoice").onchange=e=>{S.tts.voice=e.target.value;TTS.voice=TTS.list.find(v=>v.voiceURI===e.target.value)||null;saveState();
@@ -1242,7 +1287,8 @@ function buildSmartQueue(){
     else fresh.push(v);
   }
   if(F.order === "rand"){ shuffle(due); shuffle(fresh); }
-  else due.sort((a,b)=> S.srs[a.i].d < S.srs[b.i].d ? -1 : 1);
+  else due.sort((a,b)=>{ const x=S.srs[a.i].d, y=S.srs[b.i].d;   // 相等要回傳 0，排序才穩定
+                         return x<y ? -1 : x>y ? 1 : 0; });
   const q = newQuota();
   return due.concat(q === Infinity ? fresh : fresh.slice(0, q));
 }
@@ -1306,6 +1352,7 @@ function updatePoolInfo(){
   $("#filterSummary").textContent = bits.join(" · ");
 }
 function rebuildPool(keep){
+  stopSpeak();                                 // 牌組換了，正在唸的字多半也換了
   const cur = pool[pos];
   smartQueue = null;
   deckDay = today();
@@ -1321,7 +1368,7 @@ function rebuildPool(keep){
     if(k>0){ pos=k; restoredAt=k; }
   }
   else page=0;                                 // 篩選條件改變 → 單字表回到第 1 頁
-  if(!forcedPool) saveFilter();
+  saveFilter();                              // 自訂牌組內的等級／詞性變更也要保存
   updatePoolInfo();
   renderCard(); renderList(); renderStats();
 }
@@ -1422,6 +1469,7 @@ function renderCard(){
     const el=$("#"+id);
     el.className="starbtn"+(on?" on":""); el.textContent=on?"★":"☆";
     el.setAttribute("aria-label", on?"取消收藏":"加入收藏");   // 讀屏唸得出用途，不是只有星號
+    el.title = on?"取消收藏":"加入收藏";                       // 滑鼠提示同步，不再永遠顯示「收藏」
     el.setAttribute("aria-pressed", on?"true":"false");
   }
 }
@@ -1444,6 +1492,7 @@ function flip(){
 }
 function go(d){
   if(!pool.length) return;
+  stopSpeak();                                 // 上一張卡的語音不可跟到下一張
   pos=(pos+d+pool.length)%pool.length;
   renderCard(); savePos();
   if(S.tts.auto && F.dir==="j2c") speak(pool[pos].r||pool[pos].w,$("#spkF"));
@@ -1471,18 +1520,21 @@ function mark(known){
   mark._t=now;
   const v=pool[pos]; if(!v) return;
   S.seen[v.i]=1;
+  const extra = isExtraNew(v.i);               // 「全部／未學過」牌組超額評分新字 → 也計入額外學習
   const sc=schedule(v.i, known);
+  if(extra) creditExtra();
   if(known){ S.learned[v.i]=1; if(S.wrong[v.i]){ S.wrong[v.i]--; if(S.wrong[v.i]<=0) delete S.wrong[v.i]; } }   // 與測驗一致：答對扣一次
   else { delete S.learned[v.i]; S.wrong[v.i]=(S.wrong[v.i]||0)+1; }
   bumpDaily(1); saveState();
   const n=daysUntil(sc.d);
   toast(known ? `👍 已學會 · ${n} 天後再複習` : "明天會再出現一次");
   if(!deckBelongs(v)){          // 已排到未來（或已離開錯題／最愛清單）→ 退出目前牌組
-    pruneDeck(); renderCard(); savePos();
+    stopSpeak(); pruneDeck(); renderCard(); savePos();
+    if(S.tts.auto && F.dir==="j2c" && pool[pos]) speak(pool[pos].r||pool[pos].w,$("#spkF"));
   }else go(1);
   renderStats(); renderSaved();
 }
-$("#card").onclick=e=>{ if(e.target.closest(".starbtn")) return; flip(); };
+$("#card").onclick=e=>{ if(e.target.closest(".starbtn,.spkbtn,.spksm")) return; flip(); };
 $("#starF").onclick=toggleFav; $("#starB").onclick=toggleFav;
 $("#btnPrev").onclick=()=>go(-1);
 $("#btnNext").onclick=()=>go(1);
@@ -1497,6 +1549,7 @@ document.addEventListener("visibilitychange",()=>{
   else checkDayRollover();
 });
 addEventListener("focus",checkDayRollover);
+setInterval(checkDayRollover, 60000);   // 持續停在前景跨過午夜也會自動換日
 $("#btnYes").onclick=()=>mark(true);
 $("#btnNo").onclick=()=>mark(false);
 
@@ -1528,7 +1581,8 @@ document.addEventListener("keydown",e=>{
     const n=parseInt(e.key,10);
     if(e.code==="Space" && kbd) return;
     if(n>=1&&n<=4){ const b=$$("#qOpts .opt")[n-1]; if(b&&!b.disabled) b.click(); }
-    else if(e.key.toLowerCase()==="s"){ const q=Q.list[Q.idx]; if(q && quizCanSpeak()) speak(q.v.r||q.v.w,$("#spkQ")); }
+    else if(e.key.toLowerCase()==="s"){ const q=Q.list[Q.idx]; if(q && quizCanSpeak())
+      speak(q.v.r||q.v.w, $("#spkQ"), Q.speechHold ? Q.speechHold() : undefined); }
   }
 });
 
@@ -1592,7 +1646,7 @@ function renderQuestion(){
     b.onclick=()=>answer(b,o,q);
     box.appendChild(b);
   });
-  Q.answered=false; syncQuizSpk();
+  Q.answered=false; Q.speechHold=null; syncQuizSpk();
   if(S.tts.auto && Q.mode==="j2c") speak(q.v.r||q.v.w,$("#spkQ"));
 }
 /* 看中文選日文、看漢字選讀音時，作答前朗讀就等於直接公布答案 */
@@ -1608,6 +1662,7 @@ function answer(btn,opt,q){
   btns.forEach((b,i)=>{ if(q.opts[i].ok) b.classList.add("correct"); });
   S.seen[q.v.i]=1; bumpDaily(1);
   Q.answered=true; syncQuizSpk();
+  const extra = isExtraNew(q.v.i);             // 測驗中作答到超額的新字 → 與其他入口同一規則
   if(opt.ok){ Q.ok++; S.quiz.c++; if(S.wrong[q.v.i]){S.wrong[q.v.i]--; if(S.wrong[q.v.i]<=0) delete S.wrong[q.v.i];} markLearned(q.v.i, true); }
   else{
     Q.ng++; btn.classList.add("wrong"); S.wrong[q.v.i]=(S.wrong[q.v.i]||0)+1;
@@ -1616,12 +1671,26 @@ function answer(btn,opt,q){
     const box=$("#qEx");
     if(hasEx(q.v)){ box.innerHTML=exHTML(q.v,{head:false}); box.hidden=false; bindEx(box); }
   }
+  if(extra) creditExtra();
   S.quiz.t++; saveState();
-  if(S.tts.auto && Q.mode!=="j2c") speak(q.v.r||q.v.w,$("#spkQ"));   // 公布答案後才唸
   announce(opt.ok?`答對，${q.v.w}的意思是${q.v.m}`:`答錯，正確答案是${q.opts.find(o=>o.ok).txt}`);
   $("#qOk").textContent="✓ "+Q.ok; $("#qNg").textContent="✗ "+Q.ng;
   clearTimeout(qTimer);
-  qTimer=setTimeout(()=>{ qTimer=null; Q.idx++; if(Q.idx>=Q.list.length) endQuiz(); else renderQuestion(); }, opt.ok?520:(hasEx(q.v)?2600:1050));
+  const myQ=Q, myIdx=Q.idx;
+  const advance=()=>{                       // 測驗已結束／重開／已換題時不得再前進
+    if(Q!==myQ || Q.idx!==myIdx || $("#quizPlay").hidden) return;
+    Q.idx++; if(Q.idx>=Q.list.length) endQuiz(); else renderQuestion();
+  };
+  /* 統一的換題條件：最短停留時間到期 且 沒有任何進行中的朗讀。
+     答對、答錯共用同一套流程；作答後的手動重播也會透過 speechHold 序列化，
+     不會與自動朗讀產生計時競態（speak 內建 6 秒防呆，不會卡死）。 */
+  const minMs = opt.ok ? 520 : (hasEx(q.v) ? 2600 : 1050);
+  let holds=0, tDone=false;
+  const maybe=()=>{ if(tDone && holds===0) advance(); };
+  Q.speechHold=()=>{ holds++; let rel=false;
+    return ()=>{ if(rel) return; rel=true; holds=Math.max(0,holds-1); maybe(); }; };
+  if(S.tts.auto && Q.mode!=="j2c") speak(q.v.r||q.v.w, $("#spkQ"), Q.speechHold());
+  qTimer=setTimeout(()=>{ qTimer=null; tDone=true; maybe(); }, minMs);
 }
 function endQuiz(){
   clearTimeout(qTimer); qTimer=null;      // 別讓排定中的換題在成績頁背後繼續跑
@@ -1680,7 +1749,7 @@ function renderList(){
   const rows=d.slice(page*PER,(page+1)*PER);
   $("#listBody").innerHTML = rows.length? rows.map(v=>`
     <tr data-id="${v.i}" tabindex="0" aria-expanded="false">
-      <td class="c-tool"><button class="starbtn tstar${S.fav[v.i]?" on":""}" style="font-size:17px" data-id="${v.i}" aria-label="${S.fav[v.i]?"取消收藏":"加入收藏"}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀">${SPK}</button></td>
+      <td class="c-tool"><button class="starbtn tstar${S.fav[v.i]?" on":""}" style="font-size:17px" data-id="${v.i}" title="${S.fav[v.i]?"取消收藏":"加入收藏"}" aria-label="${S.fav[v.i]?"取消收藏":"加入收藏"}">${S.fav[v.i]?"★":"☆"}</button><button class="spksm tspk" data-id="${v.i}" title="朗讀" aria-label="朗讀">${SPK}</button></td>
       <td class="jpw jp" lang="ja">${furigana(v.w, v.r)}</td>
       <td class="mean">${v.m}</td>
       <td class="pos hidemob"><span class="tag">${v.p}</span></td>
@@ -1709,7 +1778,8 @@ function renderList(){
       r.innerHTML=`<td colspan="6"><div class="exwrap">${exHTML(v,{head:false})}</div></td>`;
       tr.after(r); tr.classList.add("open"); tr.setAttribute("aria-expanded","true"); bindEx(r);
     };
-    tr.onkeydown=e=>{                      // 鍵盤也能展開例句
+    tr.onkeydown=e=>{                      // 鍵盤也能展開例句（焦點在列本身時才作用，按鈕的按鍵留給按鈕）
+      if(e.target!==tr) return;
       if(e.key==="Enter"||e.code==="Space"){ e.preventDefault(); tr.click(); }
     };
   });
@@ -1719,12 +1789,14 @@ function renderList(){
   });
   $$(".tlearn").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
-    if(S.learned[id]){ delete S.learned[id]; delete S.srs[id]; }   // 取消已學會 → 排程一併清除，重新排入學習
+    if(S.learned[id]){                             // 取消已學會 → 排程一併清除，重新排入學習
+      refundNewQuota(id);                          // 今天才排進來的字 → 退回當日配額，重標不會扣兩次
+      delete S.learned[id]; delete S.srs[id];
+    }
     else {
-      const extra = !S.srs[id] && newQuota()<=0;   // 配額用完仍標記 → 列為額外學習
+      const extra = isExtraNew(id);                // 配額用完仍標記 → 列為額外學習
       markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1);
-      if(extra){ const t=today(); S.bonus[t]=(S.bonus[t]||0)+1; S.extraDay[t]=(S.extraDay[t]||0)+1;
-                 toast("今日新字目標已達成，這個字以「額外學習」計入"); }
+      if(extra){ creditExtra(); toast("今日新字目標已達成，這個字以「額外學習」計入"); }
     }
     saveState(); pruneDeck();          // 學習牌組要跟著同步
     renderList(); renderCard(); renderStats(); renderSaved();
@@ -1752,10 +1824,9 @@ function renderSaved(){
   $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();});
   $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
-    const extra = !S.srs[id] && newQuota()<=0;
-    delete S.wrong[id]; markLearned(id);
-    if(extra){ const t=today(); S.bonus[t]=(S.bonus[t]||0)+1; S.extraDay[t]=(S.extraDay[t]||0)+1;
-               toast("今日新字目標已達成，這個字以「額外學習」計入"); }
+    const extra = isExtraNew(id);
+    delete S.wrong[id]; markLearned(id); bumpDaily(1);   // 與單字表「標記學會」一致：計入當日學習量
+    if(extra){ creditExtra(); toast("今日新字目標已達成，這個字以「額外學習」計入"); }
     saveState(); pruneDeck(); renderSaved(); renderList(); renderCard(); renderStats();
   });
 }
@@ -1860,7 +1931,7 @@ $("#impFile").onchange=e=>{
   const r=new FileReader();
   r.onload=()=>{
     let data=null;
-    try{ data=JSON.parse(r.result); }catch(err){ toast("檔案格式不正確"); e.target.value=""; return; }
+    try{ data=parseStateJSON(r.result); }catch(err){ toast("檔案格式不正確"); e.target.value=""; return; }
     const ns=sanitizeState(data);                       // 驗證通過才會覆蓋現有進度
     const marker = isObj(data)&&(data.app==="jvocab"||isObj(data.learned)||isObj(data.srs)||isObj(data.seen));
     if(!ns || !marker){
@@ -1894,6 +1965,7 @@ function syncUIFromState(resetQuiz){
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
   $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
+  if(TTS.ok){ try{ pickVoice(); }catch(err){} }   // 語音選擇也同步
   if(resetQuiz){ resetQuizUI(); forcedPool=null; forcedSrc=null; }   // 對方清除／匯入 → 舊自訂牌組一併退出
   pruneDeck(); rebuildPool(true); renderSaved();
 }

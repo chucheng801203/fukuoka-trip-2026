@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "8ca0e53d8f";
+const VERSION = "05f3170fa1";
 // 快取名稱包含部署路徑＋路徑雜湊：/a-b/ 與 /a_b/ 這種替換後同名的路徑也不會互刪快取
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 let SCOPE_HASH = 0;
@@ -36,11 +36,21 @@ self.addEventListener("install", e => {
 self.addEventListener("activate", e => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    await Promise.all(keys.filter(k =>
-        (k.startsWith("jvocab" + SCOPE_TAG + "-") ||       // 本路徑的舊版本
-         k.startsWith(LEGACY_TAG) ||                       // 前一版未加雜湊的命名
-         /^jvocab-[0-9a-f]{6,}$/.test(k))                  // 最早未含路徑的命名
-        && k !== CACHE).map(k => caches.delete(k)));
+    const mine = abs(ASSETS[0]);
+    await Promise.all(keys.map(async k => {
+      if (k === CACHE) return;
+      if (k.startsWith("jvocab" + SCOPE_TAG + "-"))        // 本路徑的舊版本（含路徑雜湊，不會撞名）
+        return caches.delete(k);
+      if (k.startsWith(LEGACY_TAG)) {
+        // 前一版命名未含路徑雜湊：/a-b/ 與 /a_b/ 會產生相同前綴。
+        // 先確認快取裡存的是「本路徑」的主程式才刪，不誤刪同網域其他部署的舊快取
+        try {
+          const c = await caches.open(k);
+          if (await c.match(mine)) return caches.delete(k);
+        } catch (err) {}
+      }
+    }));
+    // 註：不清除最早期「jvocab-<build>」全域命名的快取——同網域其他部署可能還在用
     await self.clients.claim();
   })());
 });

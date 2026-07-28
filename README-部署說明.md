@@ -40,7 +40,13 @@ git push
 換上新的 `JLPT_N5-N3.html` 與 `jlpt-sw.js`（build 編號會自動改變）後 push，
 使用者下次開啟時會在頁面上方看到「已下載新版本 → 立即更新」。
 
-目前 build：`8ca0e53d8f`
+目前 build：`05f3170fa1`
+
+> **本資料夾只是建置輸出**：`build.py`、`template.html`、`data/legacy_order.json`
+> 等建置工具在原始專案裡，不在這個部署包內。改版時請一律回到原始專案執行
+> `python3 build.py` 重新產生整包檔案；**不要只手動替換 `JLPT_N5-N3.html`**——
+> Service Worker 的 build 編號是建置程序算出來的，手動替換不會更新版本，
+> 已安裝的使用者會因為快取優先策略一直拿到舊版。
 
 > **檔名為什麼還是 `JLPT_N5-N3.html`？**
 > 因為網址與已安裝 App 的 `start_url` 都指向這個檔名，改名會讓已安裝的使用者打不開。
