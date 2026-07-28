@@ -40,7 +40,7 @@ git push
 換上新的 `JLPT_N5-N3.html` 與 `jlpt-sw.js`（build 編號會自動改變）後 push，
 使用者下次開啟時會在頁面上方看到「已下載新版本 → 立即更新」。
 
-目前 build：`05f3170fa1`
+目前 build：`2867b4974e`
 
 > **本資料夾只是建置輸出**：`build.py`、`template.html`、`data/legacy_order.json`
 > 等建置工具在原始專案裡，不在這個部署包內。改版時請一律回到原始專案執行

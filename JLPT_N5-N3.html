@@ -735,6 +735,10 @@ const RUBY = /([\u4e00-\u9fff\u3005\u3006\u30f6]+)（([\u3041-\u3096\u30fc]+)）
 const esc = t => t.replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
 function ruby(t){ return esc(t).replace(RUBY, "<ruby>$1<rt>$2</rt></ruby>"); }
 function plainJa(t){ return t.replace(/（[\u3041-\u3096\u30fc]+）/g, ""); }
+/* 朗讀例句用：把「漢字（かな）」整段換成注音假名。
+   畫面標什麼就唸什麼，語音引擎不必猜多音字（例：大と小 標「だい」卻被唸成「おお」）。
+   資料中所有例句的漢字都有注音，假名化後不會殘留漢字（已全量驗證） */
+function speakJa(t){ return t.replace(RUBY, "$2"); }
 
 /* 用整詞讀音替單字標假名：漢字段落與假名段落對齊，只在漢字上標 */
 const ISK = c => /[\u4e00-\u9fff\u3005\u3006\u30f6]/.test(c);
@@ -775,7 +779,7 @@ function bindEx(root){
     e.stopPropagation();
     const [vi,si]=b.dataset.ex.split("-").map(Number);
     const a=(VOCAB[vi].e||[])[si];
-    if(a&&a[0]) speak(plainJa(a[0]), b);
+    if(a&&a[0]) speak(speakJa(a[0]), b);
   });
   root.querySelectorAll(".extoggle").forEach(b=>b.onclick=e=>{
     e.stopPropagation();
