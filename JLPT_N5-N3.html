@@ -65,7 +65,7 @@ button{font-family:inherit;font-size:inherit;color:inherit;cursor:pointer}
 input,select{font-family:inherit;font-size:inherit;color:inherit}
 
 /* ---------- layout ---------- */
-.wrap{max-width:940px;margin:0 auto;padding:0 14px 90px}
+.wrap{max-width:940px;margin:0 auto;padding:18px 14px 90px}
 header{
   position:sticky;top:0;z-index:30;background:var(--page);
   border-bottom:1px solid var(--line);
@@ -111,24 +111,19 @@ nav.tabs button{
 }
 nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--page)}
 
-/* ---------- filter bar ---------- */
-.filterwrap{margin:14px 0}
-.filtertoggle{
-  display:none;width:100%;align-items:center;gap:8px;text-align:left;
-  padding:10px 14px;background:var(--surface);border:1px solid var(--ring);
-  border-radius:var(--r);box-shadow:var(--shadow);font-size:13px;font-weight:600;color:var(--ink-2)
-}
-.filtertoggle .fsum{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-.filtertoggle .fico{font-size:15px}
-.filtertoggle .chev{transition:transform .2s;color:var(--muted)}
-.filterwrap.open .filtertoggle .chev{transform:rotate(180deg)}
-.filterwrap.open .filtertoggle{border-bottom-left-radius:0;border-bottom-right-radius:0;border-bottom-color:transparent}
+/* ---------- 篩選頁 ---------- */
+.fsumbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;
+  padding:10px 14px;background:var(--accent-soft);border-radius:var(--r);
+  font-size:13px;font-weight:700;color:var(--accent)}
+.fsumbar .fsum{flex:1;overflow-wrap:anywhere}
+.fsumbar .fico{font-size:15px;flex:none}
 .filters{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
   gap:10px 18px;align-items:center;
   padding:14px;background:var(--surface);border:1px solid var(--ring);
   border-radius:var(--r);box-shadow:var(--shadow)
 }
+.fdone{margin-top:14px;display:flex;justify-content:flex-end}
 .filters .fgroup{justify-content:space-between}
 .filters select{flex:1;min-width:0;max-width:62%}
 .filters .chips{flex:1;justify-content:flex-end}
@@ -158,7 +153,7 @@ select:focus,input:focus{border-color:var(--accent-2)}
 
 .cardstage{perspective:1400px;margin-bottom:14px}
 .card{
-  position:relative;width:100%;height:clamp(330px,52vh,520px);display:grid;
+  position:relative;width:100%;height:clamp(280px,min(62vh,calc(100vh - 305px)),600px);display:grid;
   transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.7,.2,1);
   cursor:pointer;
 }
@@ -344,10 +339,9 @@ td.c-tool{white-space:nowrap}
 @media (max-width:820px){
   .controls{grid-template-columns:repeat(2,1fr)}
   th.hidemob,td.hidemob{display:none}
-  .filtertoggle{display:flex}
-  .filters{display:none;padding:12px;border-radius:0 0 var(--r) var(--r);border-top:0;
-    grid-template-columns:1fr}
-  .filterwrap.open .filters{display:grid}
+  .filters{padding:12px;grid-template-columns:1fr}
+  .wrap{padding-top:14px}
+  .fsumbar{margin:0 0 8px}
   .filters .filtail{justify-content:space-between}
   #view-list th.c-w{width:34%}
   #view-list th.c-l{width:58px}
@@ -375,18 +369,13 @@ td.c-tool{white-space:nowrap}
   .controls{grid-template-columns:repeat(4,1fr)}
 }
 @media (max-height:560px){
-  /* 矮視窗一律把篩選收成一行摘要，把高度留給卡片 */
-  .filtertoggle{display:flex;min-height:0;padding:7px 12px}
-  .filters{display:none;border-radius:0 0 var(--r) var(--r);border-top:0}
-  .filterwrap.open .filters{display:grid}
-  .filterwrap{margin:6px 0 !important}
+  .fsumbar{margin:0 0 6px;padding:6px 12px}
   .card{min-height:clamp(104px,34vh,190px)}
   .controls .btn{padding:9px 6px;font-size:13px}
   .hint{display:none}
   .logo{font-size:15px}
   .hd{padding:6px 14px}
   nav.tabs{padding-bottom:5px}
-  .filterwrap{margin:8px 0}
   .deckbar{margin-bottom:6px}
   .controls{position:sticky;bottom:0;z-index:5;background:var(--page);
     padding:6px 0 calc(6px + env(safe-area-inset-bottom))}
@@ -418,18 +407,18 @@ td.c-tool{white-space:nowrap}
 }
 /* 低高度（手機橫向）：背面例句很長時不可把卡片撐到超出畫面 */
 @media (max-height:560px){
-  .card{height:calc(100vh - 190px);min-height:220px}
+  .card{height:calc(100vh - 150px);min-height:220px}
   .tablewrap tr.emptyrow{display:block;padding:0}
   .mini{margin-left:0}
   .controls{position:sticky;bottom:0;z-index:5;background:var(--page);
     padding:8px 0 calc(8px + env(safe-area-inset-bottom))}
-  .wrap{padding-bottom:24px}
+  .wrap{padding:8px 14px 24px}
 }
 @media (max-width:400px){
   .filters{padding:10px}
   .word{font-size:calc(clamp(30px,10vw,44px)*var(--fs))}
 }
-@media print{ header,nav.tabs,.controls,.filterwrap{display:none} }
+@media print{ header,nav.tabs,.controls,#view-filter{display:none} }
 </style>
 </head>
 <body>
@@ -451,19 +440,17 @@ td.c-tool{white-space:nowrap}
     <button role="tab" data-view="list" aria-selected="false">單字表</button>
     <button role="tab" data-view="saved" aria-selected="false">收藏 / 錯題</button>
     <button role="tab" data-view="stats" aria-selected="false">統計</button>
+    <button role="tab" data-view="filter" aria-selected="false">⚙️ 篩選</button>
   </nav>
 </header>
 
 <div class="wrap">
 
-  <!-- filter bar -->
-  <div class="filterwrap" id="filterWrap">
-  <button class="filtertoggle" id="filterToggle" aria-expanded="false" aria-controls="filterBar">
-    <span class="fico">⚙️</span>
-    <span class="fsum" id="filterSummary">篩選條件</span>
-    <span class="chev">▾</span>
-  </button>
-  <div class="filters" id="filterBar">
+  <!-- ============ 篩選 / 設定 ============ -->
+  <section id="view-filter" role="tabpanel" aria-label="篩選與設定" tabindex="-1" hidden>
+    <div class="fsumbar"><span class="fico" aria-hidden="true">⚙️</span>
+      <span class="fsum" id="filterSummary">篩選條件</span></div>
+    <div class="filters" id="filterBar">
     <div class="fgroup"><span class="flabel">等級</span>
       <div class="chips" id="lvChips"></div>
     </div>
@@ -534,9 +521,9 @@ td.c-tool{white-space:nowrap}
       <span class="tiny" id="poolInfo"></span>
       <button class="mini" id="resetPool" hidden>回到完整單字池</button>
     </div>
-  </div>
-  </div>
-  <p class="tiny" id="ttsWarn" style="margin:-4px 0 12px"></p>
+    <p class="tiny" id="ttsWarn" style="margin:10px 0 0"></p>
+    <div class="fdone"><button class="btn primary" id="filterDone">✓ 完成，回到學習</button></div>
+  </section>
 
   <!-- ============ STUDY ============ -->
   <section id="view-study" role="tabpanel" aria-label="學習" tabindex="-1">
@@ -1278,11 +1265,7 @@ function buildFilterUI(){
   $("#fontSel").onchange=e=>{ S.fs=e.target.value; saveState(); applyFont(); };
   $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();saveFilter();};
   $("#resetPool").onclick=()=>{forcedPool=null;forcedSrc=null;rebuildPool();toast("已回到完整單字池");};
-  $("#filterToggle").onclick=()=>{
-    const w=$("#filterWrap"), open=!w.classList.contains("open");
-    w.classList.toggle("open",open);
-    $("#filterToggle").setAttribute("aria-expanded",open);
-  };
+  $("#filterDone").onclick=()=>switchView(lastContentView);
   $("#hdcount").textContent=`${VOCAB.length} 字 · N5〜N1`;
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#qCount").onchange=e=>{S.qcfg.count=e.target.value;saveState();};
@@ -1862,7 +1845,6 @@ function renderSaved(){
 function useCustom(items,view,srcKind){
   if(!items.length){toast("清單是空的");return;}
   forcedPool=items; forcedSrc=srcKind||null; rebuildPool(); switchView(view);
-  $("#filterWrap").classList.add("open"); $("#filterToggle").setAttribute("aria-expanded","true");
   if(!pool.length) toast("已載入自訂清單，但目前的等級／詞性篩選把單字全部濾掉了，請調整篩選");
   else if(pool.length<items.length) toast(`已載入 ${pool.length} 個單字（清單共 ${items.length} 個，其餘不符合目前的等級／詞性篩選）`);
   else toast(`已載入 ${pool.length} 個單字`);
@@ -2028,8 +2010,10 @@ function applyState(){
 $("#resetBtn").onclick=()=>{ if(confirm("確定要清除所有學習進度嗎？此動作無法復原。")){ S=clone(DEF); S.theme=document.documentElement.getAttribute("data-theme"); applyState(); toast("進度已清除"); } };
 
 /* ================= 視圖切換 ================= */
-const VIEWS=["study","quiz","list","saved","stats"];
+const VIEWS=["study","quiz","list","saved","stats","filter"];
 let navBooted=false;
+/* 從篩選頁按「完成」時要回到的內容頁（預設學習） */
+let lastContentView="study";
 function switchView(v,fromHistory){
   if(!VIEWS.includes(v)) v="study";
   currentView=v;
@@ -2045,7 +2029,8 @@ function switchView(v,fromHistory){
   navBooted=true;
   $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected", b.dataset.view===v));
   VIEWS.forEach(k=>$("#view-"+k).hidden = k!==v);
-  $("#filterWrap").hidden = (v==="saved"||v==="stats");
+  if(v!=="filter") lastContentView=v;             // 記住從哪一頁進篩選，按完成才回得去
+  if(v==="filter") updateDeckInfo();              // 摘要與符合字數即時更新
   if(v==="study"){ pruneDeck(); renderCard(); }   // 測驗中改過的排程要立刻反映在牌組
   if(v==="saved") renderSaved();
   if(v==="stats") renderStats();
