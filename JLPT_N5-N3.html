@@ -16,6 +16,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="日文單字卡">
 <style>
+/* 字體大小倍率：只縮放學習內容文字，介面外框不動，放大不跑版 */
+:root{--fs:1}
+html[data-fs="s"]{--fs:.88}
+html[data-fs="l"]{--fs:1.15}
+html[data-fs="xl"]{--fs:1.3}
+
 html{scrollbar-gutter:stable}
 :root{
   color-scheme: light;
@@ -168,9 +174,9 @@ select:focus,input:focus{border-color:var(--accent-2)}
 /* 垂直置中改用彈性空隙：內容超出高度時仍可捲到最上面，不會被切掉 */
 .face::before,.face::after{content:"";display:block;flex:none;margin:auto}
 .face.back{transform:rotateY(180deg)}
-.word{font-size:clamp(34px,9vw,58px);font-weight:700;line-height:1.25;letter-spacing:.02em}
-.reading{font-size:clamp(16px,4.2vw,22px);color:var(--accent);font-weight:600}
-.meaning{font-size:clamp(20px,5.5vw,30px);font-weight:700;line-height:1.4}
+.word{font-size:calc(clamp(34px,9vw,58px)*var(--fs));font-weight:700;line-height:1.25;letter-spacing:.02em}
+.reading{font-size:calc(clamp(16px,4.2vw,22px)*var(--fs));color:var(--accent);font-weight:600}
+.meaning{font-size:calc(clamp(20px,5.5vw,30px)*var(--fs));font-weight:700;line-height:1.4}
 .metarow{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:2px}
 .tag{
   font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:999px;
@@ -198,8 +204,8 @@ body.nofuri rt{visibility:hidden;font-size:.1em}
 .exitem:last-child{margin-bottom:0}
 .exbody{flex:1;min-width:0}
 .exsense{font-size:11px;font-weight:700;color:var(--accent);margin-bottom:1px}
-.exjp{font-family:var(--font-jp);font-size:15.5px;line-height:2.1;overflow-wrap:anywhere}
-.exzh{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-top:1px;overflow-wrap:anywhere}
+.exjp{font-family:var(--font-jp);font-size:calc(15.5px*var(--fs));line-height:2.1;overflow-wrap:anywhere}
+.exzh{font-size:calc(12.5px*var(--fs));color:var(--ink-2);line-height:1.6;margin-top:1px;overflow-wrap:anywhere}
 .exspk{flex:none;margin-top:4px}
 tr.exrow>td{padding:0 16px 14px;border-bottom:1px solid var(--line)}
 tr.exrow .exwrap{border-top:0;margin-top:0;padding-top:0}
@@ -245,12 +251,12 @@ html[data-theme="dark"] .btn.primary{color:#0d0d0d}
 /* ---------- quiz ---------- */
 .qbox{background:var(--surface);border:1px solid var(--ring);border-radius:20px;box-shadow:var(--shadow);padding:24px 20px}
 .qprompt{text-align:center;padding:14px 0 22px}
-.qword{font-size:clamp(30px,8vw,50px);font-weight:700;line-height:1.25}
+.qword{font-size:calc(clamp(30px,8vw,50px)*var(--fs));font-weight:700;line-height:1.25}
 .qsub{font-size:14px;color:var(--muted);margin-top:6px}
 .opts{display:grid;gap:10px}
 .opt{
   border:1px solid var(--ring);background:var(--surface);border-radius:12px;
-  padding:14px 16px;text-align:left;font-size:16px;font-weight:600;
+  padding:14px 16px;text-align:left;font-size:calc(16px*var(--fs));font-weight:600;
   display:flex;align-items:center;gap:10px;transition:background .12s,border-color .12s
 }
 .opt:hover:not(:disabled){background:var(--surface-2)}
@@ -268,7 +274,7 @@ html[data-theme="dark"] .btn.primary{color:#0d0d0d}
 /* ---------- list / table ---------- */
 .tablewrap{background:var(--surface);border:1px solid var(--ring);border-radius:var(--r);
   box-shadow:var(--shadow);overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+table{width:100%;border-collapse:collapse;font-size:calc(14px*var(--fs));table-layout:fixed}
 th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
 th{font-size:12px;color:var(--muted);font-weight:700;background:var(--surface-2);
    position:sticky;top:0;white-space:nowrap}
@@ -278,11 +284,11 @@ tr:last-child td{border-bottom:0}
 #listBody tr[data-id]{cursor:pointer}
 #listBody tr[data-id]:hover{background:var(--surface-2)}
 #listBody tr.open{background:var(--accent-soft)}
-td.jpw{font-weight:700;font-size:16px;overflow-wrap:anywhere;line-height:1.95}
+td.jpw{font-weight:700;font-size:calc(16px*var(--fs));overflow-wrap:anywhere;line-height:1.95}
 td.jpw ruby{ruby-align:center;margin-inline:.1em}
 td.jpw rt{font-size:.5em;font-weight:600;color:var(--accent);letter-spacing:0}
 
-td.rd{color:var(--accent);font-size:13px;overflow-wrap:anywhere}
+td.rd{color:var(--accent);font-size:calc(13px*var(--fs));overflow-wrap:anywhere}
 td.mean{overflow-wrap:anywhere}
 td.act{white-space:nowrap;text-align:right}
 .mini{border:1px solid var(--ring);background:var(--surface);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;margin-left:4px}
@@ -398,8 +404,8 @@ td.c-tool{white-space:nowrap}
   .tablewrap tr:last-child{border-bottom:0}
   .tablewrap td{border:0;padding:0}
   .tablewrap td.c-tool{grid-area:tool;display:flex;align-items:center}
-  .tablewrap td.jpw{grid-area:word;font-size:17px}
-  .tablewrap td.mean{grid-area:mean;color:var(--ink-2);font-size:13.5px}
+  .tablewrap td.jpw{grid-area:word;font-size:calc(17px*var(--fs))}
+  .tablewrap td.mean{grid-area:mean;color:var(--ink-2);font-size:calc(13.5px*var(--fs))}
   .tablewrap td.act{grid-area:act;text-align:right}
   .tablewrap td.rd,.tablewrap td.lv,.tablewrap td.pos{display:none}
   /* 空狀態：整列脫離 Grid，「找不到符合的單字」才能橫跨整張卡片置中 */
@@ -421,7 +427,7 @@ td.c-tool{white-space:nowrap}
 }
 @media (max-width:400px){
   .filters{padding:10px}
-  .word{font-size:clamp(30px,10vw,44px)}
+  .word{font-size:calc(clamp(30px,10vw,44px)*var(--fs))}
 }
 @media print{ header,nav.tabs,.controls,.filterwrap{display:none} }
 </style>
@@ -513,6 +519,14 @@ td.c-tool{white-space:nowrap}
         <option value="1.2">快</option>
       </select>
     </div>
+    <div class="fgroup"><label class="flabel" for="fontSel">字體大小</label>
+      <select id="fontSel">
+        <option value="s">小</option>
+        <option value="m" selected>標準</option>
+        <option value="l">大</option>
+        <option value="xl">特大</option>
+      </select>
+    </div>
     <div class="fgroup" id="voiceGroup" hidden><label class="flabel" for="ttsVoice">語音</label>
       <select id="ttsVoice"></select>
     </div>
@@ -546,7 +560,7 @@ td.c-tool{white-space:nowrap}
           <div class="idx" id="bIdx"></div>
           <div class="corner"><button class="spkbtn" id="spkB" title="朗讀（S）" aria-label="朗讀"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="M15.4 8.6a4.8 4.8 0 0 1 0 6.8"/><path d="M18.6 5.4a9.3 9.3 0 0 1 0 13.2"/></svg></button><button class="starbtn" id="starB" title="加入收藏" aria-label="加入收藏">☆</button></div>
           <div class="reading jp" id="bRead" lang="ja"></div>
-          <div class="word jp" id="bWord" lang="ja" style="font-size:clamp(24px,6vw,36px)"></div>
+          <div class="word jp" id="bWord" lang="ja" style="font-size:calc(clamp(24px,6vw,36px)*var(--fs))"></div>
           <div class="meaning" id="bMean"></div>
           <div class="metarow"><span class="tag lv" id="bLv"></span><span class="tag" id="bPos"></span><span class="tag srs" id="bSrs" hidden></span></div>
           <div class="exwrap" id="bEx"></div>
@@ -897,7 +911,7 @@ const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null
            filter:null,                                   // 上次的篩選條件
            last:{i:null,w:"",r:"",view:"",page:0},        // 上次讀到的單字／分頁
            qcfg:{count:"20",mode:"j2c"},                  // 上次的測驗設定
-           showEx:true, showFuri:true,                    // 例句顯示與注音
+           showEx:true, showFuri:true, fs:"m",           // 例句顯示、注音與字體大小
            srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, extraDay:{}, srsMig:0,
            resetSeq:0};   // 間隔重複排程＋清除／匯入識別碼（跨分頁同步用）
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -977,6 +991,7 @@ function sanitizeState(o){
     showRead: bool(o.filter.showRead, false)};
   S2.showEx   = bool(o.showEx, true);
   S2.showFuri = bool(o.showFuri, true);
+  S2.fs       = oneOf(o.fs, ["s","m","l","xl"], "m");
   S2.srsMig   = o.srsMig ? 1 : 0;
   S2.resetSeq = Math.max(0, int(o.resetSeq, 0));
   return S2;
@@ -1260,6 +1275,7 @@ function buildFilterUI(){
   $("#showFuri").onchange=e=>{
     S.showFuri=e.target.checked; saveState(); applyFuri();
   };
+  $("#fontSel").onchange=e=>{ S.fs=e.target.value; saveState(); applyFont(); };
   $("#showRead").onchange=e=>{F.showRead=e.target.checked;renderCard();saveFilter();};
   $("#resetPool").onclick=()=>{forcedPool=null;forcedSrc=null;rebuildPool();toast("已回到完整單字池");};
   $("#filterToggle").onclick=()=>{
@@ -1978,6 +1994,7 @@ function syncUIFromState(resetQuiz){
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
   $("#ttsAuto").checked=!!S.tts.auto; $("#ttsRate").value=String(S.tts.rate);
   $("#showEx").checked=S.showEx!==false; $("#showFuri").checked=S.showFuri!==false;
+  applyFont();                                    // 字體大小也同步
   if(TTS.ok){ try{ pickVoice(); }catch(err){} }   // 語音選擇也同步
   if(resetQuiz){ resetQuizUI(); forcedPool=null; forcedSrc=null; }   // 對方清除／匯入 → 舊自訂牌組一併退出
   pruneDeck(); rebuildPool(true); renderSaved();
@@ -1994,7 +2011,7 @@ function applyState(){
   migrateSRS();                              // 舊版備份只有 learned → 立刻補建排程，不必等重新整理
   saveState();
   applyTheme(S.theme || document.documentElement.getAttribute("data-theme"));
-  applySavedFilter(); applyFuri();
+  applySavedFilter(); applyFuri(); applyFont();
   if(TTS.ok){ try{ pickVoice(); }catch(err){} }   // 匯入的語音選擇立即生效
   $("#npdSel").value=String(S.srsCfg.npd);
   $("#qCount").value=S.qcfg.count; $("#qMode").value=S.qcfg.mode;
@@ -2177,6 +2194,13 @@ $("#showFuri").checked = S.showFuri !== false;
 migrateSRS();
 function applyFuri(){ document.body.classList.toggle("nofuri", S.showFuri===false); }
 applyFuri();
+/* 字體大小：改 html 的 data-fs，由 CSS 變數縮放內容文字（不動介面外框，不會跑版） */
+function applyFont(){
+  const f = ["s","m","l","xl"].includes(S.fs) ? S.fs : "m";
+  document.documentElement.setAttribute("data-fs", f);
+  const el=$("#fontSel"); if(el) el.value=f;
+}
+applyFont();
 $("#ttsRate").value = String(S.tts.rate || 1);
 pickVoice();
 buildFilterUI();
