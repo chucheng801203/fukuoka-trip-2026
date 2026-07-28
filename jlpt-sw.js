@@ -1,6 +1,6 @@
 /* 日文單字卡 JLPT — Service Worker
    只接管本 App 自己的檔案，同資料夾下的其他網頁完全不受影響。 */
-const VERSION = "b998de570a";
+const VERSION = "8ca0e53d8f";
 // 快取名稱包含部署路徑＋路徑雜湊：/a-b/ 與 /a_b/ 這種替換後同名的路徑也不會互刪快取
 const SCOPE_PATH = new URL(self.registration.scope).pathname;
 let SCOPE_HASH = 0;

@@ -346,6 +346,7 @@ td.c-tool{white-space:nowrap}
   #view-list th.c-w{width:34%}
   #view-list th.c-l{width:58px}
   #view-list th.c-s{width:104px}
+  .kbd,.kbdhint{display:none}   /* 手機版（窄螢幕）不顯示電腦版快捷鍵提示 */
 }
 /* ---------- 觸控裝置：加大點擊區、隱藏鍵盤提示 ---------- */
 @media (hover:none) and (pointer:coarse){
@@ -489,7 +490,7 @@ td.c-tool{white-space:nowrap}
       <input type="checkbox" id="showRead"></label>
     <label class="fgroup cbrow"><span class="flabel">自動朗讀</span>
       <input type="checkbox" id="ttsAuto"></label>
-    <div class="fgroup"><label class="flabel" for="npdSel">每日新字上限</label>
+    <div class="fgroup"><label class="flabel" for="npdSel">每日新字目標</label>
       <select id="npdSel">
         <option value="10">10 字</option>
         <option value="20">20 字</option>
@@ -819,11 +820,19 @@ function packState(st){
   p.app="jvocab"; p.ver=2; p.sig=DATA_SIG;
   return p;
 }
-/* 讀取時：穩定 ID → 目前索引；數字 key 直接沿用（相容既有儲存與舊備份） */
+/* 舊數字備份的索引 → 目前索引。
+   建置程序（build.py）維護一份凍結的「數字索引時代」單字順序快照（data/legacy_order.json，只建立一次）：
+   - 每次建置都會逐筆比對目前字庫與快照；
+   - 順序完全一致 → 注入 null，數字索引直接沿用（安全，因為已驗證相同）；
+   - 一旦插入／刪除／重排 → 自動注入完整的 舊索引→新索引 對應表，舊備份仍正確對應。
+   因此 null 不代表「沒有遷移機制」，而是「本版經驗證無需遷移」。 */
+const LEGACY_MAP = null;
+/* 讀取時：穩定 ID → 目前索引；數字 key 經遷移表對應（相容既有儲存與舊備份） */
 function unpackKeys(m){
   const o={}; if(!m||typeof m!=="object") return o;
   for(const k in m){
     if(k.includes(SEP)){ const i=KEY2I[k]; if(i!==undefined) o[i]=m[k]; }
+    else if(LEGACY_MAP){ const ni=LEGACY_MAP[+k]; if(ni!==undefined && ni!==null && ni>=0) o[ni]=m[k]; }
     else o[k]=m[k];
   }
   return o;
@@ -865,7 +874,7 @@ const DEF={learned:{},seen:{},fav:{},wrong:{},quiz:{t:0,c:0},daily:{},theme:null
            last:{i:null,w:"",r:"",view:"",page:0},        // 上次讀到的單字／分頁
            qcfg:{count:"20",mode:"j2c"},                  // 上次的測驗設定
            showEx:true, showFuri:true,                    // 例句顯示與注音
-           srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, srsMig:0,
+           srs:{}, srsCfg:{npd:20}, newDay:{}, bonus:{}, extraDay:{}, srsMig:0,
            resetSeq:0};   // 間隔重複排程＋清除／匯入識別碼（跨分頁同步用）
 const clone = o => JSON.parse(JSON.stringify(o));
 const isObj = v => !!v && typeof v === "object" && !Array.isArray(v);
@@ -900,6 +909,7 @@ function sanitizeState(o){
   S2.daily   = numMap(o.daily, 0);
   S2.newDay  = numMap(o.newDay, 0);
   S2.bonus   = numMap(o.bonus, 0);
+  S2.extraDay= numMap(o.extraDay, 0);
   if(isObj(o.quiz)) S2.quiz = {t: Math.max(0, int(o.quiz.t, 0)), c: Math.max(0, int(o.quiz.c, 0))};
   if(S2.quiz.c > S2.quiz.t) S2.quiz.c = S2.quiz.t;
 
@@ -1336,7 +1346,9 @@ function updateDeckInfo(){
   const btn = left===0 ? ""
     : F.stat==="due" ? ` <button class="mini" id="toSmart" style="margin-left:6px">改用智慧複習學新字</button>`
     : q===0 ? ` <button class="mini" id="moreNew" style="margin-left:6px">再多學 20 個</button>` : "";
-  el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` + btn;
+  const extra = S.extraDay[td]||0;                        // 超過目標的額外學習持續顯示，不只提示一次
+  el.innerHTML = `今日待複習 <b>${d}</b> 字・今天還可學 <b>${qt}</b>${left?"新字":""}` +
+    (extra?`・今日額外學習 <b>${extra}</b> 字`:"") + btn;
   const b=$("#moreNew");
   if(b) b.onclick=()=>{ grantNew(20); rebuildPool(); toast("今天的新字配額 +20"); };
   const t=$("#toSmart");
@@ -1653,7 +1665,7 @@ $("#searchBox").oninput=e=>{search=e.target.value.trim();page=0;renderList();};
 function listWidened(){ return F.stat==="smart" && !forcedPool && !!search; }
 function listData(){
   let d = !search ? pool.slice()                    // 與學習牌組同一份、同順序（自訂牌組也一致）
-        : forcedPool ? forcedPool.slice()           // 自訂牌組搜尋：在整份清單內找
+        : forcedPool ? forcedPool.filter(v=>F.levels.has(v.l)&&(F.pos==="all"||v.p===F.pos))  // 自訂牌組搜尋：同樣遵守等級／詞性
         : VOCAB.filter(matchFilter);                // 一般搜尋：放寬到所有符合條件的字
   if(search){
     const s=search.toLowerCase();
@@ -1677,7 +1689,7 @@ function renderList(){
     </tr>`).join("") : `<tr class="emptyrow"><td class="emptycell" colspan="6"><div class="emptybox">找不到符合的單字</div></td></tr>`;
   $("#pager").innerHTML = d.length? `
     <button class="mini" id="pPrev" ${page===0?"disabled":""}>上一頁</button>
-    <span>第 ${page+1} / ${pages} 頁 · 共 ${d.length} 字${listWidened()?"（搜尋時不套用每日新字上限）":""}</span>
+    <span>第 ${page+1} / ${pages} 頁 · 共 ${d.length} 字${listWidened()?"（搜尋時不套用每日新字目標）":""}</span>
     <button class="mini" id="pNext" ${page>=pages-1?"disabled":""}>下一頁</button>` : "";
   const pp=$("#pPrev"), pn=$("#pNext");
   if(pp) pp.onclick=()=>{page--;renderList();savePos();window.scrollTo({top:0,behavior:"smooth"});};
@@ -1708,7 +1720,12 @@ function renderList(){
   $$(".tlearn").forEach(b=>b.onclick=()=>{
     const id=+b.dataset.id;
     if(S.learned[id]){ delete S.learned[id]; delete S.srs[id]; }   // 取消已學會 → 排程一併清除，重新排入學習
-    else { markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1); }
+    else {
+      const extra = !S.srs[id] && newQuota()<=0;   // 配額用完仍標記 → 列為額外學習
+      markLearned(id); S.seen[id]=1; if(S.wrong[id]) delete S.wrong[id]; bumpDaily(1);
+      if(extra){ const t=today(); S.bonus[t]=(S.bonus[t]||0)+1; S.extraDay[t]=(S.extraDay[t]||0)+1;
+                 toast("今日新字目標已達成，這個字以「額外學習」計入"); }
+    }
     saveState(); pruneDeck();          // 學習牌組要跟著同步
     renderList(); renderCard(); renderStats(); renderSaved();
   });
@@ -1733,7 +1750,14 @@ function renderSaved(){
   $("#wrongList").innerHTML=miniTable(wrongs,null,"已學會");
   $$(".sspk").forEach(b=>b.onclick=()=>{const v=VOCAB[+b.dataset.id];speak(v.r||v.w);});
   $("#favList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{delete S.fav[+b.dataset.id];saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();});
-  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{const id=+b.dataset.id;delete S.wrong[id];markLearned(id);saveState();pruneDeck();renderSaved();renderList();renderCard();renderStats();});
+  $("#wrongList").querySelectorAll(".rm").forEach(b=>b.onclick=()=>{
+    const id=+b.dataset.id;
+    const extra = !S.srs[id] && newQuota()<=0;
+    delete S.wrong[id]; markLearned(id);
+    if(extra){ const t=today(); S.bonus[t]=(S.bonus[t]||0)+1; S.extraDay[t]=(S.extraDay[t]||0)+1;
+               toast("今日新字目標已達成，這個字以「額外學習」計入"); }
+    saveState(); pruneDeck(); renderSaved(); renderList(); renderCard(); renderStats();
+  });
 }
 function useCustom(items,view,srcKind){
   if(!items.length){toast("清單是空的");return;}
@@ -1842,11 +1866,20 @@ $("#impFile").onchange=e=>{
     if(!ns || !marker){
       toast("這不是進度備份檔"); e.target.value=""; return;
     }
+    const hasNumeric = ["learned","seen","srs","fav","wrong"].some(k=>
+      isObj(data[k]) && Object.keys(data[k]).some(x=>!x.includes(SEP)));
+    if(hasNumeric && data.sig!==undefined && data.sig!==DATA_SIG &&
+       !confirm("這份備份使用舊式數字編號，而且它的資料簽章與目前的單字庫不同，進度可能會對應到錯誤的單字。仍要匯入嗎？")){
+      e.target.value=""; return;
+    }
     if(stateWeight(ns) < stateWeight(S) &&
        !confirm(`這份備份的學習紀錄（${stateWeight(ns)} 筆）比目前的進度（${stateWeight(S)} 筆）少，匯入會以備份內容覆蓋現有進度。確定要繼續嗎？`)){
       e.target.value=""; return;
     }
-    S=ns; applyState(); toast("進度已匯入");
+    S=ns; applyState();
+    toast(!hasNumeric ? "進度已匯入"
+      : LEGACY_MAP ? "進度已匯入（舊版編號格式，已透過編號對應表轉換到目前字庫；建議重新匯出一份新格式備份）"
+                   : "進度已匯入（舊版編號格式；建置時已驗證目前字庫順序與舊版一致，編號直接沿用。建議重新匯出一份新格式備份）");
     e.target.value="";
   };
   r.readAsText(f);
