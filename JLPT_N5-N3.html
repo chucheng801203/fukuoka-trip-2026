@@ -350,9 +350,11 @@ td.c-tool{white-space:nowrap}
 /* ---------- 平板／手機（≤820px）：篩選收合、隱藏次要欄 ---------- */
 @media (max-width:820px){
   .controls{grid-template-columns:repeat(2,1fr)}
+  /* 手機版兩欄時：第一列＝還不熟／已學會，第二列＝上一張／下一張 */
+  #btnNo{order:1}#btnYes{order:2}#btnPrev{order:3}#btnNext{order:4}
   th.hidemob,td.hidemob{display:none}
   .filters{padding:12px;grid-template-columns:1fr}
-  .wrap{padding-top:14px}
+  .wrap{padding-top:14px;padding-bottom:14px}
   .fsumbar{margin:0 0 8px}
   .filters .filtail{justify-content:space-between}
   #view-list th.c-w{width:34%}
@@ -379,6 +381,8 @@ td.c-tool{white-space:nowrap}
 /* ---------- 矮視窗／橫向持握：作答鈕固定在底部 ---------- */
 @media (max-height:560px) and (min-width:520px){
   .controls{grid-template-columns:repeat(4,1fr)}
+  /* 單列排回原順序：上一張／還不熟／已學會／下一張 */
+  #btnPrev{order:0}#btnNo{order:0}#btnYes{order:0}#btnNext{order:0}
 }
 @media (max-height:560px){
   .fsumbar{margin:0 0 6px;padding:6px 12px}
@@ -1594,6 +1598,8 @@ function mark(known){
   if(now-(mark._t||0)<300) return;           // 防連點：雙擊只算一次，不會動到下一張卡
   mark._t=now;
   const v=pool[pos]; if(!v) return;
+  /* 同一張卡同一天只吃第一次「已學會」：之後再按不升盒、不計數，只當「下一張」 */
+  if(known && S.learned[v.i] && gradedToday(v.i)){ toast("今天已標記過「已學會」"); go(1); return; }
   S.seen[v.i]=1;
   const extra = isExtraNew(v.i);               // 「全部／未學過」牌組超額評分新字 → 也計入額外學習
   const sc=schedule(v.i, known);
